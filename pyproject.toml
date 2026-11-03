@@ -41,7 +41,7 @@ mysql = ["aiomysql>=0.2"]
 mongo = ["motor>=3.3"]
 redis = ["redis>=5.0"]
 all = ["asyncpg>=0.29", "aiomysql>=0.2", "motor>=3.3", "redis>=5.0"]
-dev = ["pytest>=8", "pytest-asyncio>=0.23", "mongomock-motor>=0.0.29"]
+dev = ["pytest>=8", "pytest-asyncio>=0.23", "mongomock-motor>=0.0.29", "typing-extensions>=4"]  # mongomock-motor imports it without declaring it (seen on 3.13)
 
 [project.scripts]
 nicebot = "nicebot.cli:main"

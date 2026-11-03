@@ -85,6 +85,7 @@ a:hover { text-decoration-thickness: 2px; }
   border: 1px solid var(--rule); background: var(--paper-2); color: var(--ink); cursor: pointer;
 }
 .menu-btn { display: none; }
+.langs, .icon-btn, .menu-btn { flex: none; }
 .icon-btn svg, .menu-btn svg { width: 18px; height: 18px; }
 .search { position: relative; width: min(320px, 34vw); }
 .search input {
@@ -274,6 +275,7 @@ footer div { max-width: 1400px; margin: 0 auto; padding-block: 22px; padding-lef
 }
 @media (max-width: 560px) {
   .brand b { display: none; }
+  .icon-btn[aria-label="GitHub"] { display: none; }
   .langs button { padding: 0 8px; }
   .facts { grid-template-columns: minmax(0, 1fr); }
   .facts div + div { padding-left: 0; border-left: 0; border-top: 1px solid var(--rule); }

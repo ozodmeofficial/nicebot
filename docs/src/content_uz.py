@@ -29,7 +29,7 @@ PAGES = {}
 PAGES["intro"] = ("Kirish", """
 nicebot — Telegram bot yozishni iloji boricha sodda qiladigan Python kutubxonasi. Bitta import, bitta obyekt va oddiy funksiyalar. Baza, tugmalar, suhbatlar, tarjimalar, statistika va admin panel ichida tayyor turadi.
 
-{code:hello}
+{demo:hello}
 
 Bu to'liq ishlaydigan bot. Unda `Dispatcher`, `Router` yoki holatlar klassi yo'q. Foydalanuvchi esa avtomatik bazaga saqlanadi.
 
@@ -41,7 +41,7 @@ Oddiy ro'yxatdan o'tish botini ikki usulda solishtiramiz. Avval aiogram:
 
 Endi xuddi shu bot nicebot'da:
 
-{code:nicebot_same}
+{demo:nicebot_same}
 
 `ctx.ask()` savol beradi va javobni kutadi. `int` bersangiz, son kiritilmaguncha muloyim qayta so'raydi. `StatesGroup` yozish, holatni saqlash va tozalash kerak emas.
 
@@ -93,7 +93,7 @@ Telegram'da @BotFather'ni oching, `/newbot` yozing, botga nom va username bering
 
 `bot.py` faylini yarating:
 
-{code:hello}
+{demo:hello}
 
 ## 3. Ishga tushiring
 
@@ -255,7 +255,7 @@ PAGES["buttons"] = ("Inline tugmalar", """
 
 `Button` matn va bitta amalni oladi. Eng qulayi `on_click`: tugma bosilganda oddiy funksiya chaqiriladi. Callback data o'ylab topish va uni alohida handlerda tutib olish shart emas.
 
-{code:buttons}
+{demo:buttons}
 
 | Turi | Yozilishi |
 |---|---|
@@ -299,7 +299,7 @@ Matn oxiridagi `:contact` raqam so'raydigan, `:location` esa joylashuv so'raydig
 
 Sozlamalar menyusi uchun. Tugma bosilganda ✅ va ⬜️ o'zi almashadi, qiymat esa har bir foydalanuvchi uchun saqlanadi.
 
-{code:toggle}
+{demo:toggle}
 
 O'zgarishni darhol ushlash uchun `Toggle(..., on_change=func)` yozing, `func(ctx, value)` chaqiriladi.
 """)
@@ -309,7 +309,7 @@ nicebot'ning eng katta qulayligi shu. Savol berasiz va javobni o'sha funksiya ic
 
 ## ask
 
-{code:ask}
+{demo:ask}
 
 - Foydalanuvchi `/cancel` yozsa yoki "🚫 Bekor qilish" tugmasini bossa, suhbat jimgina tugaydi
 - 10 daqiqa javob bo'lmasa, "⌛️ Javob kutish vaqti tugadi" chiqadi. Buni `timeout="5m"` bilan o'zgartirish mumkin
@@ -317,7 +317,7 @@ nicebot'ning eng katta qulayligi shu. Savol berasiz va javobni o'sha funksiya ic
 
 ## confirm
 
-{code:confirm}
+{demo:confirm}
 
 ## choose
 
@@ -373,7 +373,7 @@ PAGES["menus"] = ("Menyu va sahifalash", """
 
 Menyuni lug'at ko'rinishida yozasiz. Navigatsiya va "⬅️ Orqaga" tugmasi avtomatik ishlaydi, xabar esa yangisi yuborilmasdan joyida tahrirlanadi.
 
-{code:menu}
+{demo:menu}
 
 Qiymat turlari: matn (ko'rsatiladi), `Menu` yoki `dict` (ichki menyu), funksiya (chaqiriladi), URL (havola tugmasi) yoki `Button`.
 
@@ -711,12 +711,3 @@ FEATURE_GROUPS = [
     ]),
 ]
 
-HOME = {
-    "title": "Kam kod. Hamma narsa ichida.",
-    "lead": "nicebot — Telegram botlar uchun Python kutubxonasi. Baza, tugmalar, suhbatlar, tarjimalar va admin panel bitta importda tayyor turadi.",
-    "cta": "Boshlash",
-    "cta2": "50 ta imkoniyat",
-    "stat1": "Bot API metodlari",
-    "stat2": "ma'lumotlar bazasi",
-    "stat3": "tayyor imkoniyat",
-}

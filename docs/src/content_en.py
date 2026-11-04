@@ -29,7 +29,7 @@ PAGES = {}
 PAGES["intro"] = ("Introduction", """
 nicebot is a Python library that makes writing Telegram bots as simple as possible. One import, one object and plain functions. A database, buttons, dialogs, translations, statistics and an admin panel are built in.
 
-{code:hello}
+{demo:hello}
 
 This is a complete, working bot. There is no `Dispatcher`, no `Router` and no state classes, and the user is saved to the database automatically.
 
@@ -41,7 +41,7 @@ Let's compare a simple sign-up bot. First, aiogram:
 
 The same bot in nicebot:
 
-{code:nicebot_same}
+{demo:nicebot_same}
 
 `ctx.ask()` asks a question and waits for the answer. Pass `int` and the bot politely asks again until it gets a number. You don't write a `StatesGroup`, and you don't store or clear any state.
 
@@ -93,7 +93,7 @@ Open @BotFather in Telegram, send `/newbot`, then choose a name and a username. 
 
 Create `bot.py`:
 
-{code:hello}
+{demo:hello}
 
 ## 3. Run it
 
@@ -255,7 +255,7 @@ PAGES["buttons"] = ("Inline buttons", """
 
 `Button` takes a label and one action. The most convenient is `on_click`: pressing the button calls a plain function. You don't invent callback data or catch it in a separate handler.
 
-{code:buttons}
+{demo:buttons}
 
 | Kind | Syntax |
 |---|---|
@@ -299,7 +299,7 @@ The `:contact` suffix makes a button that asks for the phone number, and `:locat
 
 For settings menus. Pressing the button swaps ✅ and ⬜️ by itself, and the value is saved for each user.
 
-{code:toggle}
+{demo:toggle}
 
 To react to a change right away, write `Toggle(..., on_change=func)`, and `func(ctx, value)` is called.
 """)
@@ -309,7 +309,7 @@ This is the biggest convenience in nicebot. You ask a question and wait for the 
 
 ## ask
 
-{code:ask}
+{demo:ask}
 
 - If the user sends `/cancel` or presses "🚫 Cancel", the dialog ends quietly
 - After 10 minutes without an answer, "⌛️ Time is up" is shown. Change it with `timeout="5m"`
@@ -317,7 +317,7 @@ This is the biggest convenience in nicebot. You ask a question and wait for the 
 
 ## confirm
 
-{code:confirm}
+{demo:confirm}
 
 ## choose
 
@@ -373,7 +373,7 @@ PAGES["menus"] = ("Menus and pagination", """
 
 You describe the menu as a dictionary. Navigation and the "⬅️ Back" button work automatically, and the message is edited in place instead of sending a new one.
 
-{code:menu}
+{demo:menu}
 
 Value types: text (shown), `Menu` or `dict` (a submenu), a function (called), a URL (a link button) or a `Button`.
 
@@ -711,12 +711,3 @@ FEATURE_GROUPS = [
     ]),
 ]
 
-HOME = {
-    "title": "Less code. Everything inside.",
-    "lead": "nicebot is a Python library for Telegram bots. A database, buttons, dialogs, translations and an admin panel come in a single import.",
-    "cta": "Get started",
-    "cta2": "50 features",
-    "stat1": "Bot API methods",
-    "stat2": "databases",
-    "stat3": "built-in features",
-}

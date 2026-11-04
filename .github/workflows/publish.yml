@@ -4,8 +4,10 @@
 #   PyPI project name: nicebot · Owner: <your GitHub username> · Repository: nicebot
 #   Workflow name: publish.yml · Environment name: pypi
 #
-# Release: bump src/nicebot/__about__.py, add a CHANGELOG.md section, then push a tag:
-#   git tag v1.0.0 && git push origin v1.0.0
+# Release: bump src/nicebot/__about__.py, add a CHANGELOG.md section, merge to main, then either
+#   * push a tag:  git tag v1.0.0 && git push origin v1.0.0
+#   * or run this workflow by hand (Actions → Publish to PyPI → Run workflow) on main —
+#     the tag v<version> is created together with the GitHub Release.
 # The workflow runs the tests, builds, uploads to PyPI and creates the GitHub Release with the changelog notes.
 
 name: Publish to PyPI
@@ -60,7 +62,7 @@ jobs:
 
   github-release:
     needs: publish
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -74,10 +76,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION=$(python3 -c "import re;print(re.search(r'\"(.+)\"', open('src/nicebot/__about__.py').read()).group(1))")
+          TAG="v$VERSION"
           awk -v v="$VERSION" '$0 ~ "^## "v" " {f=1; next} f && /^## / {exit} f' CHANGELOG.md > notes.md
-          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" dist/* --clobber
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber
           else
-            gh release create "$GITHUB_REF_NAME" dist/* --title "nicebot $VERSION" --notes-file notes.md --latest
+            gh release create "$TAG" dist/* --target "$GITHUB_SHA" --title "nicebot $VERSION" --notes-file notes.md --latest
           fi

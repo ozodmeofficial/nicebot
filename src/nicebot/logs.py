@@ -1,4 +1,10 @@
-"""Pretty, colourful console logs (no extra dependency)."""
+"""Pretty, colourful console logs (no extra dependency).
+
+Example::
+
+    from nicebot.logs import setup_logging
+    setup_logging("INFO")
+"""
 from __future__ import annotations
 
 import logging
@@ -21,6 +27,12 @@ class _Formatter(logging.Formatter):
 
 
 def setup_logging(level: str | int = "INFO") -> None:
+    """Colourful console logging (called by ``bot.start``). Safe to call twice.
+
+    Example::
+
+        setup_logging("DEBUG")
+    """
     root = logging.getLogger()
     if any(getattr(h, "_nicebot", False) for h in root.handlers):
         return

@@ -1,4 +1,17 @@
-"""Validators for ``ctx.ask`` and ``ctx.form``. Each one turns a message into a clean value or raises ``ValidationError``."""
+"""Validators for ``ctx.ask`` and ``ctx.form``: each one checks the user's answer and turns it into a clean value.
+
+A wrong answer raises ``ValidationError``; ``ctx.ask`` shows its text and asks again.
+
+Example::
+
+    from nicebot import Date, Document, Email, Integer, Phone, Photo, Text
+
+    name  = await ctx.ask("Name?", Text(min=2, max=40))
+    age   = await ctx.ask("Age?", Integer(min=14, max=99))
+    phone = await ctx.ask("Phone?", Phone)                         # shows a "Share phone" button
+    birth = await ctx.ask("Birthday? (DD.MM.YYYY)", Date)
+    cv    = await ctx.ask("Send your CV (PDF, max 5 MB)", Document(mime="application/pdf", max_size="5MB"))
+"""
 from __future__ import annotations
 
 import datetime as dt
@@ -9,14 +22,31 @@ from .errors import ValidationError
 
 if TYPE_CHECKING:
     from .context import Context
-    from .types import Message
+    from .media import Media as MediaFile
+    from .types import Location as LocationT
+    from .types import Message, PhotoSize
 
 
 class Validator:
-    """Base: override ``check(ctx, message) -> value``. ``prompt`` is the question shown."""
+    """Base class: override ``check(ctx, message)`` and return the clean value (or ``raise self.fail(ctx)``).
+
+    Arguments every validator accepts: ``prompt`` (the question, used by ``ctx.form``),
+    ``error`` (your own error text) and ``optional``.
+
+    Example::
+
+        class EvenNumber(Validator):
+            async def check(self, ctx, message):
+                n = int(message.text or "1")
+                if n % 2:
+                    raise self.fail(ctx)          # shows error= or the default text
+                return n
+
+        n = await ctx.ask("Send an even number", EvenNumber(error="That is odd!"))
+    """
 
     error_key = "nb.invalid"
-    keyboard: Any = None  # reply keyboard shown while asking (e.g. "send phone")
+    keyboard: Any = None  # reply keyboard shown while asking (e.g. "Share phone")
 
     def __init__(self, prompt: str | None = None, *, error: str | None = None, optional: bool = False):
         self.prompt = prompt
@@ -24,9 +54,21 @@ class Validator:
         self.optional = optional
 
     def fail(self, ctx: "Context", key: str | None = None, **kw: Any) -> ValidationError:
+        """Build the ``ValidationError`` to raise (your ``error=`` text, or a translated default).
+
+        Example::
+
+            raise self.fail(ctx, "nb.v.min", min=10)
+        """
         return ValidationError(self.error or ctx.t(key or self.error_key, **kw))
 
     async def check(self, ctx: "Context", message: "Message") -> Any:
+        """Validate one answer. The base version returns the message text.
+
+        Example::
+
+            value = await Text().check(ctx, ctx.message)
+        """
         return message.text
 
     async def __call__(self, ctx: "Context", message: "Message") -> Any:
@@ -34,6 +76,13 @@ class Validator:
 
 
 class Text(Validator):
+    """Text with an optional length limit (captions count as text).
+
+    Example::
+
+        comment = await ctx.ask("Your comment?", Text(min=10, max=500))
+    """
+
     error_key = "nb.v.text"
 
     def __init__(self, prompt: str | None = None, *, min: int | None = None, max: int | None = None, strip: bool = True, **kw: Any):
@@ -41,6 +90,12 @@ class Text(Validator):
         self.min, self.max, self.strip = min, max, strip
 
     async def check(self, ctx: "Context", message: "Message") -> str:
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         text = message.text if message.text is not None else message.caption
         if text is None:
             raise self.fail(ctx)
@@ -54,6 +109,13 @@ class Text(Validator):
 
 
 class Int(Validator):
+    """A whole number; spaces and separators are allowed (``1 000 000``). Exported as ``Integer``.
+
+    Example::
+
+        qty = await ctx.ask("How many?", Integer(min=1, max=100))
+    """
+
     error_key = "nb.v.int"
 
     def __init__(self, prompt: str | None = None, *, min: int | None = None, max: int | None = None, **kw: Any):
@@ -61,6 +123,12 @@ class Int(Validator):
         self.min, self.max = min, max
 
     async def check(self, ctx: "Context", message: "Message") -> int:
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         raw = (message.text or "").replace(" ", "").replace("_", "").replace(",", "")
         if not re.fullmatch(r"[-+]?\d+", raw):
             raise self.fail(ctx)
@@ -73,9 +141,22 @@ class Int(Validator):
 
 
 class Float(Int):
+    """A decimal number; a comma works as the decimal point (``12,5``). Exported as ``Number``.
+
+    Example::
+
+        weight = await ctx.ask("Weight, kg?", Number(min=0.1))
+    """
+
     error_key = "nb.v.float"
 
     async def check(self, ctx: "Context", message: "Message") -> float:  # type: ignore[override]
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         raw = (message.text or "").replace(" ", "").replace(",", ".")
         try:
             v = float(raw)
@@ -92,7 +173,16 @@ _UZ_CODES = ("33", "50", "55", "61", "62", "65", "66", "67", "69", "70", "71", "
 
 
 def normalize_phone(raw: str, default_country: str = "998") -> str | None:
-    """``"90 123-45-67"`` → ``"+998901234567"``. Returns ``None`` if it doesn't look like a phone."""
+    """Normalize a phone number to ``+<digits>``; ``None`` if it does not look like a phone.
+
+    Uzbek numbers are checked by operator code; 9-digit local numbers get ``+998``.
+
+    Example::
+
+        normalize_phone("90 123-45-67")        # "+998901234567"
+        normalize_phone("+7 (912) 345-67-89")  # "+79123456789"
+        normalize_phone("hello")               # None
+    """
     digits = re.sub(r"\D", "", raw or "")
     if not digits:
         return None
@@ -108,7 +198,12 @@ def normalize_phone(raw: str, default_country: str = "998") -> str | None:
 
 
 def format_phone(phone: str) -> str:
-    """``"+998901234567"`` → ``"+998 90 123 45 67"``."""
+    """Pretty-print a phone number.
+
+    Example::
+
+        format_phone("+998901234567")   # "+998 90 123 45 67"
+    """
     d = re.sub(r"\D", "", phone)
     if d.startswith("998") and len(d) == 12:
         return f"+998 {d[3:5]} {d[5:8]} {d[8:10]} {d[10:12]}"
@@ -116,7 +211,15 @@ def format_phone(phone: str) -> str:
 
 
 class Phone(Validator):
-    """Accepts a shared contact or a typed number. Uzbek numbers are checked by operator code."""
+    """A shared contact or a typed phone number, returned as ``"+998901234567"``.
+
+    ``button=True`` shows a "Share phone" button; ``own=True`` rejects other people's contacts.
+
+    Example::
+
+        phone = await ctx.ask("Your phone number?", Phone)
+        phone = await ctx.ask("Phone?", Phone(button=False))
+    """
 
     error_key = "nb.v.phone"
 
@@ -126,6 +229,12 @@ class Phone(Validator):
 
     @property
     def keyboard(self) -> Any:  # type: ignore[override]
+        """The reply keyboard shown while asking (e.g. a "Share phone" button).
+
+        Example::
+
+            Phone().keyboard
+        """
         if not self.button:
             return None
         from .keyboards import ReplyButton
@@ -133,6 +242,12 @@ class Phone(Validator):
         return _LazyText("nb.send_phone", lambda text: [ReplyButton(text, contact=True)])
 
     async def check(self, ctx: "Context", message: "Message") -> str:
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         if message.contact is not None:
             if self.own and message.contact.user_id and ctx.user_id and message.contact.user_id != ctx.user_id:
                 raise self.fail(ctx)
@@ -145,10 +260,23 @@ class Phone(Validator):
 
 
 class Email(Validator):
+    """An e-mail address (lower-cased).
+
+    Example::
+
+        email = await ctx.ask("Your e-mail?", Email)
+    """
+
     error_key = "nb.v.email"
     _rx = re.compile(r"^[\w.+-]+@[\w-]+(\.[\w-]+)+$")
 
     async def check(self, ctx: "Context", message: "Message") -> str:
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         v = (message.text or "").strip().lower()
         if not self._rx.match(v):
             raise self.fail(ctx)
@@ -156,10 +284,23 @@ class Email(Validator):
 
 
 class Url(Validator):
+    """A link starting with ``http://`` or ``https://``.
+
+    Example::
+
+        site = await ctx.ask("Your website?", Url)
+    """
+
     error_key = "nb.v.url"
     _rx = re.compile(r"^https?://[^\s/$.?#].[^\s]*$", re.I)
 
     async def check(self, ctx: "Context", message: "Message") -> str:
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         v = (message.text or "").strip()
         if not self._rx.match(v):
             raise self.fail(ctx)
@@ -167,7 +308,13 @@ class Url(Validator):
 
 
 class Date(Validator):
-    """Parses dates like ``25.12.2026`` (``format`` uses strftime codes)."""
+    """A date such as ``25.12.2026``, returned as ``datetime.date`` (``format`` uses strftime codes).
+
+    Example::
+
+        birthday = await ctx.ask("Birthday? (DD.MM.YYYY)", Date(max=dt.date.today()))
+        day = await ctx.ask("Date? (2026-12-25)", Date(format="%Y-%m-%d"))
+    """
 
     error_key = "nb.v.date"
 
@@ -176,7 +323,13 @@ class Date(Validator):
         self.format, self.min, self.max = format, min, max
 
     async def check(self, ctx: "Context", message: "Message") -> dt.date:
-        human = self.format.replace("%d", "KK").replace("%m", "OO").replace("%Y", "YYYY")
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
+        human = self.format.replace("%d", ctx.t("nb.date.d")).replace("%m", ctx.t("nb.date.m")).replace("%Y", ctx.t("nb.date.y"))
         try:
             v = dt.datetime.strptime((message.text or "").strip(), self.format).date()
         except ValueError:
@@ -189,7 +342,13 @@ class Date(Validator):
 
 
 class Choice(Validator):
-    """One of the given options (shown as reply buttons)."""
+    """One of the given options, shown as reply-keyboard buttons.
+
+    Example::
+
+        size = await ctx.ask("Size?", Choice(choices=["S", "M", "L"]))
+        size = await ctx.ask("Size?", ["S", "M", "L"])      # the same, shorter
+    """
 
     error_key = "nb.v.choice"
 
@@ -200,9 +359,21 @@ class Choice(Validator):
 
     @property
     def keyboard(self) -> Any:  # type: ignore[override]
+        """The reply keyboard shown while asking (e.g. a "Share phone" button).
+
+        Example::
+
+            Phone().keyboard
+        """
         return self.choices
 
     async def check(self, ctx: "Context", message: "Message") -> str:
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         v = (message.text or "").strip()
         for c in self.choices:
             if v == c or (self.ignore_case and v.lower() == c.lower()):
@@ -211,6 +382,13 @@ class Choice(Validator):
 
 
 class Regex(Validator):
+    """Text that fully matches a regular expression.
+
+    Example::
+
+        passport = await ctx.ask("Passport series?", Regex(r"[A-Z]{2}\\d{7}"))
+    """
+
     error_key = "nb.v.regex"
 
     def __init__(self, pattern: str, prompt: str | None = None, **kw: Any):
@@ -218,6 +396,12 @@ class Regex(Validator):
         self.rx = re.compile(pattern)
 
     async def check(self, ctx: "Context", message: "Message") -> str:
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         v = (message.text or "").strip()
         if not self.rx.fullmatch(v):
             raise self.fail(ctx)
@@ -225,54 +409,208 @@ class Regex(Validator):
 
 
 class Photo(Validator):
-    """Returns the largest ``PhotoSize`` (use ``.file_id``)."""
+    """A photo; returns the largest ``PhotoSize`` (``.file_id``, ``.width``, ``.height``).
+
+    Example::
+
+        photo = await ctx.ask("Send a photo of the product", Photo)
+        await Product.create(photo_id=photo.file_id)
+    """
 
     error_key = "nb.v.photo"
 
-    async def check(self, ctx: "Context", message: "Message") -> Any:
+    async def check(self, ctx: "Context", message: "Message") -> "PhotoSize":
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         if not message.photo:
             raise self.fail(ctx)
-        return message.photo[-1]
+        return max(message.photo, key=lambda p: (p.width or 0) * (p.height or 0))
 
 
 class File(Validator):
-    """Any document/photo/video/audio/voice. Returns the media object."""
+    """Any file (photo, video, document, audio, voice…) as a ``Media`` object, with optional limits.
+
+    * ``kinds`` — allowed kinds: ``"photo"``, ``"video"``, ``"document"``, ``"audio"``, ``"voice"``, ``"animation"``, ``"video_note"``, ``"sticker"``
+    * ``max_size`` — ``"10MB"``, ``"500KB"`` or bytes
+    * ``mime`` — ``"application/pdf"``, ``"image/*"`` or a list of them
+
+    Example::
+
+        f = await ctx.ask("Send any file", File)
+        cv = await ctx.ask("Send your CV as PDF (max 5 MB)", File(kinds=["document"], mime="application/pdf", max_size="5MB"))
+        path = await cv.save("cvs/")
+
+        pic = await ctx.ask("Send a picture", File(mime="image/*"))   # photo or image document
+    """
 
     error_key = "nb.v.file"
 
-    async def check(self, ctx: "Context", message: "Message") -> Any:
-        for attr in ("document", "video", "audio", "voice", "video_note", "animation"):
-            v = getattr(message, attr, None)
-            if v is not None:
-                return v
-        if message.photo:
-            return message.photo[-1]
-        raise self.fail(ctx)
+    def __init__(self, prompt: str | None = None, *, kinds: Iterable[str] | None = None, max_size: int | str | None = None,
+                 mime: str | Iterable[str] | None = None, **kw: Any):
+        from .media import parse_size
+
+        super().__init__(prompt, **kw)
+        self.kinds = set(kinds) if kinds else None
+        self.max_size = parse_size(max_size)
+        self.mime = [mime] if isinstance(mime, str) else list(mime) if mime else None
+
+    def _mime_ok(self, mime: str | None) -> bool:
+        if not self.mime:
+            return True
+        if not mime:
+            return False
+        for pattern in self.mime:
+            if pattern.endswith("/*") and mime.startswith(pattern[:-1]):
+                return True
+            if mime == pattern:
+                return True
+        return False
+
+    async def check(self, ctx: "Context", message: "Message") -> "MediaFile":
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
+        from .media import Media as MediaObj
+        from .media import human_size
+
+        m = MediaObj.of(message, ctx.bot)
+        if m is None or (self.kinds is not None and m.kind not in self.kinds):
+            raise self.fail(ctx)
+        if self.max_size is not None and m.size is not None and m.size > self.max_size:
+            raise self.fail(ctx, "nb.v.too_big", max=human_size(self.max_size))
+        if not self._mime_ok(m.mime):
+            raise self.fail(ctx, "nb.v.mime")
+        return m
+
+
+class Video(File):
+    """A video (``File`` with ``kinds=["video"]``).
+
+    Example::
+
+        clip = await ctx.ask("Send a video (max 50 MB)", Video(max_size="50MB"))
+    """
+
+    error_key = "nb.v.video"
+
+    def __init__(self, prompt: str | None = None, **kw: Any):
+        kw.setdefault("kinds", ["video"])
+        super().__init__(prompt, **kw)
+
+
+class Document(File):
+    """A file sent as a document (``File`` with ``kinds=["document"]``).
+
+    Example::
+
+        report = await ctx.ask("Send the Excel report", Document(mime=["application/vnd.ms-excel",
+                               "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]))
+    """
+
+    error_key = "nb.v.document"
+
+    def __init__(self, prompt: str | None = None, **kw: Any):
+        kw.setdefault("kinds", ["document"])
+        super().__init__(prompt, **kw)
+
+
+class Audio(File):
+    """A music file (``File`` with ``kinds=["audio"]``).
+
+    Example::
+
+        song = await ctx.ask("Send a song", Audio)
+    """
+
+    error_key = "nb.v.audio"
+
+    def __init__(self, prompt: str | None = None, **kw: Any):
+        kw.setdefault("kinds", ["audio"])
+        super().__init__(prompt, **kw)
+
+
+class Voice(File):
+    """A voice message (``File`` with ``kinds=["voice"]``).
+
+    Example::
+
+        note = await ctx.ask("Record a voice message", Voice)
+        await note.save("voices/")
+    """
+
+    error_key = "nb.v.voice"
+
+    def __init__(self, prompt: str | None = None, **kw: Any):
+        kw.setdefault("kinds", ["voice"])
+        super().__init__(prompt, **kw)
 
 
 class Location(Validator):
+    """A shared location (shows a "Share location" button). Returns ``Location`` with ``.latitude``/``.longitude``.
+
+    Example::
+
+        where = await ctx.ask("Where should we deliver?", Location)
+        await ctx.reply(f"{where.latitude}, {where.longitude}")
+    """
+
     error_key = "nb.v.location"
 
     @property
     def keyboard(self) -> Any:  # type: ignore[override]
+        """The reply keyboard shown while asking (e.g. a "Share phone" button).
+
+        Example::
+
+            Phone().keyboard
+        """
         from .keyboards import ReplyButton
 
         return _LazyText("nb.send_location", lambda text: [ReplyButton(text, location=True)])
 
-    async def check(self, ctx: "Context", message: "Message") -> Any:
+    async def check(self, ctx: "Context", message: "Message") -> "LocationT":
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         if message.location is None:
             raise self.fail(ctx)
         return message.location
 
 
 class Custom(Validator):
-    """Wrap any function: ``Custom(lambda text: text.upper())``. Raise ``ValueError`` with the message to show."""
+    """Wrap any function of the text. Raise ``ValueError`` with the message to show the user.
+
+    Example::
+
+        def promo(text: str) -> str:
+            if text.upper() not in CODES:
+                raise ValueError("Unknown promo code")
+            return text.upper()
+
+        code = await ctx.ask("Promo code?", promo)        # functions are wrapped automatically
+    """
 
     def __init__(self, func: Callable[[str], Any], prompt: str | None = None, **kw: Any):
         super().__init__(prompt, **kw)
         self.func = func
 
     async def check(self, ctx: "Context", message: "Message") -> Any:
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         from .utils import maybe_await
 
         try:
@@ -297,7 +635,15 @@ TYPE_MAP: dict[Any, type[Validator]] = {str: Text, int: Int, float: Float, dt.da
 
 
 def as_validator(spec: Any, prompt: str | None = None) -> Validator:
-    """``int`` → Int(), ``Phone`` (class) → Phone(), ``["a","b"]`` → Choice, callable → Custom."""
+    """Turn what you pass to ``ctx.ask`` into a validator.
+
+    ``int`` → ``Integer()``, ``Phone`` (class) → ``Phone()``, ``["a", "b"]`` → ``Choice``, a function → ``Custom``.
+
+    Example::
+
+        as_validator(int)            # Int()
+        as_validator(["S", "M"])     # Choice(choices=["S", "M"])
+    """
     if isinstance(spec, Validator):
         if prompt and not spec.prompt:
             spec.prompt = prompt
@@ -312,4 +658,4 @@ def as_validator(spec: Any, prompt: str | None = None) -> Validator:
         return Custom(spec, prompt)
     if spec is None:
         return Text(prompt)
-    raise TypeError(f"Validator emas: {spec!r}")
+    raise TypeError(f"Not a validator: {spec!r}. Use str, int, float, a Validator, a list of choices or a function.")

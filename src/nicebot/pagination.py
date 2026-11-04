@@ -1,4 +1,10 @@
-"""``ctx.paginate`` — long lists split into pages with ◀️ n/m ▶️ navigation."""
+"""``ctx.paginate`` — long lists split into pages with ◀️ 2/5 ▶️ navigation.
+
+Example::
+
+    users = await bot.User.all().order_by("-created_at")
+    await ctx.paginate(users, per_page=20, title="👥 Users", render=lambda u, i: f"{i}. {u.mention}")
+"""
 from __future__ import annotations
 
 import math
@@ -52,6 +58,12 @@ def _render_page(ctx: "Context", rec: dict[str, Any], pid: str, page: int) -> tu
 
 async def start_pagination(ctx: "Context", items: Sequence[Any], *, per_page: int, title: Any, render: Callable[[Any, int], Any] | None,
                            columns: Any, numbered: bool, ttl: Any, empty: Any, edit: bool) -> Any:
+    """Send the first page of a paginated list (used by ``ctx.paginate``).
+
+    Example::
+
+        await start_pagination(ctx, items, per_page=10, title="Products", render=None, columns=1, numbered=True, ttl="7d", empty=None, edit=False)
+    """
     items = list(items)
     if not items:
         return await (ctx.respond if edit else ctx.reply)(empty or ctx.t("nb.empty"))
@@ -79,6 +91,12 @@ async def start_pagination(ctx: "Context", items: Sequence[Any], *, per_page: in
 
 
 async def handle_page(ctx: "Context", data: str) -> None:
+    """Handle ◀️/▶️ presses (internal ``~p…`` callback data).
+
+    Example::
+
+        await handle_page(ctx, ctx.data)
+    """
     pid, _, page = data[2:].partition(":")
     rec = await ctx.bot.storage.get(f"pg:{pid}")
     if rec is None:

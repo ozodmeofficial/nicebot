@@ -1,4 +1,17 @@
-"""``@bot.every("1h")`` and ``@bot.at("09:00")`` jobs."""
+"""Scheduled jobs: ``@bot.every("1h")`` and ``@bot.at("09:00")``.
+
+Days are ``0``–``6``, ``mon``…``sun`` or Uzbek ``du se chor pay ju shan yak``.
+
+Example::
+
+    @bot.every("10m")
+    async def heartbeat(bot: Nicebot):
+        await bot.storage.set("alive", True, ttl=900)
+
+    @bot.at("21:00", days=["fri"], tz="Asia/Tashkent")
+    async def weekly(bot: Nicebot):
+        await bot.broadcast("🎉 Weekend sale starts now!")
+"""
 from __future__ import annotations
 
 import asyncio
@@ -25,7 +38,7 @@ def _day(d: int | str) -> int:
     for k, v in _DAYS.items():
         if s.startswith(k):
             return v
-    raise ValueError(f"Noma'lum kun: {d!r} (mon..sun yoki du, se, chor, pay, ju, shan, yak)")
+    raise ValueError(f"Unknown day {d!r}: use 0-6, mon..sun, or Uzbek du, se, chor, pay, ju, shan, yak")
 
 
 def _zone(tz: str | None) -> Any:
@@ -37,6 +50,15 @@ def _zone(tz: str | None) -> Any:
 
 
 class Job:
+    """A scheduled function: every N seconds, or daily at ``HH:MM`` (optionally on some weekdays, in a time zone).
+
+    Created by ``@bot.every`` and ``@bot.at``.
+
+    Example::
+
+        job = Job(cleanup, every=3600)
+        job = Job(report, at="09:00", days=["mon", "fri"], tz="Asia/Tashkent")
+    """
     def __init__(self, func: Callable[..., Any], *, every: float | None = None, first: float | None = None, at: str | None = None,
                  days: Iterable[int | str] | None = None, tz: str | None = None):
         self.func = func
@@ -51,6 +73,12 @@ class Job:
         self.name = getattr(func, "__name__", "job")
 
     def next_delay(self, now: dt.datetime | None = None) -> float:
+        """Seconds until the next run.
+
+        Example::
+
+            Job(report, at="09:00").next_delay()   # e.g. 3600.0
+        """
         if self.at is None:
             return float(self.every or 60)
         zone = _zone(self.tz)
@@ -61,11 +89,17 @@ class Job:
         return (target - now).total_seconds()
 
     async def call(self, bot: "Nicebot") -> None:
+        """Run the function once (``func()`` or ``func(bot)``); errors are logged, not raised.
+
+        Example::
+
+            await job.call(bot)
+        """
         try:
             takes = len(inspect.signature(self.func).parameters) >= 1
             await maybe_await(self.func(bot) if takes else self.func())
         except Exception:  # noqa: BLE001
-            log.exception("Rejalashtirilgan vazifa '%s' xato berdi", self.name)
+            log.exception("Scheduled job %r failed", self.name)
 
 
 async def _run(bot: "Nicebot", job: Job) -> None:
@@ -82,6 +116,12 @@ async def _run(bot: "Nicebot", job: Job) -> None:
 
 
 async def run_jobs(bot: "Nicebot", jobs: list[Job]) -> None:
+    """Run all jobs until cancelled (started by ``bot.run()``).
+
+    Example::
+
+        await run_jobs(bot, bot._jobs)
+    """
     if not jobs:
         return
     tasks = [asyncio.create_task(_run(bot, j)) for j in jobs]

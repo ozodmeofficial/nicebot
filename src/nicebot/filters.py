@@ -1,4 +1,13 @@
-"""Composable filters: ``F.text & ~F.command``, ``F.photo | F.document``, or any ``lambda ctx: ...``."""
+"""Filters decide whether a handler runs. Combine them with ``&``, ``|`` and ``~``.
+
+Example::
+
+    from nicebot import F
+
+    @bot.message(F.photo & F.private)
+    async def photo(ctx: Context):
+        await ctx.reply("Nice photo!")
+"""
 from __future__ import annotations
 
 import inspect
@@ -12,7 +21,15 @@ FilterFunc = Callable[["Context"], Union[bool, Awaitable[bool]]]
 
 
 class Filter:
-    """Wraps a predicate; combine with ``&`` ``|`` ``~``."""
+    """A condition on ``ctx``; combine with ``&`` (and), ``|`` (or) and ``~`` (not). Sync or async functions work.
+
+    Example::
+
+        is_vip = Filter(lambda ctx: ctx.user and ctx.user.data.get("vip"), "vip")
+
+        @bot.message(F.photo & is_vip)
+        async def vip_photo(ctx: Context): ...
+    """
 
     __slots__ = ("func", "name")
 
@@ -55,11 +72,17 @@ class Filter:
 
 
 def as_filter(obj: Any) -> Filter:
+    """Turn a ``Filter`` or a function of ``ctx`` into a ``Filter``.
+
+    Example::
+
+        f = as_filter(lambda ctx: ctx.is_private)
+    """
     if isinstance(obj, Filter):
         return obj
     if callable(obj):
         return Filter(obj, getattr(obj, "__name__", "filter"))
-    raise TypeError(f"Filter bo'lishi kerak: {obj!r}")
+    raise TypeError(f"Not a filter: {obj!r} (use F.something, a Filter or a function of ctx)")
 
 
 def _has(attr: str) -> Filter:
@@ -67,7 +90,19 @@ def _has(attr: str) -> Filter:
 
 
 class _F:
-    """Ready-made filters. ``from nicebot import F``."""
+    """Ready-made filters: ``from nicebot import F``.
+
+    Content: ``F.text F.photo F.video F.document F.audio F.voice F.sticker F.contact F.location F.media F.reply F.forwarded``…
+    Chat: ``F.private F.group F.channel``; sender: ``F.admin F.premium``; plus ``F.regex() F.contains() F.user() F.chat() F.lang() F.state()``.
+
+    Example::
+
+        @bot.message(F.photo & F.private)
+        async def private_photo(ctx: Context): ...
+
+        @bot.message(F.contains("price", "cost") & ~F.admin)
+        async def price(ctx: Context): ...
+    """
 
     text = _has("text")
     photo = _has("photo")
@@ -98,11 +133,25 @@ class _F:
 
     @staticmethod
     def regex(pattern: str | re.Pattern, flags: int = 0) -> Filter:
+        """Text matches a regular expression (search).
+
+        Example::
+
+            @bot.message(F.regex(r"^\\d{6}$"))
+            async def code(ctx: Context): ...
+        """
         rx = re.compile(pattern, flags) if isinstance(pattern, str) else pattern
         return Filter(lambda ctx: bool(ctx.text and rx.search(ctx.text)), f"regex({rx.pattern})")
 
     @staticmethod
     def contains(*words: str, ignore_case: bool = True) -> Filter:
+        """Text contains any of the words.
+
+        Example::
+
+            @bot.message(F.contains("help", "support"))
+            async def support(ctx: Context): ...
+        """
         ws = [w.lower() for w in words] if ignore_case else list(words)
 
         def check(ctx: "Context") -> bool:
@@ -114,21 +163,49 @@ class _F:
 
     @staticmethod
     def user(*ids: int) -> Filter:
+        """Sender is one of these ids.
+
+        Example::
+
+            @bot.message(F.user(111, 222))
+            async def managers(ctx: Context): ...
+        """
         s = set(ids)
         return Filter(lambda ctx: ctx.user_id in s, "user")
 
     @staticmethod
     def chat(*ids: int) -> Filter:
+        """Message is in one of these chats.
+
+        Example::
+
+            @bot.message(F.chat(-1001234567890))
+            async def in_group(ctx: Context): ...
+        """
         s = set(ids)
         return Filter(lambda ctx: ctx.chat_id in s, "chat")
 
     @staticmethod
     def lang(*codes: str) -> Filter:
+        """User's language is one of these codes.
+
+        Example::
+
+            @bot.command("start", filters=[F.lang("ru")])
+            async def start_ru(ctx: Context): ...
+        """
         s = set(codes)
         return Filter(lambda ctx: ctx.lang in s, "lang")
 
     @staticmethod
     def state(*names: str | None) -> Filter:
+        """User is in one of these states (``None`` = no state).
+
+        Example::
+
+            @bot.message(F.state("feedback"))
+            async def feedback(ctx: Context): ...
+        """
         s = set(names)
 
         async def check(ctx: "Context") -> bool:

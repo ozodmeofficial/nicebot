@@ -18,6 +18,8 @@ GROUPS = {
     "start": "Boshlash",
     "basics": "Asoslar",
     "ui": "Tugmalar va suhbat",
+    "media": "Media va fayllar",
+    "miniapp": "Mini App",
     "data": "Ma'lumotlar",
     "business": "Biznes vositalari",
     "advanced": "Ilg'or",
@@ -52,6 +54,8 @@ Endi xuddi shu bot nicebot'da:
 - **Suhbatlar:** `ask`, `confirm`, `choose`, `form` va tayyor validatorlar
 - **Tugmalar:** `on_click`, shablonlar, toggle, muddatli va bir martalik tugmalar, avto-joylashuv
 - **Biznes:** referal, broadcast, statistika, admin panel, majburiy obuna, support, Telegram Stars
+- **Media:** `ctx.media` — kelgan fayl bitta obyektda, `save()`, `download()`, aralash albomlar
+- **Mini App:** `@bot.api`, `nicebot.js`, `tunnel=True` bilan domensiz HTTPS
 - **Ishonchlilik:** flood-wait'ni o'zi kutadi, tarmoq xatosida qayta uradi, restartda update yo'qolmaydi
 - **Tezlik:** msgspec turlari va bitta ulanish pooli
 
@@ -109,7 +113,7 @@ Terminalda `✅ @sizning_bot ishga tushdi` yozuvi chiqadi. Telegram'da botingizg
 |---|---|
 | `Nicebot(token=...)` | Botni yaratadi. Baza berilmasa, xotiradagi SQLite ishlatiladi |
 | `@bot.command("start")` | `/start` buyrug'i kelganda pastdagi funksiyani chaqiradi |
-| `async def start(ctx)` | `ctx` joriy xabar haqidagi hamma narsani biladi |
+| `async def start(ctx: Context)` | `ctx` joriy xabar haqidagi hamma narsani biladi. `: Context` muharrirga avtomatik to'ldirishni yoqadi |
 | `await ctx.reply(...)` | Shu chatga javob yuboradi |
 | `bot.start()` | Telegram'dan xabarlarni olishni boshlaydi. To'xtatish uchun Ctrl+C |
 
@@ -191,6 +195,11 @@ Har qanday dekoratorga quyidagi parametrlarni qo'shish mumkin:
 """)
 
 PAGES["ctx"] = ("ctx — kontekst", """
+`ctx` — har bir handler birinchi argument sifatida oladigan obyekt. Bu sahifa eng ko'p ishlatiladigan qismlarini ko'rsatadi; to'liq ro'yxat — [ctx: to'liq ma'lumotnoma](#ref-ctx).
+
+> [!TIP]
+> `async def handler(ctx: Context)` deb yozing — VS Code `ctx.` dan keyin barcha metodlarni ko'rsatadi. [Batafsil](#vscode).
+
 ## Ma'lumotlar
 
 {code:ctx_props}
@@ -549,18 +558,6 @@ Nom bo'yicha keladiganlar: `bot`, `message`, `callback`, `user`, `chat`, `text`,
 {code:errors}
 """)
 
-PAGES["miniapp"] = ("Mini App", """
-nicebot'da bot bilan bitta jarayonda ishlaydigan veb-server bor. U Mini App fayllarini beradi va API endpoint'larni yaratadi. Telegram `initData` imzosi HMAC orqali avtomatik tekshiriladi.
-
-{code:miniapp_py}
-
-Brauzer tomonida tayyor `nicebot.js` ulanadi. U `initData`'ni o'zi qo'shib yuboradi:
-
-{code:miniapp_js:html}
-
-`initData` noto'g'ri yoki eskirgan bo'lsa, so'rov `401` bilan rad etiladi. `@bot.api(..., auth=False)` ochiq endpoint yaratadi. `WebAppRequest` obyektida `user`, `json`, `query`, `params` va `db_user()` bor.
-""")
-
 PAGES["scheduler"] = ("Rejalashtirish, fon va kesh", """
 ## Rejalashtirilgan vazifalar
 
@@ -604,6 +601,10 @@ Ctrl+C yoki SIGTERM kelganda bot yangi update olishni to'xtatadi va ishlayotgan 
 - Tarmoq va 5xx xatolari: eksponensial kutish bilan 3 marta qayta urinadi
 - Noma'lum yangi update turlari bot ishini to'xtatmaydi, ular logga yozilib, o'tkazib yuboriladi
 - Bir vaqtdagi handlerlar soni `max_concurrency=256` bilan cheklangan
+
+## Domensiz webhook
+
+`bot.start(tunnel=True, webhook=True)` — webhook bepul HTTPS tunnel orqali ishlaydi. Production'da: `Nicebot(public_url="https://bot.example.uz")` va `bot.start(webhook=True, port=8080)`.
 """)
 
 PAGES["testing"] = ("Testlash", """
@@ -623,6 +624,10 @@ Botni Telegram'siz, haqiqiy foydalanuvchidek sinab ko'rish mumkin. Soxta API bar
 | `t.blocked = {id}` | Botni bloklagan foydalanuvchi |
 
 `pytest` va `pytest-asyncio` bilan ishlaydi.
+
+## Fayllar va Mini App
+
+`user.send_document("report.pdf", content=b"...")`, `send_photo`, `send_video`, `send_voice` — bot bu fayllarni `ctx.download()` bilan haqiqatan yuklab oladi. Mini App endpointlarini `await t.api("/api/...", {...}, user=ali)` bilan tekshiring — [misol](#miniapp-backend).
 """)
 
 PAGES["features"] = ("50 ta imkoniyat", """
@@ -640,7 +645,7 @@ Turlar `from nicebot import types` orqali olinadi, masalan `types.Message` yoki 
 
 | | |
 |---|---|
-| nicebot | 0.1.2 |
+| nicebot | 1.0.0 |
 | Bot API | 10.3 |
 | Python | 3.10+ |
 | Litsenziya | MIT |

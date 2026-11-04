@@ -1,4 +1,10 @@
-"""Mass messaging that respects Telegram limits, marks blocked users and can resume after a restart."""
+"""Mass messaging with Telegram's limits respected, blocked users marked, and resume support.
+
+Example::
+
+    result = await bot.broadcast("📢 New products in the shop!", id="june-news")
+    print(result)   # {"total": 1200, "sent": 1180, "failed": 20, "blocked": 18}
+"""
 from __future__ import annotations
 
 import asyncio
@@ -18,12 +24,19 @@ log = logging.getLogger("nicebot.broadcast")
 
 async def broadcast(bot: "Nicebot", content: Any, *, users: Iterable[int] | None = None, buttons: Any = None, copy_from: tuple[int, int] | None = None,
                     rate: float = 25, id: str | None = None, on_progress: Callable[..., Any] | None = None, progress_every: float = 3.0, **kw: Any) -> dict[str, int]:
-    """Send ``content`` (text, or ``callable(user_id) -> text``) to all users (or ``users``).
+    """Send ``content`` (text, or ``callable(user_id) -> text``) to all users that did not block the bot (or to ``users``).
 
-    * ``rate`` — messages per second (Telegram allows ~30/s)
+    * ``rate`` — messages per second (Telegram allows about 30/s)
     * ``copy_from=(chat_id, message_id)`` — copy any message (photo, video, buttons…)
     * ``id="newyear"`` — remembers progress; calling again with the same id continues where it stopped
+    * ``on_progress`` — ``func(stats)`` called every ``progress_every`` seconds
     * returns ``{"total", "sent", "failed", "blocked"}``
+
+    Example::
+
+        stats = await bot.broadcast("🎉 Happy New Year!", id="ny-2027", buttons=[Button("🎁 Gift", url=GIFT_URL)])
+        stats = await bot.broadcast(None, copy_from=(ctx.chat_id, ctx.message.reply_to_message.message_id))
+        stats = await bot.broadcast(lambda uid: f"Your id is {uid}", users=[111, 222])
     """
     if users is None:
         users = await bot.User.filter(is_blocked=False).order_by("id").values_list("id")

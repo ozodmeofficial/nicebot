@@ -1,4 +1,9 @@
-"""HTTP layer: one pooled aiohttp session, msgspec encode/decode, smart retries."""
+"""HTTP layer: one pooled aiohttp session, msgspec encoding/decoding, smart retries, uploads and downloads.
+
+Example::
+
+    data = await bot.client.download((await bot.get_file(file_id)).file_path)
+"""
 from __future__ import annotations
 
 import asyncio
@@ -31,6 +36,12 @@ _ENCODER = msgspec.json.Encoder()
 
 
 def decoder_for(returns: Any) -> msgspec.json.Decoder:
+    """A cached msgspec decoder for a return type such as ``"Message"`` or ``"list[Update]"``.
+
+    Example::
+
+        msg = decoder_for("Message").decode(raw_json)
+    """
     key = returns if isinstance(returns, str) else repr(returns)
     dec = _DECODERS.get(key)
     if dec is None:
@@ -43,7 +54,12 @@ _FILE_FIELDS = ("photo", "document", "video", "audio", "voice", "animation", "st
 
 
 def extract_file_id(message: Any) -> str | None:
-    """Return the file_id of the media inside a sent Message (for the file cache)."""
+    """The ``file_id`` of the media inside a sent ``Message`` (used by the upload cache).
+
+    Example::
+
+        extract_file_id(await ctx.photo("a.jpg"))   # "AgACAgIAAxk..."
+    """
     for name in _FILE_FIELDS:
         val = getattr(message, name, None)
         if val:
@@ -54,13 +70,24 @@ def extract_file_id(message: Any) -> str | None:
 
 
 class Client:
-    """Talks to the Bot API.  Handles flood-wait (429), 5xx and network errors."""
+    """Talks to the Bot API over one pooled aiohttp session. Handles flood-wait (429), 5xx and network errors with retries,
+    uploads files, and remembers ``file_id`` of uploaded local files so they are never uploaded twice.
+
+    You normally use it through the bot (``bot.client``).
+
+    Example::
+
+        client = Client("123456:ABC...")
+        me = await client.request("getMe", returns="User")
+        await client.close()
+    """
 
     def __init__(
         self,
         token: str,
         *,
         api_url: str = "https://api.telegram.org",
+        test_server: bool = False,
         timeout: float = 30.0,
         retries: int = 3,
         flood_wait_max: float = 60.0,
@@ -68,6 +95,7 @@ class Client:
     ):
         self.token = token
         self.api_url = api_url.rstrip("/")
+        self.test_server = test_server
         self.timeout = timeout
         self.retries = retries
         self.flood_wait_max = flood_wait_max
@@ -77,6 +105,12 @@ class Client:
 
     # ------------------------------------------------------------- session
     async def session(self) -> aiohttp.ClientSession:
+        """The shared ``aiohttp.ClientSession`` (created on first use).
+
+        Example::
+
+            session = await bot.client.session()
+        """
         if self._session is None or self._session.closed:
             self._session = aiohttp.ClientSession(
                 connector=aiohttp.TCPConnector(limit=100, ttl_dns_cache=300),
@@ -85,6 +119,12 @@ class Client:
         return self._session
 
     async def close(self) -> None:
+        """Close the HTTP session.
+
+        Example::
+
+            await bot.client.close()
+        """
         if self._session and not self._session.closed:
             await self._session.close()
         self._session = None
@@ -158,10 +198,16 @@ class Client:
 
     # ------------------------------------------------------------- request
     async def request(self, method: str, params: dict[str, Any] | None = None, returns: Any = "Any", *, timeout: float | None = None) -> Any:
+        """Call a Bot API method by its Telegram name and decode the result into ``returns``.
+
+        Example::
+
+            msg = await bot.client.request("sendMessage", {"chat_id": 42, "text": "hi"}, "Message")
+        """
         payload, files, cache_keys = await self._prepare(params or {})
         if self.on_request:
             self.on_request(method, payload)
-        url = f"{self.api_url}/bot{self.token}/{method}"
+        url = self.method_url(method)
         attempt = 0
         flood_waited = 0.0
         while True:
@@ -178,7 +224,7 @@ class Client:
                 wait = e.retry_after
                 if flood_waited + wait > self.flood_wait_max:
                     raise
-                log.warning("Flood control on %s: kutilyapti %.0fs", method, wait)
+                log.warning("Flood control on %s: waiting %.0fs", method, wait)
                 flood_waited += wait
                 await asyncio.sleep(wait)
             except ServerError:
@@ -194,7 +240,12 @@ class Client:
                 await asyncio.sleep(min(0.5 * 2 ** attempt, 8))
 
     async def remember_files(self, cache_keys: dict[str, str], result: Any) -> None:
-        """Store the file_id Telegram gave an uploaded local file, so it is never uploaded twice."""
+        """Store the file_id Telegram gave an uploaded local file (internal).
+
+        Example::
+
+            await client.remember_files(cache_keys, result)
+        """
         if not cache_keys or self.file_cache is None:
             return
         fid = extract_file_id(result)
@@ -216,8 +267,77 @@ class Client:
         async with session.post(url, data=_ENCODER.encode(payload), headers={"Content-Type": "application/json"}, timeout=to) as resp:
             return await resp.read()
 
+    @property
+    def is_cloud(self) -> bool:
+        """``True`` when talking to Telegram's cloud Bot API (20 MB download limit), ``False`` for a local server.
+
+        Example::
+
+            Client("123:ABC").is_cloud                                   # True
+            Client("123:ABC", api_url="http://localhost:8081").is_cloud  # False
+        """
+        return "api.telegram.org" in self.api_url
+
+    def method_url(self, method: str) -> str:
+        """Full URL of a Bot API method (``/test/`` is added on the test server).
+
+        Example::
+
+            client.method_url("getMe")   # https://api.telegram.org/bot<token>/getMe
+        """
+        return f"{self.api_url}/bot{self.token}/{'test/' if self.test_server else ''}{method}"
+
+    def file_url(self, file_path: str) -> str:
+        """Download URL of a file returned by ``getFile``.
+
+        Example::
+
+            info = await bot.get_file(file_id)
+            url = bot.client.file_url(info.file_path)
+        """
+        return f"{self.api_url}/file/bot{self.token}/{'test/' if self.test_server else ''}{file_path}"
+
     async def download(self, file_path: str) -> bytes:
+        """Download a file by its ``file_path`` (from ``getFile``) into memory.
+
+        With a local Bot API server started with ``--local``, ``file_path`` is an absolute path on disk and is read directly.
+
+        Example::
+
+            info = await bot.get_file(file_id)
+            data = await bot.client.download(info.file_path)
+        """
+        import os
+
+        if os.path.isabs(file_path) and os.path.isfile(file_path):
+            return await asyncio.to_thread(_read_bytes, file_path)
         session = await self.session()
-        async with session.get(f"{self.api_url}/file/bot{self.token}/{file_path}") as resp:
+        async with session.get(self.file_url(file_path)) as resp:
             resp.raise_for_status()
             return await resp.read()
+
+    async def download_to(self, file_path: str, dest: Any, chunk_size: int = 256 * 1024) -> None:
+        """Stream a file to ``dest`` on disk in chunks (big files never sit in memory).
+
+        Example::
+
+            info = await bot.get_file(file_id)
+            await bot.client.download_to(info.file_path, "video.mp4")
+        """
+        import os
+        import shutil
+
+        if os.path.isabs(file_path) and os.path.isfile(file_path):
+            await asyncio.to_thread(shutil.copyfile, file_path, dest)
+            return
+        session = await self.session()
+        async with session.get(self.file_url(file_path), timeout=aiohttp.ClientTimeout(total=None, sock_read=120)) as resp:
+            resp.raise_for_status()
+            with open(dest, "wb") as fh:
+                async for chunk in resp.content.iter_chunked(chunk_size):
+                    fh.write(chunk)
+
+
+def _read_bytes(path: str) -> bytes:
+    with open(path, "rb") as fh:
+        return fh.read()

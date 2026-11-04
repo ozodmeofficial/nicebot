@@ -1,5 +1,18 @@
 """Built-in behaviour: user tracking, referrals, maintenance, forced subscription, captcha,
-support relay, toggles, internal buttons, admin panel and statistics."""
+support relay, toggles, internal buttons, admin panel and statistics.
+
+You do not import this module: the features switch on through ``Nicebot`` options.
+
+Example::
+
+    bot = Nicebot(
+        token="...",
+        admins=[123456789],                 # /stats /broadcast /maintenance /backup
+        required_channels=["@my_channel"],  # forced subscription
+        support_chat=-1001234567890,        # support relay
+        captcha="2m",                       # captcha for new group members
+    )
+"""
 from __future__ import annotations
 
 import datetime as dt
@@ -31,7 +44,16 @@ def _now() -> dt.datetime:
 
 # ============================================================================ middlewares
 async def user_mw(ctx: "Context", nxt: Next) -> Any:
-    """Save every user to the database once and keep their profile fresh (``ctx.user``)."""
+    """Middleware: save every user to the database once and keep their profile fresh (``ctx.user``).
+
+    Enabled by default (``Nicebot(track_users=False)`` turns it off).
+
+    Example::
+
+        @bot.command("me")
+        async def me(ctx: Context):
+            await ctx.reply(f"You joined on {ctx.user.created_at:%d.%m.%Y}")
+    """
     bot = ctx.bot
     u = ctx.from_user
     if u is None or u.is_bot or ctx.event_name not in TRACK_EVENTS:
@@ -103,6 +125,12 @@ async def user_mw(ctx: "Context", nxt: Next) -> Any:
 
 
 async def maintenance_mw(ctx: "Context", nxt: Next) -> Any:
+    """Middleware: while maintenance is on, everyone except admins gets the maintenance text.
+
+    Example::
+
+        await bot.maintenance(True)     # or the /maintenance admin command
+    """
     bot = ctx.bot
     if bot._maintenance is None or ctx.is_admin or ctx.event_name not in ("message", "callback_query"):
         return await nxt()
@@ -133,6 +161,13 @@ async def _channel_link(bot: "Nicebot", ch: Any) -> tuple[Any, str]:
 
 
 async def missing_channels(ctx: "Context") -> list[tuple[Any, str]]:
+    """Channels from ``required_channels`` the user has not joined yet, as ``(chat, link)`` pairs.
+
+    Example::
+
+        if await missing_channels(ctx):
+            await ctx.reply("Please join our channels")
+    """
     bot = ctx.bot
     missing = []
     for ch in bot.required_channels:
@@ -150,13 +185,19 @@ async def missing_channels(ctx: "Context") -> list[tuple[Any, str]]:
 async def _subscription_prompt(ctx: "Context", missing: list[tuple[Any, str]]) -> None:
     buttons: list[list[Button]] = []
     for i, (chat_id, link) in enumerate(missing, 1):
-        title = chat_id if isinstance(chat_id, str) and chat_id.startswith("@") else f"📢 Kanal {i}"
+        title = chat_id if isinstance(chat_id, str) and chat_id.startswith("@") else ctx.t("nb.admin.channel", n=i)
         buttons.append([Button(str(title), url=link)])
     buttons.append([Button(ctx.t("nb.check"), data="~s")])
     await ctx.reply(ctx.t("nb.subscribe"), buttons=buttons)
 
 
 async def subscription_mw(ctx: "Context", nxt: Next) -> Any:
+    """Middleware: users must join ``required_channels`` before the bot answers them.
+
+    Example::
+
+        bot = Nicebot(token="...", required_channels=["@my_channel"])
+    """
     if ctx.is_admin or not ctx.is_private or ctx.event_name not in ("message", "callback_query"):
         return await nxt()
     if ctx.is_callback and ctx.data == "~s":
@@ -172,6 +213,12 @@ async def subscription_mw(ctx: "Context", nxt: Next) -> Any:
 
 
 async def captcha_mw(ctx: "Context", nxt: Next) -> Any:
+    """Middleware: new group members are muted until they press "I'm not a robot".
+
+    Example::
+
+        bot = Nicebot(token="...", captcha="2m")   # kick if not confirmed in 2 minutes
+    """
     bot = ctx.bot
     m = ctx.message if ctx.event_name == "message" else None
     if not bot.captcha or m is None or not m.new_chat_members or not ctx.is_group:
@@ -183,7 +230,7 @@ async def captcha_mw(ctx: "Context", nxt: Next) -> Any:
         try:
             await bot.restrict_chat_member(ctx.chat_id, member.id, T.ChatPermissions(can_send_messages=False))
         except TelegramError as e:
-            log.warning("Captcha: cheklab bo'lmadi (%s). Bot guruhda admin bo'lishi kerak.", e)
+            log.warning("Captcha: could not restrict the member (%s). The bot must be a group admin.", e)
             continue
         who = mention(member.first_name, member.id)
         msg = await ctx.reply(ctx.t("nb.captcha", mention=who, seconds=seconds), buttons=[Button(ctx.t("nb.captcha_button"), data=f"~a{member.id}")])
@@ -207,6 +254,12 @@ async def _captcha_timeout(bot: "Nicebot", chat_id: int, user_id: int, key: str)
 
 # ============================================================================ internal callbacks
 async def handle_internal_callback(ctx: "Context") -> bool:
+    """Handle nicebot's own buttons (``~…`` callback data: on_click, toggles, menus, pages, captcha). Internal.
+
+    Example::
+
+        handled = await handle_internal_callback(ctx)
+    """
     from .di import call_handler
 
     bot = ctx.bot
@@ -321,6 +374,12 @@ async def _toggle(ctx: "Context", data: str) -> None:
 
 # ============================================================================ support relay
 async def support_relay(ctx: "Context", phase: str) -> bool:
+    """Support mode: forward unmatched private messages to ``support_chat``; replies there go back to the user.
+
+    Example::
+
+        bot = Nicebot(token="...", support_chat=-1001234567890)
+    """
     bot = ctx.bot
     if bot.support_chat is None or ctx.message is None:
         return False
@@ -335,7 +394,7 @@ async def support_relay(ctx: "Context", phase: str) -> bool:
             await bot.copy_message(uid, m.chat.id, m.message_id)
             await ctx.react("👍")
         except Forbidden:
-            await ctx.reply("⛔️ Foydalanuvchi botni bloklagan.")
+            await ctx.reply(ctx.t("nb.admin.user_blocked"))
         return True
     if not ctx.is_private or ctx.is_admin or ctx.command:
         return False
@@ -354,6 +413,13 @@ async def support_relay(ctx: "Context", phase: str) -> bool:
 
 # ============================================================================ commands menu
 async def register_commands(bot: "Nicebot") -> None:
+    """Publish commands that have ``description=`` in Telegram's menu (and admin commands for admins).
+
+    Example::
+
+        @bot.command("help", description={"uz": "Yordam", "en": "Help"})
+        async def help(ctx: Context): ...
+    """
     default: list[T.BotCommand] = []
     per_lang: dict[str, list[T.BotCommand]] = {}
     for h in bot.all_handlers():
@@ -374,23 +440,26 @@ async def register_commands(bot: "Nicebot") -> None:
         for lang, cmds in per_lang.items():
             await bot.set_my_commands(cmds, language_code=lang)
         if bot.admin_panel and bot.admins:
-            admin_cmds = default + [
-                T.BotCommand(command="stats", description="📊 Statistika"),
-                T.BotCommand(command="broadcast", description="📣 Hammaga xabar"),
-                T.BotCommand(command="maintenance", description="🛠 Texnik ishlar rejimi"),
-                T.BotCommand(command="backup", description="💾 Bazaning nusxasi"),
-            ]
+            lang = bot.i18n.default
+            admin_cmds = default + [T.BotCommand(command=c, description=bot.i18n.t(f"nb.cmd.{c}", lang)) for c in ("stats", "broadcast", "maintenance", "backup")]
             for admin in bot.admins:
                 try:
                     await bot.set_my_commands(admin_cmds, scope=T.BotCommandScopeChat(chat_id=admin))
                 except TelegramError:
                     pass
     except TelegramError as e:
-        log.warning("Buyruqlar menyusini o'rnatib bo'lmadi: %s", e)
+        log.warning("Could not set the commands menu: %s", e)
 
 
 # ============================================================================ statistics
 async def compute_stats(bot: "Nicebot") -> dict[str, Any]:
+    """Users, new users, DAU/WAU/MAU, blocked, premium, referrals, 7-day retention and top commands.
+
+    Example::
+
+        s = await compute_stats(bot)      # same as await bot.stats()
+        print(s["dau"], s["top_commands"])
+    """
     await bot.flush_stats()
     from .orm.builtin import Stat
 
@@ -421,24 +490,42 @@ async def compute_stats(bot: "Nicebot") -> dict[str, Any]:
     }
 
 
-def format_stats(s: dict[str, Any]) -> str:
+def format_stats(s: dict[str, Any], t: Callable[..., str] | None = None) -> str:
+    """Render ``bot.stats()`` as an HTML message (``t`` is a translator such as ``ctx.t``).
+
+    Example::
+
+        await ctx.reply(format_stats(await bot.stats(), ctx.t))
+    """
+    if t is None:
+        from .i18n import I18n
+
+        _i18n = I18n(None, default="en")
+        t = lambda key, **kw: _i18n.t(key, "en", **kw)  # noqa: E731
     lines = [
-        "📊 <b>Statistika</b>",
+        t("nb.admin.stats_title"),
         "",
-        f"👥 Jami: <b>{s['users']}</b>",
-        f"🆕 Bugun: <b>{s['new_today']}</b> · 7 kunda: <b>{s['new_week']}</b>",
-        f"🔥 DAU: <b>{s['dau']}</b> · WAU: <b>{s['wau']}</b> · MAU: <b>{s['mau']}</b>",
-        f"⛔️ Bloklagan: <b>{s['blocked']}</b> · ⭐️ Premium: <b>{s['premium']}</b>",
-        f"🔗 Referal orqali: <b>{s['referred']}</b>",
-        f"📈 7 kunlik retention: <b>{s['retention_d7'] if s['retention_d7'] is not None else '—'}%</b>",
+        t("nb.admin.stats_total", users=s["users"]),
+        t("nb.admin.stats_new", today=s["new_today"], week=s["new_week"]),
+        t("nb.admin.stats_active", dau=s["dau"], wau=s["wau"], mau=s["mau"]),
+        t("nb.admin.stats_blocked", blocked=s["blocked"], premium=s["premium"]),
+        t("nb.admin.stats_referred", referred=s["referred"]),
+        t("nb.admin.stats_retention", retention=s["retention_d7"] if s["retention_d7"] is not None else "—"),
     ]
     if s["top_commands"]:
-        lines += ["", "<b>Top buyruqlar (30 kun):</b>"] + [f"/{escape(c)} — {n}" for c, n in s["top_commands"]]
+        lines += ["", t("nb.admin.stats_top")] + [f"/{escape(c)} — {n}" for c, n in s["top_commands"]]
     return "\n".join(lines)
 
 
 # ============================================================================ admin panel
 def builtin_router(bot: "Nicebot") -> Router:
+    """The router with the admin commands (/stats, /maintenance, /backup, /broadcast). Built once per bot.
+
+    Example::
+
+        router = builtin_router(bot)
+        print([h.commands for h in router.all_handlers()])
+    """
     cached = bot.__dict__.get("_builtin_router")
     if cached is not None:
         return cached
@@ -451,21 +538,21 @@ def builtin_router(bot: "Nicebot") -> Router:
 
     @r.command("stats", admin=True)
     async def _stats(ctx: "Context") -> None:
-        await ctx.reply(format_stats(await bot.stats()))
+        await ctx.reply(format_stats(await bot.stats(), ctx.t))
 
     @r.command("maintenance", admin=True)
     async def _maintenance(ctx: "Context") -> None:
         arg = ctx.arg.strip().lower()
-        on = arg in ("on", "yoq", "1", "true", "") if arg else bot._maintenance is None
-        if arg in ("off", "o'chir", "ochir", "0", "false"):
+        on = arg in ("on", "yoq", "вкл", "1", "true", "") if arg else bot._maintenance is None
+        if arg in ("off", "o'chir", "ochir", "выкл", "0", "false"):
             on = False
         await bot.maintenance(on)
-        await ctx.reply("🛠 Texnik ishlar rejimi: <b>YOQILDI</b>" if on else "✅ Texnik ishlar rejimi: <b>O'CHIRILDI</b>")
+        await ctx.reply(ctx.t("nb.admin.maintenance_on") if on else ctx.t("nb.admin.maintenance_off"))
 
     @r.command("backup", admin=True)
     async def _backup(ctx: "Context") -> None:
         if bot.db.dialect != "sqlite" or getattr(bot.db.backend, "path", ":memory:") == ":memory:":
-            await ctx.reply("💾 /backup faqat fayldagi SQLite uchun. PostgreSQL/MySQL/MongoDB uchun pg_dump / mysqldump / mongodump ishlating.")
+            await ctx.reply(ctx.t("nb.admin.backup_unsupported"))
             return
         import os
         import tempfile
@@ -474,19 +561,19 @@ def builtin_router(bot: "Nicebot") -> Router:
         await bot.db.backend.conn.execute("VACUUM INTO ?", [tmp])
         from ._base import InputFile
 
-        await ctx.document(InputFile(tmp, filename=f"backup-{dt.date.today().isoformat()}.db"), caption="💾 Baza nusxasi")
+        await ctx.document(InputFile(tmp, filename=f"backup-{dt.date.today().isoformat()}.db"), caption=ctx.t("nb.admin.backup_caption"))
 
     @r.command("broadcast", admin=True)
     async def _broadcast(ctx: "Context") -> None:
         m = ctx.message
         source = m.reply_to_message if m is not None else None
         if source is None and not ctx.arg:
-            await ctx.reply("📣 Foydalanish: xabarga reply qilib <code>/broadcast</code> yozing yoki <code>/broadcast matn</code>.")
+            await ctx.reply(ctx.t("nb.admin.broadcast_usage"))
             return
         n = await bot.User.filter(is_blocked=False).count()
-        if not await ctx.confirm(f"📣 {n} ta foydalanuvchiga yuborilsinmi?"):
+        if not await ctx.confirm(ctx.t("nb.admin.broadcast_confirm", count=n)):
             return
-        progress = await ctx.reply("⏳ Yuborilmoqda...")
+        progress = await ctx.reply(ctx.t("nb.admin.broadcast_sending"))
 
         async def on_progress(stats: dict[str, int]) -> None:
             try:
@@ -500,7 +587,7 @@ def builtin_router(bot: "Nicebot") -> Router:
             else:
                 result = await bot.broadcast(ctx.arg, on_progress=on_progress)
             await bot.edit_message_text(
-                f"✅ Tayyor!\nYuborildi: <b>{result['sent']}</b>\nBloklagan: <b>{result['blocked']}</b>\nXato: <b>{result['failed'] - result['blocked']}</b>",
+                ctx.t("nb.admin.broadcast_done", sent=result["sent"], blocked=result["blocked"], failed=result["failed"] - result["blocked"]),
                 chat_id=progress.chat.id, message_id=progress.message_id, parse_mode="HTML",
             )
 

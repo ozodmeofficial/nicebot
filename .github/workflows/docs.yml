@@ -5,7 +5,7 @@ name: Docs
 on:
   push:
     branches: [main]
-    paths: ["docs/**"]
+    paths: ["docs/**", "src/**"]
   workflow_dispatch:
 
 permissions:
@@ -28,6 +28,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Install nicebot (the reference pages read signatures from the library)
+        run: pip install -e .
       - name: Build docs
         run: python docs/src/build.py
       - name: Prepare site

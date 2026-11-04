@@ -1,4 +1,11 @@
-"""Translations. Put ``locales/uz.json``, ``locales/ru.json``… next to your bot and call ``ctx.t("key")``."""
+"""Translations. Put ``locales/uz.json``, ``locales/ru.json``… next to your bot and call ``ctx.t("key")``.
+
+Example::
+
+    # locales/en.json → {"hello": "Hello, {name}!"}
+    # locales/uz.json → {"hello": "Salom, {name}!"}
+    await ctx.reply(ctx.t("hello", name=ctx.name))
+"""
 from __future__ import annotations
 
 import json
@@ -58,6 +65,41 @@ BUILTIN: dict[str, dict[str, str]] = {
         "nb.v.regex": "Format noto'g'ri.",
         "nb.v.location": "Iltimos, joylashuvni yuboring.",
         "nb.v.file": "Iltimos, fayl yuboring.",
+        "nb.v.video": "Iltimos, video yuboring.",
+        "nb.v.document": "Iltimos, fayl (hujjat) yuboring.",
+        "nb.v.audio": "Iltimos, audio yuboring.",
+        "nb.v.voice": "Iltimos, ovozli xabar yuboring.",
+        "nb.v.media": "Iltimos, rasm, video yoki fayl yuboring.",
+        "nb.v.too_big": "Fayl juda katta (ko'pi bilan {max}).",
+        "nb.v.mime": "Bu turdagi fayl qabul qilinmaydi.",
+        "nb.admin.error_title": "Xatolik",
+        "nb.admin.user": "Foydalanuvchi",
+        "nb.admin.text": "Matn",
+        "nb.admin.stats_title": "📊 <b>Statistika</b>",
+        "nb.admin.stats_total": "👥 Jami: <b>{users}</b>",
+        "nb.admin.stats_new": "🆕 Bugun: <b>{today}</b> · 7 kunda: <b>{week}</b>",
+        "nb.admin.stats_active": "🔥 DAU: <b>{dau}</b> · WAU: <b>{wau}</b> · MAU: <b>{mau}</b>",
+        "nb.admin.stats_blocked": "⛔️ Bloklagan: <b>{blocked}</b> · ⭐️ Premium: <b>{premium}</b>",
+        "nb.admin.stats_referred": "🔗 Referal orqali: <b>{referred}</b>",
+        "nb.admin.stats_retention": "📈 7 kunlik retention: <b>{retention}%</b>",
+        "nb.admin.stats_top": "<b>Top buyruqlar (30 kun):</b>",
+        "nb.admin.maintenance_on": "🛠 Texnik ishlar rejimi: <b>YOQILDI</b>",
+        "nb.admin.maintenance_off": "✅ Texnik ishlar rejimi: <b>O'CHIRILDI</b>",
+        "nb.admin.backup_unsupported": "💾 /backup faqat fayldagi SQLite uchun. PostgreSQL/MySQL/MongoDB uchun pg_dump / mysqldump / mongodump ishlating.",
+        "nb.admin.backup_caption": "💾 Baza nusxasi",
+        "nb.admin.broadcast_usage": "📣 Foydalanish: xabarga reply qilib <code>/broadcast</code> yozing yoki <code>/broadcast matn</code>.",
+        "nb.admin.broadcast_confirm": "📣 {count} ta foydalanuvchiga yuborilsinmi?",
+        "nb.admin.broadcast_sending": "⏳ Yuborilmoqda...",
+        "nb.admin.broadcast_done": "✅ Tayyor!\nYuborildi: <b>{sent}</b>\nBloklagan: <b>{blocked}</b>\nXato: <b>{failed}</b>",
+        "nb.admin.user_blocked": "⛔️ Foydalanuvchi botni bloklagan.",
+        "nb.admin.channel": "📢 Kanal {n}",
+        "nb.cmd.stats": "📊 Statistika",
+        "nb.cmd.broadcast": "📣 Hammaga xabar",
+        "nb.cmd.maintenance": "🛠 Texnik ishlar rejimi",
+        "nb.cmd.backup": "💾 Bazaning nusxasi",
+        "nb.date.d": "KK",
+        "nb.date.m": "OO",
+        "nb.date.y": "YYYY",
     },
     "ru": {
         "nb.yes": "✅ Да",
@@ -107,6 +149,41 @@ BUILTIN: dict[str, dict[str, str]] = {
         "nb.v.regex": "Неверный формат.",
         "nb.v.location": "Пожалуйста, отправьте геолокацию.",
         "nb.v.file": "Пожалуйста, отправьте файл.",
+        "nb.v.video": "Пожалуйста, отправьте видео.",
+        "nb.v.document": "Пожалуйста, отправьте файл (документ).",
+        "nb.v.audio": "Пожалуйста, отправьте аудио.",
+        "nb.v.voice": "Пожалуйста, отправьте голосовое сообщение.",
+        "nb.v.media": "Пожалуйста, отправьте фото, видео или файл.",
+        "nb.v.too_big": "Файл слишком большой (максимум {max}).",
+        "nb.v.mime": "Файлы такого типа не принимаются.",
+        "nb.admin.error_title": "Ошибка",
+        "nb.admin.user": "Пользователь",
+        "nb.admin.text": "Текст",
+        "nb.admin.stats_title": "📊 <b>Статистика</b>",
+        "nb.admin.stats_total": "👥 Всего: <b>{users}</b>",
+        "nb.admin.stats_new": "🆕 Сегодня: <b>{today}</b> · за 7 дней: <b>{week}</b>",
+        "nb.admin.stats_active": "🔥 DAU: <b>{dau}</b> · WAU: <b>{wau}</b> · MAU: <b>{mau}</b>",
+        "nb.admin.stats_blocked": "⛔️ Заблокировали: <b>{blocked}</b> · ⭐️ Premium: <b>{premium}</b>",
+        "nb.admin.stats_referred": "🔗 По рефералке: <b>{referred}</b>",
+        "nb.admin.stats_retention": "📈 Удержание за 7 дней: <b>{retention}%</b>",
+        "nb.admin.stats_top": "<b>Топ команд (30 дней):</b>",
+        "nb.admin.maintenance_on": "🛠 Режим техработ: <b>ВКЛЮЧЁН</b>",
+        "nb.admin.maintenance_off": "✅ Режим техработ: <b>ВЫКЛЮЧЕН</b>",
+        "nb.admin.backup_unsupported": "💾 /backup работает только с SQLite в файле. Для PostgreSQL/MySQL/MongoDB используйте pg_dump / mysqldump / mongodump.",
+        "nb.admin.backup_caption": "💾 Копия базы",
+        "nb.admin.broadcast_usage": "📣 Использование: ответьте на сообщение командой <code>/broadcast</code> или напишите <code>/broadcast текст</code>.",
+        "nb.admin.broadcast_confirm": "📣 Отправить {count} пользователям?",
+        "nb.admin.broadcast_sending": "⏳ Отправляю...",
+        "nb.admin.broadcast_done": "✅ Готово!\nОтправлено: <b>{sent}</b>\nЗаблокировали: <b>{blocked}</b>\nОшибки: <b>{failed}</b>",
+        "nb.admin.user_blocked": "⛔️ Пользователь заблокировал бота.",
+        "nb.admin.channel": "📢 Канал {n}",
+        "nb.cmd.stats": "📊 Статистика",
+        "nb.cmd.broadcast": "📣 Рассылка",
+        "nb.cmd.maintenance": "🛠 Режим техработ",
+        "nb.cmd.backup": "💾 Копия базы",
+        "nb.date.d": "ДД",
+        "nb.date.m": "ММ",
+        "nb.date.y": "ГГГГ",
     },
     "en": {
         "nb.yes": "✅ Yes",
@@ -156,12 +233,56 @@ BUILTIN: dict[str, dict[str, str]] = {
         "nb.v.regex": "Wrong format.",
         "nb.v.location": "Please send a location.",
         "nb.v.file": "Please send a file.",
+        "nb.v.video": "Please send a video.",
+        "nb.v.document": "Please send a file (document).",
+        "nb.v.audio": "Please send an audio file.",
+        "nb.v.voice": "Please send a voice message.",
+        "nb.v.media": "Please send a photo, video or file.",
+        "nb.v.too_big": "The file is too big (max {max}).",
+        "nb.v.mime": "This file type is not accepted.",
+        "nb.admin.error_title": "Error",
+        "nb.admin.user": "User",
+        "nb.admin.text": "Text",
+        "nb.admin.stats_title": "📊 <b>Statistics</b>",
+        "nb.admin.stats_total": "👥 Total: <b>{users}</b>",
+        "nb.admin.stats_new": "🆕 Today: <b>{today}</b> · last 7 days: <b>{week}</b>",
+        "nb.admin.stats_active": "🔥 DAU: <b>{dau}</b> · WAU: <b>{wau}</b> · MAU: <b>{mau}</b>",
+        "nb.admin.stats_blocked": "⛔️ Blocked the bot: <b>{blocked}</b> · ⭐️ Premium: <b>{premium}</b>",
+        "nb.admin.stats_referred": "🔗 Came via referral: <b>{referred}</b>",
+        "nb.admin.stats_retention": "📈 7-day retention: <b>{retention}%</b>",
+        "nb.admin.stats_top": "<b>Top commands (30 days):</b>",
+        "nb.admin.maintenance_on": "🛠 Maintenance mode: <b>ON</b>",
+        "nb.admin.maintenance_off": "✅ Maintenance mode: <b>OFF</b>",
+        "nb.admin.backup_unsupported": "💾 /backup works only with a file-based SQLite database. Use pg_dump / mysqldump / mongodump for PostgreSQL/MySQL/MongoDB.",
+        "nb.admin.backup_caption": "💾 Database backup",
+        "nb.admin.broadcast_usage": "📣 Usage: reply to a message with <code>/broadcast</code> or send <code>/broadcast text</code>.",
+        "nb.admin.broadcast_confirm": "📣 Send to {count} users?",
+        "nb.admin.broadcast_sending": "⏳ Sending...",
+        "nb.admin.broadcast_done": "✅ Done!\nSent: <b>{sent}</b>\nBlocked: <b>{blocked}</b>\nErrors: <b>{failed}</b>",
+        "nb.admin.user_blocked": "⛔️ The user has blocked the bot.",
+        "nb.admin.channel": "📢 Channel {n}",
+        "nb.cmd.stats": "📊 Statistics",
+        "nb.cmd.broadcast": "📣 Message everyone",
+        "nb.cmd.maintenance": "🛠 Maintenance mode",
+        "nb.cmd.backup": "💾 Database backup",
+        "nb.date.d": "DD",
+        "nb.date.m": "MM",
+        "nb.date.y": "YYYY",
     },
 }
 
 
 class I18n:
-    """Loads ``<folder>/<lang>.json`` (or ``.toml``) files. Missing keys fall back to the default language, then to the key itself."""
+    """Loads ``<folder>/<lang>.json`` (or ``.toml``) files; nested keys become dotted (``"menu.title"``).
+
+    Missing keys fall back to the default language, then to the key itself. The library's own texts
+    (``nb.*``) are built in for uz/ru/en and can be overridden in your files.
+
+    Example::
+
+        i18n = I18n("locales", default="en")
+        i18n.t("hello", "uz", name="Ali")        # "Salom, Ali!"
+    """
 
     def __init__(self, folder: str | Path | None = "locales", default: str = "uz", languages: tuple[str, ...] | None = None):
         self.default = default
@@ -172,6 +293,12 @@ class I18n:
         self.languages = languages or tuple(sorted(self.texts))
 
     def load(self, folder: str | Path) -> None:
+        """Load every ``.json``/``.toml`` file of a folder.
+
+        Example::
+
+            bot.i18n.load("extra_locales")
+        """
         for path in sorted(Path(folder).iterdir()):
             if path.suffix == ".json":
                 data = json.loads(path.read_text(encoding="utf-8"))
@@ -185,6 +312,12 @@ class I18n:
         log.debug("Tarjimalar yuklandi: %s", sorted(self.texts))
 
     def add(self, lang: str, data: dict[str, Any], prefix: str = "") -> None:
+        """Add translations for a language from a dict (nested dicts become dotted keys).
+
+        Example::
+
+            bot.i18n.add("en", {"menu": {"title": "Main menu"}})     # key "menu.title"
+        """
         bucket = self.texts.setdefault(lang, {})
         for k, v in data.items():
             key = f"{prefix}{k}"
@@ -194,7 +327,12 @@ class I18n:
                 bucket[key] = str(v)
 
     def resolve(self, code: str | None) -> str:
-        """Map a Telegram ``language_code`` (``"ru-RU"``) to a loaded language."""
+        """Map a Telegram ``language_code`` (``"ru-RU"``, ``"uz"``) to a loaded language, else the default.
+
+        Example::
+
+            bot.i18n.resolve("ru-RU")   # "ru"
+        """
         if not code:
             return self.default
         code = code.lower().split("-")[0]
@@ -203,6 +341,12 @@ class I18n:
         return self.default
 
     def t(self, key: str, lang: str | None = None, /, **kwargs: Any) -> str:
+        """Translate ``key`` into ``lang`` and format it with ``kwargs``.
+
+        Example::
+
+            bot.i18n.t("hello", "ru", name="Ali")
+        """
         lang = lang or self.default
         text = self.texts.get(lang, {}).get(key)
         if text is None:

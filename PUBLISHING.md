@@ -54,19 +54,24 @@ Repo → **Settings → Environments → New environment** → nomi: `pypi`. Xoh
 
 ## 4. Chiqarish
 
-Repo → **Releases → Draft a new release** → tag: `v0.1.0` → **Publish release**.
+Versiya tegini push qiling:
 
-Actions bo'limida testlar 4 ta Python versiyasida PostgreSQL, MariaDB va Redis bilan ishga tushadi. Ular o'tsa, paket PyPI'ga avtomatik yuklanadi va bir necha daqiqadan keyin hamma `pip install nicebot` qila oladi.
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+Actions bo'limida testlar 4 ta Python versiyasida PostgreSQL, MariaDB va Redis bilan ishga tushadi. Ular o'tsa, paket PyPI'ga avtomatik yuklanadi va `CHANGELOG.md` dagi yozuv bilan GitHub Release yaratiladi. Teg versiyasi `__about__.py` dagi versiya bilan bir xil bo'lishi shart.
 
 ## Keyingi versiyalar
 
-1. `src/nicebot/__about__.py` faylidagi versiyani oshiring (masalan, `0.1.1`).
-2. `CHANGELOG.md` ga yozing.
-3. Push qiling va yangi release yarating (`v0.1.1`).
+1. `src/nicebot/__about__.py` faylidagi versiyani oshiring (masalan, `1.0.1`).
+2. `CHANGELOG.md` ga `## 1.0.1 — sana` bo'limini yozing.
+3. `main` ga push qiling, keyin teg: `git tag v1.0.1 && git push origin v1.0.1`.
 
 ## Hujjat sayti (GitHub Pages)
 
-Repo → **Settings → Pages → Source: GitHub Actions**. `docs/` o'zgarganda sayt `https://sizning_username.github.io/nicebot/` manzilida o'zi yangilanadi.
+Repo → **Settings → Pages → Source: GitHub Actions**. `docs/` yoki `src/` o'zgarganda sayt `https://sizning_username.github.io/nicebot/` manzilida o'zi yangilanadi.
 
 ## Muqobil yo'l: qo'lda yuklash
 

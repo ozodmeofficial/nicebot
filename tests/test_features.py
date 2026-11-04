@@ -308,7 +308,7 @@ def test_cli_new_and_include(tmp_path, monkeypatch):
     bot = make_bot()
     bot.include(str(tmp_path / "mybot" / "handlers"))
     names = {h.name for h in bot.all_handlers()}
-    assert {"ping", "salom"} <= names
+    assert {"ping", "hello"} <= names
 
 
 async def test_parse_mode_fallback():

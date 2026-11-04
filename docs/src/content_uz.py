@@ -640,7 +640,7 @@ Turlar `from nicebot import types` orqali olinadi, masalan `types.Message` yoki 
 
 | | |
 |---|---|
-| nicebot | 0.1.0 |
+| nicebot | 0.1.1 |
 | Bot API | 10.3 |
 | Python | 3.10+ |
 | Litsenziya | MIT |

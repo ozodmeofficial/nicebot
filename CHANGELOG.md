@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1 — 2026-11-04
+
+Kutubxona kodi o'zgarmagan.
+
+- README qayta yozildi: natija ko'rinishi, aiogram bilan solishtirish, tez start va hujjatlarga havolali imkoniyatlar jadvali
+- Hujjatlar sayti yangi dizaynda: landing sahifa, bo'lim sahifalari, kod yonida chat ko'rinishi va qidiruv
+
 ## 0.1.0 — 2026-11-03
 
 Birinchi chiqarilish.

@@ -23,6 +23,12 @@ def _like_escape(v: str) -> str:
 
 
 class SQLBackend:
+    """Shared SQL implementation of the ORM (dialects subclass it). Internal: use ``Database``.
+
+    Example::
+
+        db = await Database("sqlite:///bot.db").connect()
+    """
     dialect = "sql"
     q = '"'
 
@@ -32,18 +38,48 @@ class SQLBackend:
 
     # ------------------------------------------------------------- dialect bits
     def quote(self, name: str) -> str:
+        """Quote a table/column name for this SQL dialect.
+
+        Example::
+
+            backend.quote("order")   # '"order"'
+        """
         return f"{self.q}{name}{self.q}"
 
     def ph(self, i: int) -> str:
+        """The parameter placeholder for position ``i`` (``?``, ``$1`` or ``%s``).
+
+        Example::
+
+            backend.ph(1)
+        """
         return "?"
 
     def column_type(self, f: Field) -> str:
+        """SQL column type for a field.
+
+        Example::
+
+            backend.column_type(fields.Str(50))   # "VARCHAR(50)"
+        """
         raise NotImplementedError
 
     def pk_definition(self, f: Field) -> str:
+        """SQL for the auto-increment primary key column.
+
+        Example::
+
+            backend.pk_definition()
+        """
         raise NotImplementedError
 
     def limit_clause(self, limit: int | None, offset: int | None) -> str:
+        """SQL ``LIMIT/OFFSET`` clause.
+
+        Example::
+
+            backend.limit_clause(10, 20)
+        """
         sql = ""
         if limit is not None:
             sql += f" LIMIT {int(limit)}"
@@ -55,40 +91,98 @@ class SQLBackend:
 
     # ------------------------------------------------------------- driver api
     async def connect(self) -> None:
+        """Open the connection or pool.
+
+        Example::
+
+            await backend.connect()
+        """
         raise NotImplementedError
 
     async def close(self) -> None:
+        """Close the connection or pool.
+
+        Example::
+
+            await backend.close()
+        """
         raise NotImplementedError
 
     async def execute(self, sql: str, params: list[Any] | tuple = ()) -> int:
-        """Run a statement, return affected row count."""
+        """Run SQL; returns affected rows.
+
+        Example::
+
+            await backend.execute("DELETE FROM t WHERE id = ?", [1])
+        """
         raise NotImplementedError
 
     async def fetch(self, sql: str, params: list[Any] | tuple = ()) -> list[dict[str, Any]]:
+        """Run a query; returns rows as dicts.
+
+        Example::
+
+            rows = await backend.fetch("SELECT * FROM t", [])
+        """
         raise NotImplementedError
 
     async def fetchval(self, sql: str, params: list[Any] | tuple = ()) -> Any:
+        """Run a query and return the first column of the first row.
+
+        Example::
+
+            n = await backend.fetchval("SELECT COUNT(*) FROM t", [])
+        """
         rows = await self.fetch(sql, params)
         if not rows:
             return None
         return next(iter(rows[0].values()))
 
     async def insert_returning(self, sql: str, params: list[Any], pk: str) -> Any:
+        """Insert a row and return its new primary key.
+
+        Example::
+
+            pk = await backend.insert_returning("INSERT ...", params, "id")
+        """
         raise NotImplementedError
 
     async def existing_columns(self, table: str) -> set[str] | None:
-        """Column names, or None when the table does not exist."""
+        """Column names that already exist in a table (for auto-migration).
+
+        Example::
+
+            await backend.existing_columns("products")
+        """
         raise NotImplementedError
 
     async def create_index(self, table: str, name: str, cols: list[str], unique: bool) -> None:
+        """Create an index if it does not exist.
+
+        Example::
+
+            await backend.create_index("products", ["price"], unique=False)
+        """
         u = "UNIQUE " if unique else ""
         cols_sql = ", ".join(self.quote(c) for c in cols)
         await self.execute(f"CREATE {u}INDEX IF NOT EXISTS {self.quote(name)} ON {self.quote(table)} ({cols_sql})")
 
     def transaction(self) -> Any:
+        """Async context manager for a transaction.
+
+        Example::
+
+            async with backend.transaction(): ...
+        """
         raise NotImplementedError
 
     def wrap_error(self, e: Exception) -> Exception:
+        """Translate driver errors (unique violations…) into ``IntegrityError``.
+
+        Example::
+
+            raise backend.wrap_error(e)
+        """
         name = type(e).__name__.lower()
         if "integrity" in name or "unique" in name or "foreignkey" in name or "notnull" in name:
             return IntegrityError(str(e))
@@ -103,6 +197,12 @@ class SQLBackend:
         return "'" + str(v).replace("'", "''") + "'"
 
     def column_sql(self, f: Field, for_alter: bool = False) -> str:
+        """SQL definition of one column.
+
+        Example::
+
+            backend.column_sql(field)   # '"price" INTEGER NOT NULL DEFAULT 0'
+        """
         if f.pk:
             return self.pk_definition(f)
         parts = [self.quote(f.column), self.column_type(f)]
@@ -120,14 +220,32 @@ class SQLBackend:
         return " ".join(parts)
 
     def create_table_sql(self, model: Any) -> str:
+        """``CREATE TABLE`` statement for a model.
+
+        Example::
+
+            backend.create_table_sql(Product._meta)
+        """
         meta = model._meta
         cols = [self.column_sql(f) for f in meta.fields.values()]
         return f"CREATE TABLE IF NOT EXISTS {self.quote(meta.table)} ({', '.join(cols)}){self.table_suffix()}"
 
     def table_suffix(self) -> str:
+        """Extra SQL after ``CREATE TABLE (...)`` (MySQL engine/charset).
+
+        Example::
+
+            backend.table_suffix()
+        """
         return ""
 
     async def sync_schema(self, model: Any) -> None:
+        """Create missing tables, columns and indexes for a model (never drops data).
+
+        Example::
+
+            await backend.sync_schema(Product._meta)
+        """
         meta = model._meta
         existing = await self.existing_columns(meta.table)
         if existing is None:
@@ -137,7 +255,7 @@ class SQLBackend:
             for f in meta.fields.values():
                 if f.column not in existing:
                     await self.execute(f"ALTER TABLE {self.quote(meta.table)} ADD COLUMN {self.column_sql(f, for_alter=True)}")
-                    log.info("Ustun qo'shildi: %s.%s", meta.table, f.column)
+                    log.info("Column added: %s.%s", meta.table, f.column)
                     if f.unique and not f.pk:
                         await self.create_index(meta.table, f"uq_{meta.table}_{f.column}", [f.column], True)
         for f in meta.fields.values():
@@ -152,6 +270,12 @@ class SQLBackend:
 
     # ------------------------------------------------------------- compiler
     def compile_q(self, q: Q, model: Any, params: list[Any]) -> str:
+        """Compile a ``Q`` tree into a WHERE fragment / query document.
+
+        Example::
+
+            where, params = backend.compile_q(meta, Q(price__lt=5))
+        """
         parts: list[str] = []
         for child in q.children:
             if isinstance(child, Q):
@@ -169,6 +293,12 @@ class SQLBackend:
         return f"NOT ({sql})" if q.negated else sql
 
     def compile_leaf(self, leaf: tuple[str, str, Any], model: Any, params: list[Any]) -> str:
+        """Compile one ``field__lookup=value`` condition.
+
+        Example::
+
+            backend.compile_leaf(meta, "price", "lt", 5, params)
+        """
         name, op, value = leaf
         f = model._meta.field(name)
         col = self.quote(f.column)
@@ -207,14 +337,26 @@ class SQLBackend:
             if op.startswith("i"):
                 return f"LOWER({col}) LIKE LOWER({p(pattern, False)}) ESCAPE '!'"
             return f"{col} LIKE {p(pattern, False)} ESCAPE '!'"
-        raise ValueError(f"Lookup qo'llab-quvvatlanmaydi: {op}")
+        raise ValueError(f"Unsupported lookup: {op}")
 
     def where_sql(self, q: Q, model: Any, params: list[Any]) -> str:
+        """Full WHERE clause for a QuerySet.
+
+        Example::
+
+            backend.where_sql(qs, params)
+        """
         if not q or not q.children:
             return ""
         return " WHERE " + self.compile_q(q, model, params)
 
     def order_sql(self, model: Any, ordering: list[str]) -> str:
+        """ORDER BY clause for a QuerySet.
+
+        Example::
+
+            backend.order_sql(qs)
+        """
         if not ordering:
             return ""
         parts = []
@@ -235,6 +377,12 @@ class SQLBackend:
             raise err from e
 
     async def insert(self, model: Any, row: dict[str, Any]) -> Any:
+        """Insert one row; returns the primary key.
+
+        Example::
+
+            await backend.insert(meta, {"title": "Book"})
+        """
         meta = model._meta
         cols = list(row)
         params = list(row.values())
@@ -246,9 +394,21 @@ class SQLBackend:
         return row.get(meta.pk.column, pk) if pk is None else pk
 
     def empty_insert_sql(self, table: str) -> str:
+        """SQL to insert a row with only default values.
+
+        Example::
+
+            backend.empty_insert_sql("t")
+        """
         return f"INSERT INTO {self.quote(table)} DEFAULT VALUES"
 
     async def bulk_insert(self, model: Any, rows: list[dict[str, Any]]) -> list[Any]:
+        """Insert many rows at once.
+
+        Example::
+
+            await backend.bulk_insert(meta, rows)
+        """
         ids = []
         async with self.transaction():
             for row in rows:
@@ -256,6 +416,12 @@ class SQLBackend:
         return ids
 
     async def select(self, model: Any, qs: Any) -> list[dict[str, Any]]:
+        """Run a QuerySet and return rows.
+
+        Example::
+
+            rows = await backend.select(qs)
+        """
         meta = model._meta
         params: list[Any] = []
         if qs._values is not None:
@@ -269,11 +435,23 @@ class SQLBackend:
         return await self.fetch(sql, params)
 
     async def count(self, model: Any, where: Q) -> int:
+        """Count rows of a QuerySet.
+
+        Example::
+
+            n = await backend.count(qs)
+        """
         params: list[Any] = []
         sql = f"SELECT COUNT(*) AS n FROM {self.quote(model._meta.table)}" + self.where_sql(where, model, params)
         return int(await self.fetchval(sql, params) or 0)
 
     async def aggregate(self, model: Any, where: Q, func: str, f: Field) -> Any:
+        """SUM/AVG/MIN/MAX of a field.
+
+        Example::
+
+            await backend.aggregate(qs, "SUM", "price")
+        """
         params: list[Any] = []
         sql = f"SELECT {func}({self.quote(f.column)}) AS v FROM {self.quote(model._meta.table)}" + self.where_sql(where, model, params)
         v = await self.fetchval(sql, params)
@@ -296,6 +474,12 @@ class SQLBackend:
         return self.ph(len(params))
 
     async def update(self, model: Any, where: Q, data: dict[Field, Any]) -> int:
+        """Update rows of a QuerySet; returns how many changed.
+
+        Example::
+
+            await backend.update(qs, {field: 5})
+        """
         if not data:
             return 0
         params: list[Any] = []
@@ -304,6 +488,12 @@ class SQLBackend:
         return await self._guard(self.execute(sql, params))
 
     async def delete(self, model: Any, where: Q) -> int:
+        """Delete rows of a QuerySet; returns how many.
+
+        Example::
+
+            await backend.delete(qs)
+        """
         params: list[Any] = []
         sql = f"DELETE FROM {self.quote(model._meta.table)}" + self.where_sql(where, model, params)
         return await self._guard(self.execute(sql, params))
@@ -311,6 +501,12 @@ class SQLBackend:
 
 # =========================================================================== SQLite
 class SQLiteBackend(SQLBackend):
+    """SQLite via aiosqlite (``sqlite:///file.db``, ``sqlite:///:memory:``).
+
+    Example::
+
+        Nicebot(token="...", db="sqlite:///bot.db")
+    """
     dialect = "sqlite"
 
     def __init__(self, url: str, **options: Any):
@@ -324,6 +520,12 @@ class SQLiteBackend(SQLBackend):
         self._in_tx: contextvars.ContextVar[bool] = contextvars.ContextVar("nb_sqlite_tx", default=False)
 
     def column_type(self, f: Field) -> str:
+        """SQL column type for a field.
+
+        Example::
+
+            backend.column_type(fields.Str(50))   # "VARCHAR(50)"
+        """
         if isinstance(f, (Int, Bool)):
             return "INTEGER"
         if isinstance(f, Float):
@@ -331,15 +533,27 @@ class SQLiteBackend(SQLBackend):
         return "TEXT"
 
     def pk_definition(self, f: Field) -> str:
+        """SQL for the auto-increment primary key column.
+
+        Example::
+
+            backend.pk_definition()
+        """
         if f.generated:
             return f"{self.quote(f.column)} INTEGER PRIMARY KEY AUTOINCREMENT"
         return f"{self.quote(f.column)} {self.column_type(f)} PRIMARY KEY"
 
     async def connect(self) -> None:
+        """Open the connection or pool.
+
+        Example::
+
+            await backend.connect()
+        """
         try:
             import aiosqlite
         except ImportError as e:  # pragma: no cover
-            raise ImportError("SQLite uchun: pip install nicebot (aiosqlite o'rnatilgan bo'lishi kerak)") from e
+            raise ImportError("SQLite needs aiosqlite, which comes with nicebot: pip install nicebot") from e
         self.conn = await aiosqlite.connect(self.path, isolation_level=None)
         self.conn.row_factory = aiosqlite.Row
         await self.conn.execute("PRAGMA foreign_keys = ON")
@@ -349,6 +563,12 @@ class SQLiteBackend(SQLBackend):
         await self.conn.execute("PRAGMA busy_timeout = 5000")
 
     async def close(self) -> None:
+        """Close the connection or pool.
+
+        Example::
+
+            await backend.close()
+        """
         if self.conn is not None:
             await self.conn.close()
             self.conn = None
@@ -360,6 +580,12 @@ class SQLiteBackend(SQLBackend):
                 pass
 
     async def execute(self, sql: str, params: list[Any] | tuple = ()) -> int:
+        """Run SQL; returns affected rows.
+
+        Example::
+
+            await backend.execute("DELETE FROM t WHERE id = ?", [1])
+        """
         await self._wait_tx()
         cur = await self.conn.execute(sql, list(params))
         n = cur.rowcount
@@ -367,6 +593,12 @@ class SQLiteBackend(SQLBackend):
         return n
 
     async def fetch(self, sql: str, params: list[Any] | tuple = ()) -> list[dict[str, Any]]:
+        """Run a query; returns rows as dicts.
+
+        Example::
+
+            rows = await backend.fetch("SELECT * FROM t", [])
+        """
         await self._wait_tx()
         cur = await self.conn.execute(sql, list(params))
         rows = await cur.fetchall()
@@ -374,6 +606,12 @@ class SQLiteBackend(SQLBackend):
         return [dict(r) for r in rows]
 
     async def insert_returning(self, sql: str, params: list[Any], pk: str) -> Any:
+        """Insert a row and return its new primary key.
+
+        Example::
+
+            pk = await backend.insert_returning("INSERT ...", params, "id")
+        """
         await self._wait_tx()
         cur = await self.conn.execute(sql, params)
         rid = cur.lastrowid
@@ -381,11 +619,23 @@ class SQLiteBackend(SQLBackend):
         return rid
 
     async def existing_columns(self, table: str) -> set[str] | None:
+        """Column names that already exist in a table (for auto-migration).
+
+        Example::
+
+            await backend.existing_columns("products")
+        """
         rows = await self.fetch(f"PRAGMA table_info({self.quote(table)})")
         return {r["name"] for r in rows} if rows else None
 
     @contextlib.asynccontextmanager
     async def transaction(self) -> AsyncIterator[None]:
+        """Async context manager for a transaction.
+
+        Example::
+
+            async with backend.transaction(): ...
+        """
         if self._in_tx.get():
             yield
             return
@@ -405,6 +655,12 @@ class SQLiteBackend(SQLBackend):
 
 # =========================================================================== PostgreSQL
 class PostgresBackend(SQLBackend):
+    """PostgreSQL via asyncpg (``pip install "nicebot[postgres]"``).
+
+    Example::
+
+        Nicebot(token="...", db="postgresql://user:pass@localhost/shop")
+    """
     dialect = "postgres"
 
     def __init__(self, url: str, **options: Any):
@@ -413,9 +669,21 @@ class PostgresBackend(SQLBackend):
         self._conn: contextvars.ContextVar[Any] = contextvars.ContextVar("nb_pg_conn", default=None)
 
     def ph(self, i: int) -> str:
+        """The parameter placeholder for position ``i`` (``?``, ``$1`` or ``%s``).
+
+        Example::
+
+            backend.ph(1)
+        """
         return f"${i}"
 
     def column_type(self, f: Field) -> str:
+        """SQL column type for a field.
+
+        Example::
+
+            backend.column_type(fields.Str(50))   # "VARCHAR(50)"
+        """
         if isinstance(f, Bool):
             return "BOOLEAN"
         if isinstance(f, BigInt):
@@ -435,12 +703,24 @@ class PostgresBackend(SQLBackend):
         return "TEXT"
 
     def pk_definition(self, f: Field) -> str:
+        """SQL for the auto-increment primary key column.
+
+        Example::
+
+            backend.pk_definition()
+        """
         if f.generated:
             kind = "BIGSERIAL" if isinstance(f, BigInt) else "SERIAL"
             return f"{self.quote(f.column)} {kind} PRIMARY KEY"
         return f"{self.quote(f.column)} {self.column_type(f)} PRIMARY KEY"
 
     def limit_clause(self, limit: int | None, offset: int | None) -> str:
+        """SQL ``LIMIT/OFFSET`` clause.
+
+        Example::
+
+            backend.limit_clause(10, 20)
+        """
         sql = ""
         if limit is not None:
             sql += f" LIMIT {int(limit)}"
@@ -449,13 +729,25 @@ class PostgresBackend(SQLBackend):
         return sql
 
     async def connect(self) -> None:
+        """Open the connection or pool.
+
+        Example::
+
+            await backend.connect()
+        """
         try:
             import asyncpg
         except ImportError as e:  # pragma: no cover
-            raise ImportError("PostgreSQL uchun: pip install 'nicebot[postgres]'") from e
+            raise ImportError("PostgreSQL needs an extra package: pip install 'nicebot[postgres]'") from e
         self.pool = await asyncpg.create_pool(self.url, min_size=self.options.get("min_size", 1), max_size=self.options.get("max_size", 10))
 
     async def close(self) -> None:
+        """Close the connection or pool.
+
+        Example::
+
+            await backend.close()
+        """
         if self.pool is not None:
             await self.pool.close()
             self.pool = None
@@ -470,6 +762,12 @@ class PostgresBackend(SQLBackend):
             yield conn
 
     async def execute(self, sql: str, params: list[Any] | tuple = ()) -> int:
+        """Run SQL; returns affected rows.
+
+        Example::
+
+            await backend.execute("DELETE FROM t WHERE id = ?", [1])
+        """
         async with self._acquire() as c:
             status = await c.execute(sql, *params)
         try:
@@ -478,15 +776,33 @@ class PostgresBackend(SQLBackend):
             return 0
 
     async def fetch(self, sql: str, params: list[Any] | tuple = ()) -> list[dict[str, Any]]:
+        """Run a query; returns rows as dicts.
+
+        Example::
+
+            rows = await backend.fetch("SELECT * FROM t", [])
+        """
         async with self._acquire() as c:
             rows = await c.fetch(sql, *params)
         return [dict(r) for r in rows]
 
     async def insert_returning(self, sql: str, params: list[Any], pk: str) -> Any:
+        """Insert a row and return its new primary key.
+
+        Example::
+
+            pk = await backend.insert_returning("INSERT ...", params, "id")
+        """
         async with self._acquire() as c:
             return await c.fetchval(sql + f" RETURNING {self.quote(pk)}", *params)
 
     async def existing_columns(self, table: str) -> set[str] | None:
+        """Column names that already exist in a table (for auto-migration).
+
+        Example::
+
+            await backend.existing_columns("products")
+        """
         rows = await self.fetch(
             "SELECT column_name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = $1",
             [table],
@@ -495,6 +811,12 @@ class PostgresBackend(SQLBackend):
 
     @contextlib.asynccontextmanager
     async def transaction(self) -> AsyncIterator[None]:
+        """Async context manager for a transaction.
+
+        Example::
+
+            async with backend.transaction(): ...
+        """
         if self._conn.get() is not None:
             async with self._conn.get().transaction():
                 yield
@@ -510,6 +832,12 @@ class PostgresBackend(SQLBackend):
 
 # =========================================================================== MySQL / MariaDB
 class MySQLBackend(SQLBackend):
+    """MySQL/MariaDB via aiomysql (``pip install "nicebot[mysql]"``).
+
+    Example::
+
+        Nicebot(token="...", db="mysql://user:pass@localhost/shop")
+    """
     dialect = "mysql"
     q = "`"
 
@@ -519,9 +847,21 @@ class MySQLBackend(SQLBackend):
         self._conn: contextvars.ContextVar[Any] = contextvars.ContextVar("nb_my_conn", default=None)
 
     def ph(self, i: int) -> str:
+        """The parameter placeholder for position ``i`` (``?``, ``$1`` or ``%s``).
+
+        Example::
+
+            backend.ph(1)
+        """
         return "%s"
 
     def column_type(self, f: Field) -> str:
+        """SQL column type for a field.
+
+        Example::
+
+            backend.column_type(fields.Str(50))   # "VARCHAR(50)"
+        """
         if isinstance(f, Bool):
             return "TINYINT(1)"
         if isinstance(f, BigInt):
@@ -539,14 +879,32 @@ class MySQLBackend(SQLBackend):
         return "LONGTEXT"
 
     def pk_definition(self, f: Field) -> str:
+        """SQL for the auto-increment primary key column.
+
+        Example::
+
+            backend.pk_definition()
+        """
         if f.generated:
             return f"{self.quote(f.column)} BIGINT AUTO_INCREMENT PRIMARY KEY"
         return f"{self.quote(f.column)} {self.column_type(f)} PRIMARY KEY"
 
     def table_suffix(self) -> str:
+        """Extra SQL after ``CREATE TABLE (...)`` (MySQL engine/charset).
+
+        Example::
+
+            backend.table_suffix()
+        """
         return " ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
 
     def limit_clause(self, limit: int | None, offset: int | None) -> str:
+        """SQL ``LIMIT/OFFSET`` clause.
+
+        Example::
+
+            backend.limit_clause(10, 20)
+        """
         sql = ""
         if limit is not None:
             sql += f" LIMIT {int(limit)}"
@@ -557,13 +915,25 @@ class MySQLBackend(SQLBackend):
         return sql
 
     def empty_insert_sql(self, table: str) -> str:
+        """SQL to insert a row with only default values.
+
+        Example::
+
+            backend.empty_insert_sql("t")
+        """
         return f"INSERT INTO {self.quote(table)} () VALUES ()"
 
     async def connect(self) -> None:
+        """Open the connection or pool.
+
+        Example::
+
+            await backend.connect()
+        """
         try:
             import aiomysql
         except ImportError as e:  # pragma: no cover
-            raise ImportError("MySQL uchun: pip install 'nicebot[mysql]'") from e
+            raise ImportError("MySQL needs an extra package: pip install 'nicebot[mysql]'") from e
         from urllib.parse import unquote, urlparse
 
         u = urlparse(self.url)
@@ -580,6 +950,12 @@ class MySQLBackend(SQLBackend):
         )
 
     async def close(self) -> None:
+        """Close the connection or pool.
+
+        Example::
+
+            await backend.close()
+        """
         if self.pool is not None:
             self.pool.close()
             await self.pool.wait_closed()
@@ -599,20 +975,44 @@ class MySQLBackend(SQLBackend):
                 yield cur
 
     async def execute(self, sql: str, params: list[Any] | tuple = ()) -> int:
+        """Run SQL; returns affected rows.
+
+        Example::
+
+            await backend.execute("DELETE FROM t WHERE id = ?", [1])
+        """
         async with self._cursor() as cur:
             return await cur.execute(sql, tuple(params))
 
     async def fetch(self, sql: str, params: list[Any] | tuple = ()) -> list[dict[str, Any]]:
+        """Run a query; returns rows as dicts.
+
+        Example::
+
+            rows = await backend.fetch("SELECT * FROM t", [])
+        """
         async with self._cursor() as cur:
             await cur.execute(sql, tuple(params))
             return list(await cur.fetchall())
 
     async def insert_returning(self, sql: str, params: list[Any], pk: str) -> Any:
+        """Insert a row and return its new primary key.
+
+        Example::
+
+            pk = await backend.insert_returning("INSERT ...", params, "id")
+        """
         async with self._cursor() as cur:
             await cur.execute(sql, tuple(params))
             return cur.lastrowid
 
     async def existing_columns(self, table: str) -> set[str] | None:
+        """Column names that already exist in a table (for auto-migration).
+
+        Example::
+
+            await backend.existing_columns("products")
+        """
         rows = await self.fetch(
             "SELECT COLUMN_NAME AS c FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = %s",
             [table],
@@ -620,6 +1020,12 @@ class MySQLBackend(SQLBackend):
         return {r["c"] for r in rows} if rows else None
 
     async def create_index(self, table: str, name: str, cols: list[str], unique: bool) -> None:
+        """Create an index if it does not exist.
+
+        Example::
+
+            await backend.create_index("products", ["price"], unique=False)
+        """
         exists = await self.fetch(
             "SELECT 1 AS x FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = %s AND index_name = %s",
             [table, name],
@@ -631,6 +1037,12 @@ class MySQLBackend(SQLBackend):
 
     @contextlib.asynccontextmanager
     async def transaction(self) -> AsyncIterator[None]:
+        """Async context manager for a transaction.
+
+        Example::
+
+            async with backend.transaction(): ...
+        """
         if self._conn.get() is not None:
             yield
             return

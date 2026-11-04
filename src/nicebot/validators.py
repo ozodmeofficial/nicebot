@@ -90,6 +90,12 @@ class Text(Validator):
         self.min, self.max, self.strip = min, max, strip
 
     async def check(self, ctx: "Context", message: "Message") -> str:
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         text = message.text if message.text is not None else message.caption
         if text is None:
             raise self.fail(ctx)
@@ -117,6 +123,12 @@ class Int(Validator):
         self.min, self.max = min, max
 
     async def check(self, ctx: "Context", message: "Message") -> int:
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         raw = (message.text or "").replace(" ", "").replace("_", "").replace(",", "")
         if not re.fullmatch(r"[-+]?\d+", raw):
             raise self.fail(ctx)
@@ -139,6 +151,12 @@ class Float(Int):
     error_key = "nb.v.float"
 
     async def check(self, ctx: "Context", message: "Message") -> float:  # type: ignore[override]
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         raw = (message.text or "").replace(" ", "").replace(",", ".")
         try:
             v = float(raw)
@@ -211,6 +229,12 @@ class Phone(Validator):
 
     @property
     def keyboard(self) -> Any:  # type: ignore[override]
+        """The reply keyboard shown while asking (e.g. a "Share phone" button).
+
+        Example::
+
+            Phone().keyboard
+        """
         if not self.button:
             return None
         from .keyboards import ReplyButton
@@ -218,6 +242,12 @@ class Phone(Validator):
         return _LazyText("nb.send_phone", lambda text: [ReplyButton(text, contact=True)])
 
     async def check(self, ctx: "Context", message: "Message") -> str:
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         if message.contact is not None:
             if self.own and message.contact.user_id and ctx.user_id and message.contact.user_id != ctx.user_id:
                 raise self.fail(ctx)
@@ -241,6 +271,12 @@ class Email(Validator):
     _rx = re.compile(r"^[\w.+-]+@[\w-]+(\.[\w-]+)+$")
 
     async def check(self, ctx: "Context", message: "Message") -> str:
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         v = (message.text or "").strip().lower()
         if not self._rx.match(v):
             raise self.fail(ctx)
@@ -259,6 +295,12 @@ class Url(Validator):
     _rx = re.compile(r"^https?://[^\s/$.?#].[^\s]*$", re.I)
 
     async def check(self, ctx: "Context", message: "Message") -> str:
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         v = (message.text or "").strip()
         if not self._rx.match(v):
             raise self.fail(ctx)
@@ -281,6 +323,12 @@ class Date(Validator):
         self.format, self.min, self.max = format, min, max
 
     async def check(self, ctx: "Context", message: "Message") -> dt.date:
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         human = self.format.replace("%d", ctx.t("nb.date.d")).replace("%m", ctx.t("nb.date.m")).replace("%Y", ctx.t("nb.date.y"))
         try:
             v = dt.datetime.strptime((message.text or "").strip(), self.format).date()
@@ -311,9 +359,21 @@ class Choice(Validator):
 
     @property
     def keyboard(self) -> Any:  # type: ignore[override]
+        """The reply keyboard shown while asking (e.g. a "Share phone" button).
+
+        Example::
+
+            Phone().keyboard
+        """
         return self.choices
 
     async def check(self, ctx: "Context", message: "Message") -> str:
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         v = (message.text or "").strip()
         for c in self.choices:
             if v == c or (self.ignore_case and v.lower() == c.lower()):
@@ -336,6 +396,12 @@ class Regex(Validator):
         self.rx = re.compile(pattern)
 
     async def check(self, ctx: "Context", message: "Message") -> str:
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         v = (message.text or "").strip()
         if not self.rx.fullmatch(v):
             raise self.fail(ctx)
@@ -354,6 +420,12 @@ class Photo(Validator):
     error_key = "nb.v.photo"
 
     async def check(self, ctx: "Context", message: "Message") -> "PhotoSize":
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         if not message.photo:
             raise self.fail(ctx)
         return max(message.photo, key=lambda p: (p.width or 0) * (p.height or 0))
@@ -399,6 +471,12 @@ class File(Validator):
         return False
 
     async def check(self, ctx: "Context", message: "Message") -> "MediaFile":
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         from .media import Media as MediaObj
         from .media import human_size
 
@@ -487,11 +565,23 @@ class Location(Validator):
 
     @property
     def keyboard(self) -> Any:  # type: ignore[override]
+        """The reply keyboard shown while asking (e.g. a "Share phone" button).
+
+        Example::
+
+            Phone().keyboard
+        """
         from .keyboards import ReplyButton
 
         return _LazyText("nb.send_location", lambda text: [ReplyButton(text, location=True)])
 
     async def check(self, ctx: "Context", message: "Message") -> "LocationT":
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         if message.location is None:
             raise self.fail(ctx)
         return message.location
@@ -515,6 +605,12 @@ class Custom(Validator):
         self.func = func
 
     async def check(self, ctx: "Context", message: "Message") -> Any:
+        """Validate one answer and return the clean value (raises ``ValidationError`` otherwise).
+
+        Example::
+
+            value = await validator.check(ctx, ctx.message)
+        """
         from .utils import maybe_await
 
         try:

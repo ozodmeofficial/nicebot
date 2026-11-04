@@ -1,4 +1,15 @@
-"""ORM field types."""
+"""Column types for ``Model``: ``Int``, ``BigInt``, ``Float``, ``Str``, ``Text``, ``Bool``, ``DateTime``, ``Date``, ``JSON``, ``ForeignKey``.
+
+Example::
+
+    from nicebot import Model, fields
+
+    class Product(Model):
+        title = fields.Str(100)
+        price = fields.Int(default=0, index=True)
+        tags = fields.JSON(default=list)
+        created_at = fields.DateTime(auto_now_add=True)
+"""
 from __future__ import annotations
 
 import datetime as dt
@@ -9,14 +20,13 @@ _MISSING: Any = object()
 
 
 class Field:
-    """Base field.
+    """Base of all column types. Common options: ``default``, ``null``, ``unique``, ``index``, ``choices``, ``column``.
 
-    Common options:
-        default   – value or callable (``default=list``)
-        null      – allow NULL (default: True unless ``pk``/default given)
-        unique    – unique constraint
-        index     – create an index
-        pk        – primary key
+    Example::
+
+        class Order(Model):
+            status = fields.Str(20, default="new", choices=["new", "paid", "sent"], index=True)
+            note = fields.Text(null=True)
     """
 
     py_type: type | tuple = object
@@ -48,29 +58,65 @@ class Field:
 
     # called by the metaclass
     def bind(self, model: Any, name: str) -> None:
+        """Attach the field to a model under ``name`` (done by the metaclass).
+
+        Example::
+
+            field.bind(Product, "price")
+        """
         self.model, self.name = model, name
         self.column = self.column or name
 
     def has_default(self) -> bool:
+        """``True`` if a default value (or callable) is set.
+
+        Example::
+
+            Product._meta.field("price").has_default
+        """
         return self.default is not _MISSING
 
     def get_default(self) -> Any:
+        """The default value (callables are called).
+
+        Example::
+
+            fields.JSON(default=dict).get_default()   # {}
+        """
         if self.default is _MISSING:
             return None
         return self.default() if callable(self.default) else self.default
 
     # python <-> db
     def to_db(self, value: Any, dialect: str) -> Any:
+        """Convert a Python value for the database.
+
+        Example::
+
+            fields.Bool().to_db(True, "sqlite")   # 1
+        """
         return value
 
     def from_db(self, value: Any, dialect: str) -> Any:
+        """Convert a database value back to Python.
+
+        Example::
+
+            fields.Bool().from_db(1, "sqlite")   # True
+        """
         return value
 
     def validate(self, value: Any) -> Any:
+        """Check/convert a value before saving (raises ``ValueError``).
+
+        Example::
+
+            fields.Int().validate("5")   # 5
+        """
         if value is None:
             return None
         if self.choices and value not in self.choices:
-            raise ValueError(f"{self.name}: {value!r} ruxsat etilmagan ({self.choices})")
+            raise ValueError(f"{self.name}: {value!r} is not one of the allowed choices {self.choices}")
         return value
 
     def __repr__(self) -> str:
@@ -78,32 +124,80 @@ class Field:
 
 
 class Int(Field):
+    """Integer column.
+
+    Example::
+
+        stock = fields.Int(default=0)
+    """
     py_type = int
     sql_kind = "INT"
 
     def validate(self, value: Any) -> Any:
+        """Check/convert a value before saving (raises ``ValueError``).
+
+        Example::
+
+            fields.Int().validate("5")   # 5
+        """
         return None if value is None else super().validate(int(value))
 
     def from_db(self, value: Any, dialect: str) -> Any:
+        """Convert a database value back to Python.
+
+        Example::
+
+            fields.Bool().from_db(1, "sqlite")   # True
+        """
         return None if value is None else int(value)
 
 
 class BigInt(Int):
+    """64-bit integer (Telegram ids need it).
+
+    Example::
+
+        user_id = fields.BigInt(index=True)
+    """
     sql_kind = "BIGINT"
 
 
 class Float(Field):
+    """Floating point column.
+
+    Example::
+
+        rating = fields.Float(default=0.0)
+    """
     py_type = float
     sql_kind = "FLOAT"
 
     def validate(self, value: Any) -> Any:
+        """Check/convert a value before saving (raises ``ValueError``).
+
+        Example::
+
+            fields.Int().validate("5")   # 5
+        """
         return None if value is None else super().validate(float(value))
 
     def from_db(self, value: Any, dialect: str) -> Any:
+        """Convert a database value back to Python.
+
+        Example::
+
+            fields.Bool().from_db(1, "sqlite")   # True
+        """
         return None if value is None else float(value)
 
 
 class Str(Field):
+    """Short text with a maximum length (``VARCHAR``).
+
+    Example::
+
+        title = fields.Str(100)
+    """
     py_type = str
 
     def __init__(self, max_length: int = 255, **kw: Any):
@@ -112,43 +206,97 @@ class Str(Field):
 
     @property
     def sql_kind(self) -> str:  # type: ignore[override]
+        """SQL type name including the length.
+
+        Example::
+
+            fields.Str(50).sql_kind   # "str:50"
+        """
         return f"VARCHAR({self.max_length})"
 
     def validate(self, value: Any) -> Any:
+        """Check/convert a value before saving (raises ``ValueError``).
+
+        Example::
+
+            fields.Int().validate("5")   # 5
+        """
         if value is None:
             return None
         value = str(value)
         if len(value) > self.max_length:
-            raise ValueError(f"{self.name}: {self.max_length} belgidan uzun bo'lmasin")
+            raise ValueError(f"{self.name}: must be at most {self.max_length} characters")
         return super().validate(value)
 
 
 class Text(Field):
+    """Long text without a length limit.
+
+    Example::
+
+        description = fields.Text(null=True)
+    """
     py_type = str
     sql_kind = "TEXT"
 
     def validate(self, value: Any) -> Any:
+        """Check/convert a value before saving (raises ``ValueError``).
+
+        Example::
+
+            fields.Int().validate("5")   # 5
+        """
         return None if value is None else super().validate(str(value))
 
 
 class Bool(Field):
+    """True/False column.
+
+    Example::
+
+        active = fields.Bool(default=True)
+    """
     py_type = bool
     sql_kind = "BOOL"
 
     def validate(self, value: Any) -> Any:
+        """Check/convert a value before saving (raises ``ValueError``).
+
+        Example::
+
+            fields.Int().validate("5")   # 5
+        """
         return None if value is None else bool(value)
 
     def to_db(self, value: Any, dialect: str) -> Any:
+        """Convert a Python value for the database.
+
+        Example::
+
+            fields.Bool().to_db(True, "sqlite")   # 1
+        """
         if value is None or dialect in ("postgres", "mongo"):
             return value
         return int(bool(value))
 
     def from_db(self, value: Any, dialect: str) -> Any:
+        """Convert a database value back to Python.
+
+        Example::
+
+            fields.Bool().from_db(1, "sqlite")   # True
+        """
         return None if value is None else bool(value)
 
 
 class DateTime(Field):
-    """Timezone-aware datetimes (UTC stored). ``auto_now_add`` / ``auto_now``."""
+    """Timezone-aware datetime (stored in UTC). ``auto_now_add`` sets it on insert, ``auto_now`` on every save.
+
+    Example::
+
+        created_at = fields.DateTime(auto_now_add=True)
+        updated_at = fields.DateTime(auto_now=True)
+    """
 
     py_type = dt.datetime
     sql_kind = "DATETIME"
@@ -161,9 +309,21 @@ class DateTime(Field):
 
     @staticmethod
     def now() -> dt.datetime:
+        """The current UTC time.
+
+        Example::
+
+            fields.DateTime.now()
+        """
         return dt.datetime.now(dt.timezone.utc)
 
     def validate(self, value: Any) -> Any:
+        """Check/convert a value before saving (raises ``ValueError``).
+
+        Example::
+
+            fields.Int().validate("5")   # 5
+        """
         if value is None:
             return None
         if isinstance(value, str):
@@ -175,6 +335,12 @@ class DateTime(Field):
         return value
 
     def to_db(self, value: Any, dialect: str) -> Any:
+        """Convert a Python value for the database.
+
+        Example::
+
+            fields.Bool().to_db(True, "sqlite")   # 1
+        """
         if value is None:
             return None
         value = self.validate(value).astimezone(dt.timezone.utc)
@@ -185,6 +351,12 @@ class DateTime(Field):
         return value
 
     def from_db(self, value: Any, dialect: str) -> Any:
+        """Convert a database value back to Python.
+
+        Example::
+
+            fields.Bool().from_db(1, "sqlite")   # True
+        """
         if value is None:
             return None
         if isinstance(value, str):
@@ -195,10 +367,22 @@ class DateTime(Field):
 
 
 class Date(Field):
+    """A calendar date.
+
+    Example::
+
+        birthday = fields.Date(null=True)
+    """
     py_type = dt.date
     sql_kind = "DATE"
 
     def validate(self, value: Any) -> Any:
+        """Check/convert a value before saving (raises ``ValueError``).
+
+        Example::
+
+            fields.Int().validate("5")   # 5
+        """
         if value is None:
             return None
         if isinstance(value, str):
@@ -208,6 +392,12 @@ class Date(Field):
         return value
 
     def to_db(self, value: Any, dialect: str) -> Any:
+        """Convert a Python value for the database.
+
+        Example::
+
+            fields.Bool().to_db(True, "sqlite")   # 1
+        """
         if value is None:
             return None
         value = self.validate(value)
@@ -216,6 +406,12 @@ class Date(Field):
         return value
 
     def from_db(self, value: Any, dialect: str) -> Any:
+        """Convert a database value back to Python.
+
+        Example::
+
+            fields.Bool().from_db(1, "sqlite")   # True
+        """
         if value is None:
             return None
         if isinstance(value, dt.datetime):
@@ -226,17 +422,34 @@ class Date(Field):
 
 
 class JSON(Field):
-    """Any JSON value: dict, list, str, number."""
+    """Any JSON value: dict, list, string, number.
+
+    Example::
+
+        data = fields.JSON(default=dict)
+    """
 
     py_type = (dict, list)
     sql_kind = "JSON"
 
     def to_db(self, value: Any, dialect: str) -> Any:
+        """Convert a Python value for the database.
+
+        Example::
+
+            fields.Bool().to_db(True, "sqlite")   # 1
+        """
         if value is None or dialect == "mongo":
             return value
         return json.dumps(value, ensure_ascii=False)
 
     def from_db(self, value: Any, dialect: str) -> Any:
+        """Convert a database value back to Python.
+
+        Example::
+
+            fields.Bool().from_db(1, "sqlite")   # True
+        """
         if value is None or not isinstance(value, (str, bytes)):
             return value
         return json.loads(value)
@@ -249,6 +462,14 @@ class ForeignKey(BigInt):
     ...     user = fields.ForeignKey(User)
     >>> order.user_id          # int
     >>> await order.user       # User object (loaded once, then cached)
+    
+    Example::
+
+        class Order(Model):
+            product = fields.ForeignKey("Product")   # column product_id
+
+        product = await order.product                # loads (and caches) the Product
+        order.product_id                             # just the id
     """
 
     def __init__(self, to: Any, *, on_delete: str = "CASCADE", **kw: Any):
@@ -259,11 +480,23 @@ class ForeignKey(BigInt):
         self.attr = ""
 
     def bind(self, model: Any, name: str) -> None:
+        """Bind and create the ``<name>_id`` column.
+
+        Example::
+
+            field.bind(Order, "product")
+        """
         self.attr = name
         self.column = f"{name}_id"
         super().bind(model, f"{name}_id")
 
     def target(self) -> Any:
+        """The model this key points to.
+
+        Example::
+
+            Order._meta.field("product").target   # Product
+        """
         if isinstance(self.to, str):
             from .model import registry_by_name
 

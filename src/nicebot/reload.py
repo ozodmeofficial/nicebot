@@ -1,4 +1,9 @@
-"""Hot reload: ``bot.start(reload=True)`` restarts the bot when a ``.py``/``.json``/``.toml`` file changes."""
+"""Hot reload: ``bot.start(reload=True)`` restarts the bot when a ``.py``/``.json``/``.toml``/``.env`` file changes.
+
+Example::
+
+    bot.start(reload=True)
+"""
 from __future__ import annotations
 
 import logging
@@ -29,12 +34,20 @@ def _snapshot(root: Path) -> dict[str, float]:
 
 
 def supervise(root: str | os.PathLike | None = None, interval: float = 0.7) -> bool:
-    """Returns ``False`` inside the child (keep running the bot), ``True`` in the parent once it exits."""
+    """Run the bot in a child process and restart it when a watched file changes.
+
+    Returns ``False`` inside the child (keep running the bot) and ``True`` in the parent once it exits.
+
+    Example::
+
+        if not supervise():     # what bot.start(reload=True) does
+            asyncio.run(bot.run())
+    """
     if os.environ.get(ENV) == "1":
         return False
     base = Path(root or os.getcwd())
     env = {**os.environ, ENV: "1"}
-    log.info("♻️  Hot reload yoqildi — fayllar kuzatilmoqda: %s", base)
+    log.info("♻️  Hot reload is on — watching %s", base)
     while True:
         snap = _snapshot(base)
         child = subprocess.Popen([sys.executable, *sys.argv], env=env)
@@ -42,14 +55,14 @@ def supervise(root: str | os.PathLike | None = None, interval: float = 0.7) -> b
             while True:
                 time.sleep(interval)
                 if child.poll() is not None:
-                    log.warning("Bot jarayoni to'xtadi (kod %s). O'zgarish kutilmoqda...", child.returncode)
+                    log.warning("The bot process exited (code %s). Waiting for a change...", child.returncode)
                     while _snapshot(base) == snap:
                         time.sleep(interval)
                     break
                 new = _snapshot(base)
                 if new != snap:
                     changed = sorted(set(new.items()) ^ set(snap.items()))
-                    log.info("♻️  O'zgarish: %s — qayta ishga tushirilmoqda", Path(changed[0][0]).name if changed else "?")
+                    log.info("♻️  %s changed — restarting", Path(changed[0][0]).name if changed else "a file")
                     break
         except KeyboardInterrupt:
             child.terminate()

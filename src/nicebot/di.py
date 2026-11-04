@@ -1,7 +1,14 @@
-"""Dependency injection: handlers ask for what they need by name or type hint.
+"""Dependency injection: handlers ask for what they need by parameter name or type hint.
+
+Names: ``bot``, ``message``, ``callback``, ``user``, ``chat``, ``text``, ``args``, ``arg``, ``payload``, ``data``,
+``value``, ``album``, ``lang``, ``state``, ``config``, ``db``, ``storage``, plus callback/regex parameters.
+Types: ``Context``, ``Nicebot``, ``User`` (your model), ``Message``… and anything registered with ``bot.provide``.
+
+Example::
 
     @bot.callback("buy:{id:int}")
-    async def buy(ctx, id: int, user: User, cfg: Config): ...
+    async def buy(ctx: Context, id: int, user: User, config: Config):
+        await ctx.reply(f"{user.first_name} bought #{id} in {config.SHOP_NAME}")
 """
 from __future__ import annotations
 
@@ -54,7 +61,12 @@ def _resolve_hints(func: Callable[..., Any]) -> dict[str, Any]:
 
 
 def plan(func: Callable[..., Any]) -> list[tuple[str, str, Any, Any, bool]]:
-    """[(name, kind, annotation, default, keyword_only)] — computed once per function."""
+    """Inspect a handler's parameters once: ``[(name, kind, annotation, default, keyword_only)]``.
+
+    Example::
+
+        plan(buy)   # [("ctx", "ctx", Context, ..., False), ("id", "param", int, ..., False)]
+    """
     p = _PLANS.get(func)
     if p is not None:
         return p
@@ -89,6 +101,12 @@ def _convert(value: Any, ann: Any) -> Any:
 
 
 async def resolve(ctx: "Context", name: str, ann: Any, default: Any) -> Any:
+    """Find the value for one handler parameter: callback/regex params, well-known names, type hints or ``bot.provide``.
+
+    Example::
+
+        value = await resolve(ctx, "user", User, inspect.Parameter.empty)
+    """
     bot = ctx.bot
     if name in ctx.params:
         return _convert(ctx.params[name], ann)
@@ -125,6 +143,12 @@ async def resolve(ctx: "Context", name: str, ann: Any, default: Any) -> Any:
 
 
 async def call_handler(func: Callable[..., Any], ctx: "Context") -> Any:
+    """Call a handler, filling its parameters from ``ctx`` (dependency injection).
+
+    Example::
+
+        await call_handler(buy, ctx)     # buy(ctx, id=5, user=<User>)
+    """
     args: list[Any] = []
     kwargs: dict[str, Any] = {}
     for name, kind, ann, default, kwonly in plan(func):

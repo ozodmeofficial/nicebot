@@ -1,4 +1,9 @@
-"""HTTP layer: one pooled aiohttp session, msgspec encode/decode, smart retries."""
+"""HTTP layer: one pooled aiohttp session, msgspec encoding/decoding, smart retries, uploads and downloads.
+
+Example::
+
+    data = await bot.client.download((await bot.get_file(file_id)).file_path)
+"""
 from __future__ import annotations
 
 import asyncio
@@ -31,6 +36,12 @@ _ENCODER = msgspec.json.Encoder()
 
 
 def decoder_for(returns: Any) -> msgspec.json.Decoder:
+    """A cached msgspec decoder for a return type such as ``"Message"`` or ``"list[Update]"``.
+
+    Example::
+
+        msg = decoder_for("Message").decode(raw_json)
+    """
     key = returns if isinstance(returns, str) else repr(returns)
     dec = _DECODERS.get(key)
     if dec is None:
@@ -43,7 +54,12 @@ _FILE_FIELDS = ("photo", "document", "video", "audio", "voice", "animation", "st
 
 
 def extract_file_id(message: Any) -> str | None:
-    """Return the file_id of the media inside a sent Message (for the file cache)."""
+    """The ``file_id`` of the media inside a sent ``Message`` (used by the upload cache).
+
+    Example::
+
+        extract_file_id(await ctx.photo("a.jpg"))   # "AgACAgIAAxk..."
+    """
     for name in _FILE_FIELDS:
         val = getattr(message, name, None)
         if val:
@@ -54,7 +70,17 @@ def extract_file_id(message: Any) -> str | None:
 
 
 class Client:
-    """Talks to the Bot API.  Handles flood-wait (429), 5xx and network errors."""
+    """Talks to the Bot API over one pooled aiohttp session. Handles flood-wait (429), 5xx and network errors with retries,
+    uploads files, and remembers ``file_id`` of uploaded local files so they are never uploaded twice.
+
+    You normally use it through the bot (``bot.client``).
+
+    Example::
+
+        client = Client("123456:ABC...")
+        me = await client.request("getMe", returns="User")
+        await client.close()
+    """
 
     def __init__(
         self,
@@ -79,6 +105,12 @@ class Client:
 
     # ------------------------------------------------------------- session
     async def session(self) -> aiohttp.ClientSession:
+        """The shared ``aiohttp.ClientSession`` (created on first use).
+
+        Example::
+
+            session = await bot.client.session()
+        """
         if self._session is None or self._session.closed:
             self._session = aiohttp.ClientSession(
                 connector=aiohttp.TCPConnector(limit=100, ttl_dns_cache=300),
@@ -87,6 +119,12 @@ class Client:
         return self._session
 
     async def close(self) -> None:
+        """Close the HTTP session.
+
+        Example::
+
+            await bot.client.close()
+        """
         if self._session and not self._session.closed:
             await self._session.close()
         self._session = None
@@ -160,6 +198,12 @@ class Client:
 
     # ------------------------------------------------------------- request
     async def request(self, method: str, params: dict[str, Any] | None = None, returns: Any = "Any", *, timeout: float | None = None) -> Any:
+        """Call a Bot API method by its Telegram name and decode the result into ``returns``.
+
+        Example::
+
+            msg = await bot.client.request("sendMessage", {"chat_id": 42, "text": "hi"}, "Message")
+        """
         payload, files, cache_keys = await self._prepare(params or {})
         if self.on_request:
             self.on_request(method, payload)
@@ -196,7 +240,12 @@ class Client:
                 await asyncio.sleep(min(0.5 * 2 ** attempt, 8))
 
     async def remember_files(self, cache_keys: dict[str, str], result: Any) -> None:
-        """Store the file_id Telegram gave an uploaded local file, so it is never uploaded twice."""
+        """Store the file_id Telegram gave an uploaded local file (internal).
+
+        Example::
+
+            await client.remember_files(cache_keys, result)
+        """
         if not cache_keys or self.file_cache is None:
             return
         fid = extract_file_id(result)

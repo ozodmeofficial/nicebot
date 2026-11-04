@@ -11,6 +11,12 @@ from .query import F, Q
 
 
 class MongoBackend:
+    """MongoDB via motor (``pip install "nicebot[mongo]"``). Same Model API; integer ids come from a counters collection.
+
+    Example::
+
+        Nicebot(token="...", db="mongodb://localhost:27017/shop")
+    """
     dialect = "mongo"
 
     def __init__(self, url: str, client: Any = None, **options: Any):
@@ -20,11 +26,17 @@ class MongoBackend:
         self.db: Any = None
 
     async def connect(self) -> None:
+        """Open the connection or pool.
+
+        Example::
+
+            await backend.connect()
+        """
         if self.client is None:
             try:
                 from motor.motor_asyncio import AsyncIOMotorClient
             except ImportError as e:  # pragma: no cover
-                raise ImportError("MongoDB uchun: pip install 'nicebot[mongo]'") from e
+                raise ImportError("MongoDB needs an extra package: pip install 'nicebot[mongo]'") from e
             self.client = AsyncIOMotorClient(self.url, tz_aware=True)
         from urllib.parse import urlparse
 
@@ -32,6 +44,12 @@ class MongoBackend:
         self.db = self.client[name]
 
     async def close(self) -> None:
+        """Close the connection or pool.
+
+        Example::
+
+            await backend.close()
+        """
         if self.client is not None:
             self.client.close()
 
@@ -44,6 +62,12 @@ class MongoBackend:
 
     # ------------------------------------------------------------- schema
     async def sync_schema(self, model: Any) -> None:
+        """Create missing tables, columns and indexes for a model (never drops data).
+
+        Example::
+
+            await backend.sync_schema(Product._meta)
+        """
         meta = model._meta
         col = self._col(model)
         for f in meta.fields.values():
@@ -68,6 +92,12 @@ class MongoBackend:
 
     # ------------------------------------------------------------- compiler
     def compile_q(self, q: Q, model: Any) -> dict[str, Any]:
+        """Compile a ``Q`` tree into a WHERE fragment / query document.
+
+        Example::
+
+            where, params = backend.compile_q(meta, Q(price__lt=5))
+        """
         parts = []
         for child in q.children:
             if isinstance(child, Q):
@@ -86,6 +116,12 @@ class MongoBackend:
         return expr
 
     def compile_leaf(self, leaf: tuple[str, str, Any], model: Any) -> dict[str, Any]:
+        """Compile one ``field__lookup=value`` condition.
+
+        Example::
+
+            backend.compile_leaf(meta, "price", "lt", 5, params)
+        """
         name, op, value = leaf
         f = model._meta.field(name)
         k = self._key(f)
@@ -129,6 +165,12 @@ class MongoBackend:
 
     # ------------------------------------------------------------- operations
     async def insert(self, model: Any, row: dict[str, Any]) -> Any:
+        """Insert one row; returns the primary key.
+
+        Example::
+
+            await backend.insert(meta, {"title": "Book"})
+        """
         from pymongo.errors import DuplicateKeyError
 
         meta = model._meta
@@ -143,6 +185,12 @@ class MongoBackend:
         return doc["_id"]
 
     async def bulk_insert(self, model: Any, rows: list[dict[str, Any]]) -> list[Any]:
+        """Insert many rows at once.
+
+        Example::
+
+            await backend.bulk_insert(meta, rows)
+        """
         from pymongo.errors import BulkWriteError
 
         meta = model._meta
@@ -159,6 +207,12 @@ class MongoBackend:
         return [d["_id"] for d in docs]
 
     async def select(self, model: Any, qs: Any) -> list[dict[str, Any]]:
+        """Run a QuerySet and return rows.
+
+        Example::
+
+            rows = await backend.select(qs)
+        """
         meta = model._meta
         projection = None
         if qs._values is not None:
@@ -173,9 +227,21 @@ class MongoBackend:
         return [self._doc_to_row(model, d) async for d in cursor]
 
     async def count(self, model: Any, where: Q) -> int:
+        """Count rows of a QuerySet.
+
+        Example::
+
+            n = await backend.count(qs)
+        """
         return int(await self._col(model).count_documents(self.compile_q(where, model)))
 
     async def aggregate(self, model: Any, where: Q, func: str, f: Field) -> Any:
+        """SUM/AVG/MIN/MAX of a field.
+
+        Example::
+
+            await backend.aggregate(qs, "SUM", "price")
+        """
         op = {"SUM": "$sum", "AVG": "$avg", "MAX": "$max", "MIN": "$min"}[func]
         pipeline = [{"$match": self.compile_q(where, model)}, {"$group": {"_id": None, "v": {op: f"${self._key(f)}"}}}]
         docs = [d async for d in self._col(model).aggregate(pipeline)]
@@ -189,6 +255,12 @@ class MongoBackend:
         return float(v)
 
     async def update(self, model: Any, where: Q, data: dict[Field, Any]) -> int:
+        """Update rows of a QuerySet; returns how many changed.
+
+        Example::
+
+            await backend.update(qs, {field: 5})
+        """
         if not data:
             return 0
         sets: dict[str, Any] = {}
@@ -198,7 +270,7 @@ class MongoBackend:
             k = self._key(f)
             if isinstance(v, F):
                 if v.field != f.name or len(v.ops) != 1:
-                    raise NotImplementedError("MongoDB: F() faqat shu maydonning o'zi bilan bitta + - * amalda ishlaydi")
+                    raise NotImplementedError("MongoDB: F() supports only one + - * operation on the same field")
                 op, operand = v.ops[0]
                 if op == "+":
                     incs[k] = operand
@@ -219,10 +291,21 @@ class MongoBackend:
         return int(res.matched_count)
 
     async def delete(self, model: Any, where: Q) -> int:
+        """Delete rows of a QuerySet; returns how many.
+
+        Example::
+
+            await backend.delete(qs)
+        """
         res = await self._col(model).delete_many(self.compile_q(where, model))
         return int(res.deleted_count)
 
     @contextlib.asynccontextmanager
     async def transaction(self) -> AsyncIterator[None]:
-        """MongoDB transactions need a replica set; here this is a no-op context."""
+        """Async context manager for a transaction.
+
+        Example::
+
+            async with backend.transaction(): ...
+        """
         yield

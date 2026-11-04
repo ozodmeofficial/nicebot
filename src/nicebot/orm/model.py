@@ -14,17 +14,29 @@ _REGISTRY: dict[str, type["Model"]] = {}  # table -> latest model class
 
 
 def registry() -> dict[str, type["Model"]]:
+    """All model classes by table name.
+
+    Example::
+
+        registry()["nb_users"]   # the User model
+    """
     return _REGISTRY
 
 
 def registry_by_name(name: str) -> type["Model"]:
+    """Find a model class by class or table name (used by string ``ForeignKey("Product")``).
+
+    Example::
+
+        registry_by_name("Product")
+    """
     for cls in _REGISTRY.values():
         if cls.__name__ == name:
             return cls
     for cls in _REGISTRY.values():  # e.g. "User" when it was extended by a subclass
         if any(b.__name__ == name for b in cls.__mro__):
             return cls
-    raise LookupError(f"Model {name!r} topilmadi")
+    raise LookupError(f"Model {name!r} not found (is its module imported?)")
 
 
 def _table_name(cls_name: str) -> str:
@@ -35,6 +47,13 @@ def _table_name(cls_name: str) -> str:
 
 
 class Meta:
+    """Model metadata: table name, fields, indexes (``Product._meta``).
+
+    Example::
+
+        Product._meta.table          # "products"
+        list(Product._meta.fields)   # ["id", "title", "price"]
+    """
     def __init__(self, model: type, table: str, fields: dict[str, Field], indexes: list[tuple[str, ...]], unique_together: list[tuple[str, ...]], abstract: bool):
         self.model = model
         self.table = table
@@ -49,6 +68,12 @@ class Meta:
         self.fk_attrs = {f.attr: f for f in fields.values() if isinstance(f, ForeignKey)}
 
     def field(self, name: str) -> Field:
+        """A field by name.
+
+        Example::
+
+            Product._meta.field("price")
+        """
         if name == "pk":
             return self.pk
         try:
@@ -56,9 +81,15 @@ class Meta:
         except KeyError:
             if name in self.fk_attrs:
                 return self.fk_attrs[name]
-            raise AttributeError(f"{self.model.__name__} da '{name}' maydoni yo'q. Mavjud: {', '.join(self.fields)}") from None
+            raise AttributeError(f"{self.model.__name__} has no field {name!r}. Fields: {', '.join(self.fields)}") from None
 
     def backend(self) -> Any:
+        """The database backend this model uses.
+
+        Example::
+
+            Product._meta.backend
+        """
         from .db import current_database
 
         db = self.database or current_database()
@@ -108,6 +139,12 @@ class _Related:
 
 
 class ModelMeta(type):
+    """Metaclass that collects fields and registers models. Internal.
+
+    Example::
+
+        class Product(Model): ...    # ModelMeta builds Product._meta
+    """
     def __new__(mcs, name: str, bases: tuple, ns: dict[str, Any]) -> Any:
         meta_cls = ns.pop("Meta", None)
         own_fields = {k: v for k, v in list(ns.items()) if isinstance(v, Field)}
@@ -174,6 +211,17 @@ class Model(metaclass=ModelMeta):
     ...     price = fields.Int(default=0)
     >>> p = await Product.create(title="Kitob", price=50_000)
     >>> cheap = await Product.filter(price__lt=100_000).order_by("price")
+    
+    Example::
+
+        class Product(Model):
+            title = fields.Str(100)
+            price = fields.Int(default=0)
+            active = fields.Bool(default=True)
+
+        p = await Product.create(title="Book", price=50_000)
+        cheap = await Product.filter(price__lt=100_000).order_by("price")
+        await p.update(price=45_000)
     """
 
     _meta: ClassVar[Meta]
@@ -191,7 +239,7 @@ class Model(metaclass=ModelMeta):
             elif k in meta.fields:
                 self.__dict__[k] = meta.fields[k].validate(v)
             else:
-                raise AttributeError(f"{type(self).__name__} da '{k}' maydoni yo'q")
+                raise AttributeError(f"{type(self).__name__} has no field {k!r}")
 
     # ------------------------------------------------------------ helpers
     @property
@@ -200,6 +248,12 @@ class Model(metaclass=ModelMeta):
 
     @property
     def pk(self) -> Any:
+        """The primary key value (usually ``id``).
+
+        Example::
+
+            order.pk   # 15
+        """
         return self._pk_value
 
     def __setattr__(self, key: str, value: Any) -> None:
@@ -222,6 +276,12 @@ class Model(metaclass=ModelMeta):
         return obj
 
     def to_dict(self, *exclude: str) -> dict[str, Any]:
+        """The row as a dict (pass field names to leave out).
+
+        Example::
+
+            return {"user": ctx.user.to_dict("data")}
+        """
         return {k: self.__dict__.get(k) for k in self._meta.fields if k not in exclude}
 
     def __repr__(self) -> str:
@@ -272,44 +332,105 @@ class Model(metaclass=ModelMeta):
     # ------------------------------------------------------------ queries
     @classmethod
     def objects(cls: type[M]) -> QuerySet[M]:
+        """A ``QuerySet`` of every row (same as ``Model.all()``).
+
+        Example::
+
+            async for p in Product.objects():
+                print(p.title)
+        """
         return QuerySet(cls)
 
     @classmethod
     def all(cls: type[M]) -> QuerySet[M]:
+        """Every row as a lazy ``QuerySet``.
+
+        Example::
+
+            products = await Product.all().order_by("title")
+        """
         return QuerySet(cls)
 
     @classmethod
     def filter(cls: type[M], *qs: Q, **lookups: Any) -> QuerySet[M]:
+        """Rows matching lookups (``price__lt=100``) or ``Q`` objects.
+
+        Example::
+
+            cheap = await Product.filter(price__lt=100_000, active=True)
+        """
         return QuerySet(cls).filter(*qs, **lookups)
 
     @classmethod
     def exclude(cls: type[M], *qs: Q, **lookups: Any) -> QuerySet[M]:
+        """Rows NOT matching the lookups.
+
+        Example::
+
+            others = await Product.exclude(category="books")
+        """
         return QuerySet(cls).exclude(*qs, **lookups)
 
     @classmethod
     async def get(cls: type[M], *qs: Q, **lookups: Any) -> M:
+        """Exactly one row; raises ``DoesNotExist`` / ``MultipleObjectsReturned``.
+
+        Example::
+
+            p = await Product.get(id=5)
+        """
         return await QuerySet(cls).get(*qs, **lookups)
 
     @classmethod
     async def get_or_none(cls: type[M], *qs: Q, **lookups: Any) -> M | None:
+        """One row or ``None``.
+
+        Example::
+
+            p = await Product.get_or_none(slug="book")
+        """
         return await QuerySet(cls).get_or_none(*qs, **lookups)
 
     @classmethod
     async def count(cls, *qs: Q, **lookups: Any) -> int:
+        """Number of matching rows.
+
+        Example::
+
+            n = await Order.count(status="new")
+        """
         return await QuerySet(cls).filter(*qs, **lookups).count()
 
     @classmethod
     async def exists(cls, *qs: Q, **lookups: Any) -> bool:
+        """Is there at least one matching row?
+
+        Example::
+
+            if await Order.exists(user_id=ctx.user_id): ...
+        """
         return await QuerySet(cls).filter(*qs, **lookups).exists()
 
     @classmethod
     async def create(cls: type[M], **values: Any) -> M:
+        """Insert a row and return it.
+
+        Example::
+
+            order = await Order.create(user_id=ctx.user_id, product="Book", price=50_000)
+        """
         obj = cls(**values)
         await obj.save(force_insert=True)
         return obj
 
     @classmethod
     async def get_or_create(cls: type[M], defaults: dict[str, Any] | None = None, **lookups: Any) -> tuple[M, bool]:
+        """Get a row or create it with ``defaults``. Returns ``(obj, created)``.
+
+        Example::
+
+            city, created = await City.get_or_create(name="Tashkent", defaults={"population": 3_000_000})
+        """
         obj = await cls.get_or_none(**lookups)
         if obj is not None:
             return obj, False
@@ -323,6 +444,12 @@ class Model(metaclass=ModelMeta):
 
     @classmethod
     async def update_or_create(cls: type[M], defaults: dict[str, Any] | None = None, **lookups: Any) -> tuple[M, bool]:
+        """Update a row with ``defaults`` or create it. Returns ``(obj, created)``.
+
+        Example::
+
+            s, _ = await Setting.update_or_create(key="theme", defaults={"value": "dark"})
+        """
         obj = await cls.get_or_none(**lookups)
         if obj is None:
             return await cls.create(**{**lookups, **(defaults or {})}), True
@@ -332,6 +459,12 @@ class Model(metaclass=ModelMeta):
 
     @classmethod
     async def bulk_create(cls: type[M], objects: list[M] | list[dict[str, Any]]) -> list[M]:
+        """Insert many rows at once (objects or dicts).
+
+        Example::
+
+            await Product.bulk_create([{"title": "A", "price": 1}, {"title": "B", "price": 2}])
+        """
         objs = [o if isinstance(o, Model) else cls(**o) for o in objects]
         if not objs:
             return []
@@ -365,11 +498,18 @@ class Model(metaclass=ModelMeta):
                     value = f.get_default()
                     self.__dict__[name] = value
                 else:
-                    raise IntegrityError(f"{type(self).__name__}.{name} bo'sh bo'lishi mumkin emas")
+                    raise IntegrityError(f"{type(self).__name__}.{name} cannot be empty (null=False)")
             row[f.column] = f.to_db(value, dialect)
         return row
 
     async def save(self, force_insert: bool = False) -> "Model":
+        """Insert or update the whole row.
+
+        Example::
+
+            p.price = 60_000
+            await p.save()
+        """
         backend = self._meta.backend()
         meta = self._meta
         insert = force_insert or not self.__dict__.get("_persisted")
@@ -385,7 +525,12 @@ class Model(metaclass=ModelMeta):
         return self
 
     async def update(self, **values: Any) -> "Model":
-        """Change some fields and save only them (``F`` expressions allowed)."""
+        """Change some fields and save only them (``F`` expressions allowed).
+
+        Example::
+
+            await ctx.user.update(phone=phone, data={**ctx.user.data, "city": "Tashkent"})
+        """
         meta = self._meta
         data = type(self)._prepare_update(values)
         await meta.backend().update(type(self), Q(**{meta.pk.name: self._pk_value}), data)
@@ -397,18 +542,36 @@ class Model(metaclass=ModelMeta):
         return self
 
     async def increment(self, field: str, amount: int | float = 1) -> "Model":
+        """Add ``amount`` to a numeric field atomically.
+
+        Example::
+
+            await ctx.user.increment("balance", 1000)
+        """
         return await self.update(**{field: F(field) + amount})
 
     async def delete(self) -> None:
+        """Delete the row.
+
+        Example::
+
+            await order.delete()
+        """
         meta = self._meta
         await meta.backend().delete(type(self), Q(**{meta.pk.name: self._pk_value}))
         self.__dict__["_persisted"] = False
 
     async def refresh(self) -> "Model":
+        """Reload the row from the database.
+
+        Example::
+
+            await order.refresh()
+        """
         meta = self._meta
         fresh = await type(self).get_or_none(**{meta.pk.name: self._pk_value})
         if fresh is None:
-            raise DoesNotExist(f"{type(self).__name__} o'chirilgan")
+            raise DoesNotExist(f"{type(self).__name__} was deleted")
         for n in meta.fields:
             self.__dict__[n] = fresh.__dict__[n]
         return self

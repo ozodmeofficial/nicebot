@@ -111,36 +111,83 @@ class WebAppUser(dict):
 
     @property
     def id(self) -> int:
-        """Telegram user id."""
+        """Telegram user id.
+
+        Example::
+
+            req.user.id   # 123456789
+        """
         return int(self.get("id", 0))
 
     @property
     def first_name(self) -> str:
+        """First name.
+
+        Example::
+
+            req.user.first_name   # "Ali"
+        """
         return self.get("first_name", "")
 
     @property
     def last_name(self) -> str | None:
+        """Last name (may be ``None``).
+
+        Example::
+
+            req.user.last_name
+        """
         return self.get("last_name")
 
     @property
     def username(self) -> str | None:
+        """Username without ``@`` (may be ``None``).
+
+        Example::
+
+            req.user.username   # "ali_dev"
+        """
         return self.get("username")
 
     @property
     def language_code(self) -> str | None:
+        """Language of the user's Telegram app.
+
+        Example::
+
+            req.user.language_code   # "uz"
+        """
         return self.get("language_code")
 
     @property
     def is_premium(self) -> bool:
+        """Telegram Premium subscriber?
+
+        Example::
+
+            if req.user.is_premium: ...
+        """
         return bool(self.get("is_premium", False))
 
     @property
     def photo_url(self) -> str | None:
+        """Profile photo URL (``.jpeg``/``.svg``), if available.
+
+        Example::
+
+            req.user.photo_url
+        """
         return self.get("photo_url")
 
     @property
     def allows_write_to_pm(self) -> bool:
-        """``True`` if the bot may message this user."""
+        """``True`` if the bot may message this user (``req.send`` works).
+
+        Example::
+
+            if req.user.allows_write_to_pm:
+                await req.send("Thanks!")
+        """
         return bool(self.get("allows_write_to_pm", False))
 
 
@@ -166,7 +213,13 @@ class UploadedFile:
 
     @property
     def size(self) -> int:
-        """Size in bytes."""
+        """Size in bytes.
+
+        Example::
+
+            if file.size > 5_000_000:
+                raise ValueError("max 5 MB")
+        """
         return len(self.data)
 
     async def save(self, path: str | Path) -> str:
@@ -240,22 +293,43 @@ class WebAppRequest:
 
     @property
     def query_id(self) -> str | None:
-        """Set when the Mini App was opened from an inline button / keyboard; needed for ``req.answer()``."""
+        """Set when the Mini App was opened from an inline keyboard button/inline menu; needed by ``req.answer()``.
+
+        Example::
+
+            if req.query_id:
+                await req.answer("Done", "✅ Ordered")
+        """
         return self.init.get("query_id")
 
     @property
     def chat_type(self) -> str | None:
-        """Where the app was opened: ``"sender"``, ``"private"``, ``"group"``, ``"supergroup"``, ``"channel"``."""
+        """Where the app was opened: ``"sender"``, ``"private"``, ``"group"``, ``"supergroup"`` or ``"channel"``.
+
+        Example::
+
+            req.chat_type   # "private"
+        """
         return self.init.get("chat_type")
 
     @property
     def headers(self) -> Any:
-        """HTTP headers of the request."""
+        """HTTP headers of the request.
+
+        Example::
+
+            req.headers.get("User-Agent")
+        """
         return self.request.headers
 
     @property
     def ip(self) -> str | None:
-        """Client IP (respects ``X-Forwarded-For`` set by proxies)."""
+        """Client IP (respects ``X-Forwarded-For`` from proxies).
+
+        Example::
+
+            log.info("request from %s", req.ip)
+        """
         fwd = self.request.headers.get("X-Forwarded-For")
         return fwd.split(",")[0].strip() if fwd else self.request.remote
 

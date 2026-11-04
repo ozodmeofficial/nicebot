@@ -65,37 +65,74 @@ class SentMessage:
 
     @property
     def text(self) -> str | None:
-        """Text or caption."""
+        """Text or caption.
+
+        Example::
+
+            assert t.last.text == "Done"
+        """
         return self.data.get("text") if self.data.get("text") is not None else self.data.get("caption")
 
     @property
     def chat_id(self) -> int:
+        """Chat the message was sent to.
+
+        Example::
+
+            assert t.last.chat_id == ali.chat_id
+        """
         return self.data["chat"]["id"]
 
     @property
     def message_id(self) -> int:
+        """Message id.
+
+        Example::
+
+            t.last.message_id
+        """
         return self.data["message_id"]
 
     @property
     def markup(self) -> dict[str, Any] | None:
-        """The raw inline keyboard (dict) or ``None``."""
+        """Raw inline keyboard (dict) or ``None``.
+
+        Example::
+
+            t.last.markup["inline_keyboard"][0][0]["url"]
+        """
         return self.data.get("reply_markup")
 
     @property
     def buttons(self) -> list[str]:
-        """Texts of the inline buttons (flattened)."""
+        """Texts of the inline buttons (flattened).
+
+        Example::
+
+            assert t.last.buttons == ["Yes", "No"]
+        """
         m = self.markup or {}
         return [b["text"] for row in m.get("inline_keyboard", []) for b in row]
 
     @property
     def keyboard(self) -> list[str]:
-        """Texts of the reply keyboard (flattened)."""
+        """Texts of the reply keyboard (flattened).
+
+        Example::
+
+            assert t.last.keyboard == ["🛍 Shop", "📞 Contact"]
+        """
         m = self.reply_markup_raw or {}
         return [b["text"] if isinstance(b, dict) else b for row in m.get("keyboard", []) for b in row]
 
     @property
     def reply_markup_raw(self) -> dict[str, Any] | None:
-        """The raw reply keyboard (dict) or ``None``."""
+        """Raw reply keyboard (dict) or ``None``.
+
+        Example::
+
+            t.last.reply_markup_raw["resize_keyboard"]
+        """
         return self.data.get("_raw_markup")
 
     @property
@@ -137,7 +174,12 @@ class TestUser:
 
     @property
     def tg(self) -> dict[str, Any]:
-        """The user as a Telegram ``User`` dict."""
+        """The user as a Telegram ``User`` dict.
+
+        Example::
+
+            ali.tg   # {"id": 100001, "is_bot": False, "first_name": "Ali"}
+        """
         d: dict[str, Any] = {"id": self.id, "is_bot": False, "first_name": self.first_name}
         if self.username:
             d["username"] = self.username
@@ -160,7 +202,13 @@ class TestUser:
         return msg
 
     async def send(self, text: str | None = None, **fields: Any) -> None:
-        """Send a text (or any message fields) to the bot and wait until it reacts."""
+        """Send a text (or any message fields) to the bot and wait until it reacts.
+
+        Example::
+
+            await ali.send("/start")
+            await ali.send(None, dice={"emoji": "🎲", "value": 6})
+        """
         if text is not None:
             fields["text"] = text
         await self.s.feed({"message": self._message(**fields)})
@@ -240,9 +288,21 @@ class TestUser:
         await self.send(None, web_app_data={"data": raw, "button_text": button_text})
 
     async def send_contact(self, phone: str = "+998901234567", own: bool = True) -> None:
+        """Share a phone contact (``own=False`` sends somebody else's).
+
+        Example::
+
+            await ali.send_contact("+998901234567")
+        """
         await self.send(None, contact={"phone_number": phone, "first_name": self.first_name, "user_id": self.id if own else self.id + 1})
 
     async def send_location(self, latitude: float = 40.1, longitude: float = 65.37) -> None:
+        """Share a location.
+
+        Example::
+
+            await ali.send_location(41.31, 69.28)
+        """
         await self.send(None, location={"latitude": latitude, "longitude": longitude})
 
     async def send_album(self, count: int = 3) -> None:
@@ -260,14 +320,25 @@ class TestUser:
         await self.s.settle()
 
     async def join(self, chat_id: int | None = None) -> None:
-        """This user joins a group (service message)."""
+        """Join a group (service message).
+
+        Example::
+
+            await ali.join(chat_id=-100123)
+        """
         msg = self._message(new_chat_members=[self.tg])
         if chat_id is not None:
             msg["chat"] = {"id": chat_id, "type": "supergroup", "title": "Test group"}
         await self.s.feed({"message": msg})
 
     async def click(self, text: str | None = None, *, data: str | None = None, message: SentMessage | None = None) -> None:
-        """Press an inline button by (part of) its text, or by raw callback ``data``."""
+        """Press an inline button by (part of) its text, or by raw ``data``.
+
+        Example::
+
+            await ali.click("✅ Yes")
+            await ali.click(data="buy:5")
+        """
         target = message or self.s.last_with_buttons(self.chat_id)
         if target is None:
             raise AssertionError("No message with inline buttons was found in this chat")
@@ -613,7 +684,12 @@ class TestSession:
 
     @property
     def messages(self) -> list[SentMessage]:
-        """Every message the bot sent, in order, as their latest (edited) state."""
+        """Every message the bot sent, in order, in their latest (edited) state.
+
+        Example::
+
+            assert [m.text for m in t.messages] == ["Hi", "Bye"]
+        """
         seen: list[tuple[int, int]] = []
         for k in self._order:
             if k not in seen:
@@ -622,7 +698,12 @@ class TestSession:
 
     @property
     def last(self) -> SentMessage:
-        """The most recently sent or edited message."""
+        """The most recently sent or edited message.
+
+        Example::
+
+            assert t.last.text == "Welcome!"
+        """
         if not self._order:
             raise AssertionError("The bot has not sent anything yet")
         return SentMessage(self._msgs[self._order[-1]], "message")
@@ -663,7 +744,12 @@ class TestSession:
 
     @property
     def answers(self) -> list[dict[str, Any]]:
-        """``answerCallbackQuery`` calls (toasts/alerts)."""
+        """``answerCallbackQuery`` calls (button toasts/alerts).
+
+        Example::
+
+            assert t.answers[-1]["text"] == "Added"
+        """
         return [c.params for c in self.calls_of("answerCallbackQuery")]
 
     def reset(self) -> None:
@@ -694,7 +780,12 @@ class ApiResponse:
 
     @property
     def json(self) -> Any:
-        """The body decoded as JSON (``None`` if it is not JSON)."""
+        """The body decoded as JSON (``None`` if it is not JSON).
+
+        Example::
+
+            r.json["ok"]
+        """
         import json as _json
 
         try:
@@ -704,7 +795,12 @@ class ApiResponse:
 
     @property
     def text(self) -> str:
-        """The body as text."""
+        """The body as text.
+
+        Example::
+
+            r.text
+        """
         return self.body.decode(errors="replace")
 
     def __repr__(self) -> str:

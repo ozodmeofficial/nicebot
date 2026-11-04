@@ -1,4 +1,11 @@
-"""``nicebot`` command line: create a project, run a bot, show versions."""
+"""``nicebot`` command line: create a project, run a bot, show versions.
+
+Example::
+
+    $ nicebot new mybot       # bot.py, handlers/, locales/, .env
+    $ nicebot run --reload
+    $ nicebot version
+"""
 from __future__ import annotations
 
 import argparse
@@ -7,41 +14,41 @@ import runpy
 import sys
 from pathlib import Path
 
-BOT_PY = '''from nicebot import Nicebot, Button
+BOT_PY = '''from nicebot import Button, Context, Nicebot
 
-bot = Nicebot.from_env()          # BOT_TOKEN, DATABASE_URL, ADMINS — .env faylidan
-bot.include("handlers")           # handlers/ papkasidagi barcha Router'lar
+bot = Nicebot.from_env()          # BOT_TOKEN, DATABASE_URL, ADMINS from .env
+bot.include("handlers")           # every Router in the handlers/ folder
 
 
-@bot.command("start", description="Botni ishga tushirish")
-async def start(ctx):
+@bot.command("start", description="Start the bot")
+async def start(ctx: Context):
     await ctx.reply(
         ctx.t("hello", name=ctx.name),
-        buttons=[Button("ℹ️ Yordam", on_click=help_button)],
+        buttons=[Button("ℹ️ Help", on_click=help_button)],
     )
 
 
-async def help_button(ctx):
+async def help_button(ctx: Context):
     await ctx.respond(ctx.t("help"))
 
 
 if __name__ == "__main__":
-    bot.start(reload=True)        # kod o'zgarsa — bot o'zi qayta ishga tushadi
+    bot.start(reload=True)        # restarts by itself when you change the code
 '''
 
-HANDLER_PY = '''from nicebot import Router
+HANDLER_PY = '''from nicebot import Context, Router
 
 router = Router()
 
 
-@router.command("ping", description="Bot ishlayaptimi?")
-async def ping(ctx):
+@router.command("ping", description="Is the bot alive?")
+async def ping(ctx: Context):
     await ctx.reply(f"🏓 pong ({ctx.elapsed * 1000:.0f} ms)")
 
 
-@router.text("salom")
-async def salom(ctx):
-    await ctx.reply(f"Va alaykum assalom, {ctx.name}! 👋")
+@router.text("salom", "hello", "привет")
+async def hello(ctx: Context):
+    await ctx.reply(ctx.t("hello", name=ctx.name))
 '''
 
 ENV = """BOT_TOKEN=123456:ABC-your-token-from-BotFather
@@ -63,9 +70,15 @@ GITIGNORE = ".env\n*.db\n*.db-*\n__pycache__/\n.venv/\n"
 
 
 def cmd_new(args: argparse.Namespace) -> int:
+    """``nicebot new <name>`` — create a ready project (bot.py, handlers/, locales/, .env).
+
+    Example::
+
+        $ nicebot new mybot && cd mybot && python bot.py
+    """
     root = Path(args.name)
     if root.exists() and any(root.iterdir()):
-        print(f"❌ '{root}' papkasi bo'sh emas")
+        print(f"❌ The folder '{root}' is not empty")
         return 1
     (root / "handlers").mkdir(parents=True, exist_ok=True)
     (root / "locales").mkdir(exist_ok=True)
@@ -77,17 +90,23 @@ def cmd_new(args: argparse.Namespace) -> int:
     (root / ".gitignore").write_text(GITIGNORE, encoding="utf-8")
     for lang, text in LOCALES.items():
         (root / "locales" / f"{lang}.json").write_text(text, encoding="utf-8")
-    print(f"✅ Loyiha yaratildi: {root}/\n")
+    print(f"✅ Project created: {root}/\n")
     print(f"   cd {root}")
-    print("   # .env faylida BOT_TOKEN ni o'zgartiring")
+    print("   # put your token from @BotFather into .env (BOT_TOKEN=...)")
     print("   python bot.py\n")
     return 0
 
 
 def cmd_run(args: argparse.Namespace) -> int:
+    """``nicebot run [file] [--reload]`` — run a bot file.
+
+    Example::
+
+        $ nicebot run bot.py --reload
+    """
     path = Path(args.file)
     if not path.exists():
-        print(f"❌ Fayl topilmadi: {path}")
+        print(f"❌ File not found: {path}")
         return 1
     if args.reload:
         from .reload import supervise
@@ -101,6 +120,13 @@ def cmd_run(args: argparse.Namespace) -> int:
 
 
 def cmd_version(_: argparse.Namespace) -> int:
+    """``nicebot version`` — print nicebot, Bot API and Python versions.
+
+    Example::
+
+        $ nicebot version
+        nicebot 1.0.0 · Telegram Bot API 10.3 · Python 3.12.4
+    """
     from . import __version__
     from .types import API_VERSION
 
@@ -109,16 +135,22 @@ def cmd_version(_: argparse.Namespace) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(prog="nicebot", description="nicebot — Telegram botlar uchun eng qulay kutubxona")
+    """Entry point of the ``nicebot`` command.
+
+    Example::
+
+        main(["new", "mybot"])
+    """
+    p = argparse.ArgumentParser(prog="nicebot", description="nicebot — the friendliest Python library for Telegram bots")
     sub = p.add_subparsers(dest="cmd")
-    n = sub.add_parser("new", help="yangi bot loyihasini yaratish")
-    n.add_argument("name", help="papka nomi")
+    n = sub.add_parser("new", help="create a new bot project")
+    n.add_argument("name", help="folder name")
     n.set_defaults(func=cmd_new)
-    r = sub.add_parser("run", help="botni ishga tushirish")
+    r = sub.add_parser("run", help="run a bot file (default: bot.py)")
     r.add_argument("file", nargs="?", default="bot.py")
-    r.add_argument("--reload", action="store_true", help="kod o'zgarsa qayta ishga tushirish")
+    r.add_argument("--reload", action="store_true", help="restart when the code changes")
     r.set_defaults(func=cmd_run)
-    v = sub.add_parser("version", help="versiyalar")
+    v = sub.add_parser("version", help="show nicebot, Bot API and Python versions")
     v.set_defaults(func=cmd_version)
     args = p.parse_args(argv)
     if not getattr(args, "func", None):

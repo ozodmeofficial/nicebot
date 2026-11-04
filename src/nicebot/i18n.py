@@ -273,7 +273,16 @@ BUILTIN: dict[str, dict[str, str]] = {
 
 
 class I18n:
-    """Loads ``<folder>/<lang>.json`` (or ``.toml``) files. Missing keys fall back to the default language, then to the key itself."""
+    """Loads ``<folder>/<lang>.json`` (or ``.toml``) files; nested keys become dotted (``"menu.title"``).
+
+    Missing keys fall back to the default language, then to the key itself. The library's own texts
+    (``nb.*``) are built in for uz/ru/en and can be overridden in your files.
+
+    Example::
+
+        i18n = I18n("locales", default="en")
+        i18n.t("hello", "uz", name="Ali")        # "Salom, Ali!"
+    """
 
     def __init__(self, folder: str | Path | None = "locales", default: str = "uz", languages: tuple[str, ...] | None = None):
         self.default = default
@@ -284,6 +293,12 @@ class I18n:
         self.languages = languages or tuple(sorted(self.texts))
 
     def load(self, folder: str | Path) -> None:
+        """Load every ``.json``/``.toml`` file of a folder.
+
+        Example::
+
+            bot.i18n.load("extra_locales")
+        """
         for path in sorted(Path(folder).iterdir()):
             if path.suffix == ".json":
                 data = json.loads(path.read_text(encoding="utf-8"))
@@ -297,6 +312,12 @@ class I18n:
         log.debug("Tarjimalar yuklandi: %s", sorted(self.texts))
 
     def add(self, lang: str, data: dict[str, Any], prefix: str = "") -> None:
+        """Add translations for a language from a dict (nested dicts become dotted keys).
+
+        Example::
+
+            bot.i18n.add("en", {"menu": {"title": "Main menu"}})     # key "menu.title"
+        """
         bucket = self.texts.setdefault(lang, {})
         for k, v in data.items():
             key = f"{prefix}{k}"
@@ -306,7 +327,12 @@ class I18n:
                 bucket[key] = str(v)
 
     def resolve(self, code: str | None) -> str:
-        """Map a Telegram ``language_code`` (``"ru-RU"``) to a loaded language."""
+        """Map a Telegram ``language_code`` (``"ru-RU"``, ``"uz"``) to a loaded language, else the default.
+
+        Example::
+
+            bot.i18n.resolve("ru-RU")   # "ru"
+        """
         if not code:
             return self.default
         code = code.lower().split("-")[0]
@@ -315,6 +341,12 @@ class I18n:
         return self.default
 
     def t(self, key: str, lang: str | None = None, /, **kwargs: Any) -> str:
+        """Translate ``key`` into ``lang`` and format it with ``kwargs``.
+
+        Example::
+
+            bot.i18n.t("hello", "ru", name="Ali")
+        """
         lang = lang or self.default
         text = self.texts.get(lang, {}).get(key)
         if text is None:

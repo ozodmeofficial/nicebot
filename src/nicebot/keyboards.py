@@ -224,7 +224,12 @@ class Button:
 
     @property
     def needs_store(self) -> bool:
-        """``True`` when the button's data must be kept in storage (ttl/once/only)."""
+        """``True`` when the button's data must be kept in storage (``ttl``/``once``/``only``).
+
+        Example::
+
+            Button("Bonus", data="b", once=True).needs_store   # True
+        """
         return bool(self.ttl or self.once or self.only)
 
     async def build(self, bot: "Nicebot") -> T.InlineKeyboardButton:

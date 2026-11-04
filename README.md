@@ -7,11 +7,6 @@
 Savol-javob, tugmalar, baza va admin panel bitta importda tayyor turadigan Python kutubxonasi.<br>
 Siz faqat botingiz nima qilishini yozasiz.
 
-[![PyPI](https://img.shields.io/pypi/v/nicebot.svg)](https://pypi.org/project/nicebot/)
-[![Python](https://img.shields.io/pypi/pyversions/nicebot.svg)](https://pypi.org/project/nicebot/)
-[![Bot API](https://img.shields.io/badge/Bot%20API-10.3-ffd60a.svg)](https://core.telegram.org/bots/api)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-
 [**Hujjatlar**](https://ozodmeofficial.github.io/nicebot/) · [Tez start](#-tez-start) · [Imkoniyatlar](#-ichida-nimalar-bor) · [Misol](#-tolaroq-misol)
 
 🇺🇿 O'zbekcha · 🇷🇺 [Документация](https://ozodmeofficial.github.io/nicebot/) · 🇬🇧 [Documentation](https://ozodmeofficial.github.io/nicebot/)

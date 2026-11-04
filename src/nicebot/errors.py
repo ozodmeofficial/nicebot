@@ -57,6 +57,29 @@ class NetworkError(NicebotError):
     """Connection problem (retried automatically)."""
 
 
+class FileTooBig(NicebotError):
+    """The file is bigger than the 20 MB download limit of the cloud Bot API.
+
+    Run a local Bot API server (https://github.com/tdlib/telegram-bot-api) and pass
+    ``Nicebot(api_url="http://localhost:8081")`` to download files up to 2 GB.
+
+    Example::
+
+        try:
+            await ctx.media.save()
+        except FileTooBig:
+            await ctx.reply("The file is too big (max 20 MB)")
+    """
+
+    def __init__(self, size: int | None = None):
+        self.size = size
+        mb = f" ({size / 1024 / 1024:.1f} MB)" if size else ""
+        super().__init__(
+            f"File is too big to download{mb}: the cloud Bot API allows up to 20 MB. "
+            "Use a local Bot API server and Nicebot(api_url=...) for bigger files."
+        )
+
+
 def make_error(method: str, description: str, code: int, parameters: dict | None) -> TelegramError:
     cls = {400: BadRequest, 401: Unauthorized, 403: Forbidden, 404: NotFound, 409: Conflict, 429: RetryAfter}.get(code)
     if cls is None:

@@ -1,4 +1,17 @@
-"""``Nicebot`` — the one object you need."""
+"""``Nicebot`` — the one object you need.
+
+Example::
+
+    from nicebot import Context, Nicebot
+
+    bot = Nicebot(token="123456:ABC...", db="sqlite:///bot.db", admins=[123456789])
+
+    @bot.command("start")
+    async def start(ctx: Context):
+        await ctx.reply(f"Hello, {ctx.name}!")
+
+    bot.start()
+"""
 from __future__ import annotations
 
 import asyncio
@@ -9,7 +22,8 @@ import signal
 import sys
 import time
 import traceback
-from typing import Any, Awaitable, Callable, Iterable
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Awaitable, Callable, Iterable, Sequence
 
 import msgspec
 
@@ -18,11 +32,16 @@ from .api import BotAPI
 from .client import Client
 from .config import Config, load_env
 from .context import MESSAGE_EVENTS, Context
-from .errors import BadRequest, Conflict, FlowSignal, Forbidden, SkipHandler, StopHandling, TelegramError, Unauthorized
+from .errors import BadRequest, Conflict, FileTooBig, FlowSignal, Forbidden, SkipHandler, TelegramError, Unauthorized
 from .i18n import I18n
+from .media import DOWNLOAD_LIMIT, Media
 from .router import Handler, Router
 from .storage import Storage, make_storage
 from .utils import TTLCache, escape, maybe_await, parse_duration
+
+if TYPE_CHECKING:
+    from .orm.builtin import User
+    from .testing import TestSession
 
 log = logging.getLogger("nicebot")
 
@@ -34,6 +53,14 @@ Middleware = Callable[[Context, Callable[[], Awaitable[Any]]], Awaitable[Any]]
 
 
 def detect_event(update: T.Update) -> tuple[str | None, Any]:
+    """Return ``(event_name, payload)`` of an update, e.g. ``("message", Message(...))``.
+
+    Example::
+
+        name, payload = detect_event(update)
+        if name == "callback_query":
+            print(payload.data)
+    """
     for name in _UPDATE_FIELDS:
         v = getattr(update, name, None)
         if v is not None:
@@ -42,24 +69,40 @@ def detect_event(update: T.Update) -> tuple[str | None, Any]:
 
 
 class Nicebot(Router, BotAPI):
-    """Create once, decorate handlers, call ``bot.start()``.
+    """Create it once, decorate your handlers, call ``bot.start()``.
 
-    >>> bot = Nicebot(token="123:ABC", db="sqlite:///bot.db", admins=[123456789])
-    >>> @bot.command("start")
-    ... async def start(ctx):
-    ...     await ctx.reply(f"Salom, {ctx.name}!")
-    >>> bot.start()
+    Every Bot API method is available on the bot in snake_case (``await bot.send_message(...)``).
 
     Main options:
-        token            – from @BotFather (or env ``BOT_TOKEN``)
-        db               – ``sqlite:///bot.db`` · ``postgres://…`` · ``mysql://…`` · ``mongodb://…`` (default: in-memory SQLite)
-        storage          – ``"db"`` (default) · ``"memory"`` · ``"redis://…"``
-        admins           – Telegram ids allowed to use admin features
-        lang / locales   – default language and folder with ``uz.json``, ``ru.json``…
-        parse_mode       – ``"HTML"`` (default), ``"MarkdownV2"`` or ``None``
-        required_channels – users must join these channels first
-        support_chat     – forward unmatched private messages here, reply to answer
-        captcha          – ``True`` or ``"2m"``: new group members must press a button
+        token             – from @BotFather (or the ``BOT_TOKEN`` environment variable)
+        db                – ``sqlite:///bot.db`` · ``postgresql://…`` · ``mysql://…`` · ``mongodb://…`` (default: in-memory SQLite)
+        storage           – ``"db"`` (default) · ``"memory"`` · ``"redis://…"`` — where states, buttons and caches live
+        admins            – Telegram ids allowed to use admin commands
+        lang / locales    – default language and folder with ``uz.json``, ``ru.json``, ``en.json``…
+        parse_mode        – ``"HTML"`` (default), ``"MarkdownV2"`` or ``None``
+        required_channels – users must join these channels before using the bot
+        support_chat      – unmatched private messages go to this group; reply there to answer
+        captcha           – ``True`` or ``"2m"``: new group members must press a button
+        public_url        – your HTTPS address for Mini Apps and webhooks (``tunnel=True`` sets it for you)
+        test_server       – use Telegram's test environment (Mini Apps may use plain HTTP there)
+        cors              – origins allowed to call ``@bot.api`` from another site: ``["https://me.github.io"]`` or ``"*"``
+        debug             – lets you open the Mini App in a normal browser at ``http://localhost:<port>`` with a fake user
+
+    Example::
+
+        bot = Nicebot(
+            token="123456:ABC...",
+            db="sqlite:///shop.db",
+            admins=[123456789],
+            lang="en",
+            required_channels=["@my_channel"],
+        )
+
+        @bot.command("start", description="Start the bot")
+        async def start(ctx: Context):
+            await ctx.reply("Welcome!")
+
+        bot.start(reload=True)
     """
 
     def __init__(
@@ -86,6 +129,11 @@ class Nicebot(Router, BotAPI):
         state_ttl: Any = "30d",
         tz: str | None = None,
         api_url: str = "https://api.telegram.org",
+        test_server: bool = False,
+        public_url: str | None = None,
+        cors: Iterable[str] | str | None = None,
+        debug: bool = False,
+        dev_user: dict[str, Any] | None = None,
         flood_wait_max: Any = "2m",
         config: dict[str, Any] | None = None,
         name: str = "nicebot",
@@ -93,9 +141,9 @@ class Nicebot(Router, BotAPI):
         super().__init__(name)
         token = token or os.environ.get("BOT_TOKEN") or os.environ.get("TOKEN")
         if not token:
-            raise ValueError("Token kerak: Nicebot(token='...') yoki BOT_TOKEN muhit o'zgaruvchisi")
+            raise ValueError("A bot token is required: Nicebot(token='...') or the BOT_TOKEN environment variable. Get one from @BotFather.")
         self.token = token
-        self.client = Client(token, api_url=api_url, flood_wait_max=parse_duration(flood_wait_max) or 120)
+        self.client = Client(token, api_url=api_url, test_server=test_server, flood_wait_max=parse_duration(flood_wait_max) or 120)
         self.admins: set[int] = {admins} if isinstance(admins, int) else {int(a) for a in admins}
         self.parse_mode = parse_mode
         self.i18n = I18n(locales, default=lang)
@@ -111,6 +159,16 @@ class Nicebot(Router, BotAPI):
         self.state_ttl = parse_duration(state_ttl)
         self.tz = tz
         self.config = Config(config or {})
+        #: Telegram test environment (``Nicebot(test_server=True)``).
+        self.test_server = test_server
+        #: Public HTTPS address of the built-in web server (Mini Apps, webhooks). ``tunnel=True`` fills it in.
+        self.public_url: str | None = (public_url or os.environ.get("PUBLIC_URL") or "").rstrip("/") or None
+        #: Origins allowed to call ``@bot.api`` routes from the browser.
+        self.cors: list[str] = [cors] if isinstance(cors, str) else list(cors or [])
+        #: Browser testing mode for Mini Apps (see ``dev_user``).
+        self.debug = debug
+        #: The fake Telegram user used by the browser testing mode.
+        self.dev_user: dict[str, Any] = dev_user or {"id": next(iter(self.admins), 1), "first_name": "Dev", "username": "dev_user", "language_code": lang}
 
         from .orm import Database
 
@@ -119,7 +177,7 @@ class Nicebot(Router, BotAPI):
             self.db: Any = db
         else:
             if db is None:
-                log.info("db berilmadi: xotiradagi SQLite ishlatiladi (restartda ma'lumot o'chadi). Saqlash uchun db='sqlite:///bot.db'.")
+                log.info("No db= given: using in-memory SQLite (data is lost on restart). Use db='sqlite:///bot.db' to keep it.")
             self.db = Database(db or "sqlite:///:memory:")
         self.storage: Storage = make_storage(storage)
         self.client.file_cache = self.storage
@@ -139,6 +197,7 @@ class Nicebot(Router, BotAPI):
         self._jobs: list[Any] = []
         self._api_routes: list[tuple[str, str, Callable[..., Any]]] = []
         self._static: list[tuple[str, str]] = []
+        self._menu_app: tuple[str, str] | None = None
         self._albums: dict[str, list[T.Message]] = {}
         self._album_timers: dict[str, asyncio.TimerHandle] = {}
         self._stats: dict[tuple[str, str], int] = {}
@@ -149,12 +208,26 @@ class Nicebot(Router, BotAPI):
         self._ready = False
         self._index: dict[str, list[Handler]] = {}
         self._errors: list[tuple[type[BaseException], Callable[..., Any]]] = []
+        self._drop_pending = False
         self.started_at: float | None = None
 
     # ===================================================================== construction helpers
     @classmethod
     def from_env(cls, path: str = ".env", **overrides: Any) -> "Nicebot":
-        """Read ``.env``: BOT_TOKEN, DATABASE_URL, ADMINS, REDIS_URL, LANG, SUPPORT_CHAT, REQUIRED_CHANNELS, TZ."""
+        """Create the bot from a ``.env`` file / environment variables.
+
+        Reads ``BOT_TOKEN``, ``DATABASE_URL``, ``ADMINS`` (comma separated), ``REDIS_URL``, ``BOT_LANG``,
+        ``SUPPORT_CHAT``, ``REQUIRED_CHANNELS``, ``TZ`` and ``PUBLIC_URL``. Every other variable is in ``bot.config``.
+
+        Example::
+
+            # .env
+            # BOT_TOKEN=123456:ABC...
+            # ADMINS=111,222
+            # SHOP_NAME=Tezbaraka
+            bot = Nicebot.from_env()
+            print(bot.config.SHOP_NAME)
+        """
         env = load_env(path)
         g = os.environ.get
         kw: dict[str, Any] = {"token": g("BOT_TOKEN")}
@@ -177,34 +250,90 @@ class Nicebot(Router, BotAPI):
         return cls(**kw)
 
     def provide(self, key: Any, value: Any) -> None:
-        """Inject a value (or ``factory(ctx)``) into handlers that type-hint ``key``."""
+        """Make a value available to handlers that ask for it by type hint (dependency injection).
+
+        ``value`` may be an object or a ``factory(ctx)`` (sync or async) called for every update.
+
+        Example::
+
+            bot.provide(Settings, Settings(price=50_000))
+
+            @bot.command("price")
+            async def price(ctx: Context, settings: Settings):
+                await ctx.reply(f"{settings.price} so'm")
+        """
         self._providers[key] = value
 
     def middleware(self, func: Middleware) -> Middleware:
-        """``@bot.middleware async def mw(ctx, next): ...; await next()``"""
+        """Register code that runs around every update. Call ``await next()`` to continue.
+
+        Example::
+
+            @bot.middleware
+            async def timing(ctx: Context, next):
+                start = time.monotonic()
+                await next()
+                log.info("%s took %.3fs", ctx, time.monotonic() - start)
+        """
         self.middlewares.append(func)
         return func
 
     def on_startup(self, func: Callable[..., Any]) -> Callable[..., Any]:
+        """Run a function once the bot is connected (``func()`` or ``func(bot)``).
+
+        Example::
+
+            @bot.on_startup
+            async def ready(bot: Nicebot):
+                await bot.notify_admins("✅ Bot started")
+        """
         self._startup.append(func)
         return func
 
     def on_shutdown(self, func: Callable[..., Any]) -> Callable[..., Any]:
+        """Run a function when the bot stops (Ctrl+C, SIGTERM).
+
+        Example::
+
+            @bot.on_shutdown
+            async def bye(bot: Nicebot):
+                await bot.notify_admins("👋 Bot stopped")
+        """
         self._shutdown.append(func)
         return func
 
     def on_new_user(self, func: Callable[..., Any]) -> Callable[..., Any]:
-        """Called once when a user writes to the bot for the first time: ``async def h(ctx, user)``."""
+        """Called once when somebody writes to the bot for the first time: ``async def h(ctx, user)``.
+
+        Example::
+
+            @bot.on_new_user
+            async def welcome(ctx: Context, user: User):
+                await ctx.notify_admins(f"🆕 New user: {user.mention}")
+        """
         self._new_user_hooks.append(func)
         return func
 
     def on_referral(self, func: Callable[..., Any]) -> Callable[..., Any]:
-        """A new user came via someone's link: ``async def h(ctx, referrer)``."""
+        """Called when a new user came through somebody's referral link: ``async def h(ctx, referrer)``.
+
+        Example::
+
+            @bot.on_referral
+            async def bonus(ctx: Context, referrer: User):
+                await referrer.update(data={**referrer.data, "bonus": referrer.data.get("bonus", 0) + 1})
+        """
         self._referral_hooks.append(func)
         return func
 
     # ===================================================================== API plumbing
     async def request(self, method: str, params: dict[str, Any], returns: Any = "Any") -> Any:
+        """Call any Bot API method by its Telegram name (``None`` values are dropped).
+
+        Example::
+
+            me = await bot.request("getMe", {})
+        """
         return await self.client.request(method, {k: v for k, v in params.items() if v is not None}, returns)
 
     async def _call_with_parse_fallback(self, method: str, **params: Any) -> Any:
@@ -213,12 +342,18 @@ class Nicebot(Router, BotAPI):
             return await fn(**params)
         except BadRequest as e:
             if "can't parse entities" in e.description.lower() and params.get("parse_mode"):
-                log.warning("HTML/Markdown xato (%s) — matn formatlashsiz yuborildi. Foydalanuvchi matni uchun html() ishlating.", e.description)
+                log.warning("Bad HTML/Markdown (%s) — the message was sent without formatting. Use html() for user-provided text.", e.description)
                 params["parse_mode"] = None
                 return await fn(**params)
             raise
 
     async def safe_delete(self, chat_id: int | str, message_id: int) -> bool:
+        """Delete a message and return ``False`` instead of raising when it is impossible.
+
+        Example::
+
+            await bot.safe_delete(chat_id, msg.message_id)
+        """
         try:
             return bool(await self.delete_message(chat_id, message_id))
         except TelegramError:
@@ -230,7 +365,13 @@ class Nicebot(Router, BotAPI):
         return task
 
     def later(self, delay: Any, coro: Awaitable[Any]) -> asyncio.Task:
-        """Run ``coro`` after ``delay`` (``"30s"``, ``"5m"``…)."""
+        """Run a coroutine after ``delay`` (``"30s"``, ``"5m"``, seconds) without blocking the handler.
+
+        Example::
+
+            msg = await ctx.reply("This offer ends in 1 minute")
+            bot.later("1m", bot.safe_delete(msg.chat.id, msg.message_id))
+        """
         seconds = parse_duration(delay) or 0
 
         async def runner() -> None:
@@ -243,14 +384,19 @@ class Nicebot(Router, BotAPI):
             try:
                 await coro
             except Exception:  # noqa: BLE001
-                log.exception("later() vazifasida xato")
+                log.exception("Error in a later() task")
 
         task = asyncio.create_task(runner())
         task._nb_later = True  # type: ignore[attr-defined]
         return self._track(task)
 
     def background(self, func: Callable[..., Awaitable[Any]], *args: Any, retries: int = 3, delay: Any = "2s", **kwargs: Any) -> asyncio.Task:
-        """Fire-and-forget with retries + exponential backoff. Awaited on graceful shutdown."""
+        """Fire-and-forget with retries and exponential backoff; awaited on graceful shutdown.
+
+        Example::
+
+            bot.background(send_invoice_email, order.id, retries=5)
+        """
         base = parse_duration(delay) or 1
 
         async def runner() -> Any:
@@ -259,7 +405,7 @@ class Nicebot(Router, BotAPI):
                     return await maybe_await(func(*args, **kwargs))
                 except Exception:  # noqa: BLE001
                     if attempt >= retries:
-                        log.exception("Fon vazifasi %s %d urinishdan keyin ham bajarilmadi", getattr(func, "__name__", func), retries + 1)
+                        log.exception("Background task %s failed after %d attempts", getattr(func, "__name__", func), retries + 1)
                         return None
                     await asyncio.sleep(base * (2 ** attempt))
             return None
@@ -267,6 +413,12 @@ class Nicebot(Router, BotAPI):
         return self._track(asyncio.create_task(runner()))
 
     async def notify_admins(self, text: Any, **kw: Any) -> None:
+        """Send a message to every admin (errors such as "blocked" are ignored).
+
+        Example::
+
+            await bot.notify_admins("📈 1000 users today!")
+        """
         for admin in self.admins:
             try:
                 await self._call_with_parse_fallback("send_message", chat_id=admin, text=str(text), parse_mode=self.parse_mode, **kw)
@@ -274,48 +426,200 @@ class Nicebot(Router, BotAPI):
                 pass
 
     def ref_link(self, user_id: int) -> str:
-        """``https://t.me/<bot>?start=ref_<id>`` — new users who open it get ``referrer_id``."""
+        """Referral link of a user: ``https://t.me/<bot>?start=ref_<id>``. New users who open it get ``referrer_id``.
+
+        Example::
+
+            await ctx.reply(f"Your link: {bot.ref_link(ctx.user_id)}")
+        """
         return f"https://t.me/{self.username or 'bot'}?start=ref_{int(user_id)}"
 
-    def deep_link(self, payload: str, group: bool = False) -> str:
+    def start_link(self, payload: str, group: bool = False) -> str:
+        """A ``t.me`` link that opens the bot with ``/start <payload>`` (``group=True`` adds the bot to a group).
+
+        Example::
+
+            bot.start_link("promo_2026")      # https://t.me/your_bot?start=promo_2026
+        """
         return f"https://t.me/{self.username or 'bot'}?{'startgroup' if group else 'start'}={payload}"
 
+    def deep_link(self, payload: Any, **opts: Any) -> Any:
+        """Decorator: handle ``/start <payload>`` links (``payload`` is a regex, named groups become parameters).
+
+        For backwards compatibility the returned value is also the link itself (a ``str``), but prefer
+        ``bot.start_link(payload)`` to build links.
+
+        Example::
+
+            @bot.deep_link(r"promo_(?P<code>\\w+)")
+            async def promo(ctx: Context, code: str):
+                await ctx.reply(f"Promo code: {code}")
+        """
+        deco = Router.deep_link(self, payload, **opts)
+        if isinstance(payload, str):
+            return _LinkDecorator(self.start_link(payload), deco)
+        return deco
+
+    def app_link(self, short_name: str | None = None, startapp: str | None = None) -> str:
+        """A direct link that opens your Mini App: ``https://t.me/<bot>/<short_name>?startapp=<param>``.
+
+        Without ``short_name`` it opens the bot's main Mini App (set up in @BotFather → Bot Settings → Configure Mini App).
+
+        Example::
+
+            bot.app_link("shop", startapp="promo")   # https://t.me/your_bot/shop?startapp=promo
+            bot.app_link()                           # https://t.me/your_bot?startapp
+        """
+        base = f"https://t.me/{self.username or 'bot'}"
+        if short_name:
+            return f"{base}/{short_name}" + (f"?startapp={startapp}" if startapp else "")
+        return f"{base}?startapp" + (f"={startapp}" if startapp else "")
+
     async def get_setting(self, user_id: int, key: str, default: Any = False) -> Any:
+        """Read a per-user setting (``Toggle`` values, ``ctx.set_setting``).
+
+        Example::
+
+            notify = await bot.get_setting(user.id, "notify", default=True)
+        """
         return await self.storage.get(f"set:{user_id}:{key}", default)
 
     async def set_setting(self, user_id: int, key: str, value: Any) -> None:
+        """Save a per-user setting.
+
+        Example::
+
+            await bot.set_setting(user.id, "notify", False)
+        """
         await self.storage.set(f"set:{user_id}:{key}", value)
 
     @property
-    def User(self) -> Any:
-        """The ORM model used for ``ctx.user`` (``nicebot.User`` or your subclass)."""
+    def User(self) -> "type[User]":
+        """The ORM model behind ``ctx.user`` (``nicebot.User`` or the subclass you passed as ``user_model``).
+
+        Example::
+
+            active = await bot.User.filter(is_blocked=False).count()
+        """
         if self.user_model is not None:
-            return self.user_model
+            return self.user_model  # type: ignore[return-value]
         from .orm.model import registry
 
-        return registry()["nb_users"]
+        return registry()["nb_users"]  # type: ignore[return-value]
+
+    # ===================================================================== files
+    async def download_file(self, file: Any) -> bytes:
+        """Download a Telegram file into memory.
+
+        ``file`` may be a ``file_id``, a ``Media``, a Telegram media object (``PhotoSize``, ``Document``…),
+        a list of photo sizes or a ``Message``. Raises ``FileTooBig`` above 20 MB on the cloud Bot API.
+
+        Example::
+
+            data = await bot.download_file(message.document)
+        """
+        file_id, size = self._file_ref(file)
+        path = await self._file_path(file_id, size)
+        return await self.client.download(path)
+
+    async def save_file(self, file: Any, path: str | os.PathLike[str] | None = None, *, folder: str | os.PathLike[str] = "downloads") -> str:
+        """Download a Telegram file straight to disk (streamed) and return the path.
+
+        Example::
+
+            await bot.save_file(user_photo_id, "avatars/42.jpg")
+        """
+        media = file if isinstance(file, Media) else Media.of(file, self) if isinstance(file, T.Message) else None
+        file_id, size = self._file_ref(file)
+        name = media.filename if media else None
+        tg_path = await self._file_path(file_id, size)
+        if name is None:
+            name = Path(tg_path).name or file_id
+        dest = Path(folder) / name if path is None else Path(path)
+        if path is not None and (str(path).endswith(("/", "\\")) or dest.is_dir()):
+            dest = dest / name
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        await self.client.download_to(tg_path, dest)
+        return str(dest)
+
+    def _file_ref(self, file: Any) -> tuple[str, int | None]:
+        if isinstance(file, str):
+            return file, None
+        if isinstance(file, Media):
+            return file.file_id, file.size
+        if isinstance(file, T.Message):
+            m = Media.of(file, self)
+            if m is None:
+                raise ValueError("This message has no file")
+            return m.file_id, m.size
+        if isinstance(file, (list, tuple)) and file:
+            file = max(file, key=lambda p: (getattr(p, "width", 0) or 0) * (getattr(p, "height", 0) or 0))
+        file_id = getattr(file, "file_id", None)
+        if not file_id:
+            raise TypeError(f"Cannot download {type(file).__name__}: pass a file_id, Media, Message or a Telegram media object")
+        return file_id, getattr(file, "file_size", None)
+
+    async def _file_path(self, file_id: str, size: int | None) -> str:
+        if size is not None and size > DOWNLOAD_LIMIT and self.client.is_cloud:
+            raise FileTooBig(size)
+        try:
+            info = await self.get_file(file_id)
+        except BadRequest as e:
+            if "too big" in e.description.lower():
+                raise FileTooBig(size) from e
+            raise
+        if not info.file_path:
+            raise FileTooBig(size)
+        return info.file_path
 
     # ===================================================================== maintenance & broadcast
     async def maintenance(self, on: bool = True, text: str | None = None) -> None:
-        """Only admins can use the bot while maintenance is on."""
+        """Turn maintenance mode on/off: only admins can use the bot while it is on (survives restarts).
+
+        Example::
+
+            await bot.maintenance(True, "🛠 Back in 10 minutes")
+        """
         self._maintenance = (text or "") if on else None
         await self.storage.set("nb:maintenance", self._maintenance)
 
     async def broadcast(self, content: Any, *, users: Iterable[int] | None = None, buttons: Any = None, copy_from: tuple[int, int] | None = None,
                         rate: float = 25, id: str | None = None, on_progress: Callable[..., Any] | None = None, **kw: Any) -> dict[str, int]:
-        """Send to many users with the rate limit respected; resumable with ``id=``. See ``nicebot.broadcast``."""
+        """Send a message to many users, respecting Telegram limits; resumable with ``id=``.
+
+        Returns ``{"sent": …, "failed": …, "blocked": …, "total": …}``.
+
+        Example::
+
+            result = await bot.broadcast("🎉 New collection!", buttons=[Button("🛍 Open", url=SHOP)], id="june-sale")
+            await ctx.reply(f"Sent to {result['sent']} users")
+        """
         from .broadcast import broadcast
 
         return await broadcast(self, content, users=users, buttons=buttons, copy_from=copy_from, rate=rate, id=id, on_progress=on_progress, **kw)
 
     async def stats(self) -> dict[str, Any]:
+        """Usage statistics: users, DAU/WAU/MAU, retention and top commands.
+
+        Example::
+
+            s = await bot.stats()
+            await ctx.reply(f"Users: {s['users']}, today: {s['dau']}")
+        """
         from .features import compute_stats
 
         return await compute_stats(self)
 
-    # ===================================================================== scheduler & mini app
+    # ===================================================================== scheduler
     def every(self, interval: Any, *, first: Any = None) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
-        """``@bot.every("1h")`` — run periodically while the bot is up."""
+        """Decorator: run a function periodically while the bot is running.
+
+        Example::
+
+            @bot.every("1h")
+            async def sync_prices(bot: Nicebot):
+                await Product.refresh_prices()
+        """
         from .scheduler import Job
 
         def deco(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -325,7 +629,14 @@ class Nicebot(Router, BotAPI):
         return deco
 
     def at(self, time_of_day: str, *, days: Iterable[int | str] | None = None, tz: str | None = None) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
-        """``@bot.at("09:00")`` daily; ``days=["mon","fri"]``; ``tz="Asia/Tashkent"``."""
+        """Decorator: run a function every day at ``"HH:MM"`` (optionally only on some ``days``).
+
+        Example::
+
+            @bot.at("09:00", days=["mon", "fri"], tz="Asia/Tashkent")
+            async def report(bot: Nicebot):
+                await bot.notify_admins(str(await bot.stats()))
+        """
         from .scheduler import Job
 
         def deco(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -334,12 +645,24 @@ class Nicebot(Router, BotAPI):
 
         return deco
 
+    # ===================================================================== mini apps
     def api(self, path: str, methods: Iterable[str] = ("POST",), *, auth: bool = True) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
-        """Mini App backend endpoint; Telegram ``initData`` is verified for you (``auth=True``).
+        """Decorator: a backend endpoint for your Mini App. Telegram ``initData`` is verified for you (``auth=True``).
 
-        >>> @bot.api("/score")
-        ... async def score(req):
-        ...     return {"user": req.user["id"], "body": req.json}
+        The handler gets a ``WebAppRequest`` and returns a dict (JSON), a string or an aiohttp response.
+        Raise ``PermissionError`` → 403, ``ValueError``/``KeyError`` → 400.
+
+        Example::
+
+            @bot.api("/api/score")
+            async def score(req: WebAppRequest):
+                user = await req.db_user()
+                await user.update(data={**user.data, "score": int(req.json["score"])})
+                return {"ok": True}
+
+            @bot.api("/api/products", methods=["GET"], auth=False)
+            async def products(req: WebAppRequest):
+                return [p.to_dict() for p in await Product.all()]
         """
 
         def deco(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -350,9 +673,65 @@ class Nicebot(Router, BotAPI):
 
         return deco
 
-    def webapp(self, folder: str, path: str = "/") -> None:
-        """Serve a Mini App's static files (``index.html``…) from ``folder`` at ``path``."""
-        self._static.append((path, folder))
+    def webapp(self, folder: str | os.PathLike[str], path: str = "/") -> None:
+        """Serve your Mini App's static files (``index.html``, JS, CSS, images) from ``folder`` at ``path``.
+
+        Unknown routes fall back to ``index.html`` so single-page apps (React, Vue…) work.
+
+        Example::
+
+            bot.webapp("webapp")            # webapp/index.html → https://<public_url>/
+            bot.webapp("admin", "/admin")   # admin/index.html → https://<public_url>/admin
+        """
+        self._static.append((path, str(folder)))
+
+    def menu_app(self, text: str, path: str = "/") -> None:
+        """Show a Mini App button next to the message field (the "menu button") for every user.
+
+        Applied when the bot starts, once the public HTTPS address is known.
+
+        Example::
+
+            bot.webapp("webapp")
+            bot.menu_app("🛍 Shop")      # opens https://<public_url>/
+            bot.start(tunnel=True)
+        """
+        self._menu_app = (text, path)
+
+    def webapp_url(self, path: str = "/") -> str:
+        """Turn a path like ``"/shop"`` into the full public URL of your Mini App.
+
+        Telegram opens Mini Apps only over HTTPS (plain HTTP is allowed on the test server).
+
+        Example::
+
+            bot.webapp_url("/shop?item=5")   # "https://red-cat.trycloudflare.com/shop?item=5"
+        """
+        if path.startswith(("https://", "http://")):
+            url = path
+        else:
+            if not self.public_url:
+                raise ValueError(
+                    f"The Mini App path {path!r} needs a public HTTPS address. Run bot.start(tunnel=True) while developing, "
+                    "or set Nicebot(public_url='https://your-domain') / the PUBLIC_URL variable."
+                )
+            url = self.public_url + "/" + path.lstrip("/")
+        if url.startswith("http://") and not self.test_server:
+            raise ValueError(
+                f"Telegram opens Mini Apps only over HTTPS, got {url!r}. Use bot.start(tunnel=True), deploy behind HTTPS, "
+                "or use Telegram's test server (Nicebot(test_server=True)) where HTTP is allowed."
+            )
+        return url
+
+    async def set_menu_app(self, text: str, url: str = "/", *, chat_id: int | None = None) -> bool:
+        """Set the menu button to open a Mini App now (for everyone, or for one ``chat_id``).
+
+        Example::
+
+            await bot.set_menu_app("🎮 Play", "/game", chat_id=ctx.chat_id)
+        """
+        button = T.MenuButtonWebApp(text=text, web_app=T.WebAppInfo(url=self.webapp_url(url)))
+        return await self.set_chat_menu_button(chat_id=chat_id, menu_button=button)
 
     # ===================================================================== dispatch
     def _build_index(self) -> None:
@@ -366,32 +745,49 @@ class Nicebot(Router, BotAPI):
 
     @property
     def allowed_updates(self) -> list[str]:
+        """Update types requested from Telegram (computed from your handlers).
+
+        Example::
+
+            print(bot.allowed_updates)   # ['callback_query', 'message', 'my_chat_member']
+        """
+        if not self._index:
+            self._build_index()
         events = set(self._index) - {"album", "fallback"}
         events |= {"message", "callback_query", "my_chat_member"}
         if self.captcha:
             events.add("chat_member")
-        if "edited_message" in events:
-            events.add("edited_message")
         return sorted(e for e in events if e in _UPDATE_FIELDS)
 
     async def feed(self, update: T.Update | dict[str, Any] | bytes) -> None:
-        """Process one update (webhook servers, tests, custom transports)."""
+        """Process one update (from a webhook, a test or a custom transport).
+
+        Example::
+
+            await bot.feed({"update_id": 1, "message": {...}})
+        """
         if isinstance(update, (bytes, bytearray, str)):
             raw = update.encode() if isinstance(update, str) else bytes(update)
             try:
                 update = _UPDATE_DECODER.decode(raw)
             except msgspec.ValidationError as e:
-                log.warning("Update'ni o'qib bo'lmadi (%s) — o'tkazib yuborildi", e)
+                log.warning("Could not decode an update (%s) — skipped", e)
                 return
         elif isinstance(update, dict):
             try:
                 update = msgspec.convert(update, T.Update)
             except msgspec.ValidationError as e:
-                log.warning("Update'ni o'qib bo'lmadi (%s) — o'tkazib yuborildi", e)
+                log.warning("Could not decode an update (%s) — skipped", e)
                 return
         await self.process_update(update)
 
     async def process_update(self, update: T.Update) -> None:
+        """Route a decoded ``Update`` to the matching handler (used by polling and webhooks).
+
+        Example::
+
+            await bot.process_update(T.Update(update_id=1, message=msg))
+        """
         if not self._index:
             self._build_index()
         event_name, event = detect_event(update)
@@ -436,7 +832,7 @@ class Nicebot(Router, BotAPI):
         if not self._waiters:
             return False
         if ctx.event_name == "message":
-            w = self._waiters.get((ctx.chat_id, ctx.user_id))
+            w = self._waiters.get((ctx._chat_id_or_none(), ctx.user_id))
             if w and not w[0].done():
                 w[0].set_result(ctx)
                 return True
@@ -454,7 +850,7 @@ class Nicebot(Router, BotAPI):
         return False
 
     def _buffer_album(self, msg: T.Message) -> None:
-        gid = msg.media_group_id
+        gid = msg.media_group_id or ""
         self._albums.setdefault(gid, []).append(msg)
         timer = self._album_timers.pop(gid, None)
         if timer:
@@ -525,6 +921,12 @@ class Nicebot(Router, BotAPI):
         self._stats[key] = self._stats.get(key, 0) + n
 
     async def flush_stats(self) -> None:
+        """Write the in-memory usage counters to the database (done every 30 s and on shutdown).
+
+        Example::
+
+            await bot.flush_stats()
+        """
         if not self._stats or not self.db.connected:
             return
         from .orm.builtin import Stat
@@ -539,7 +941,7 @@ class Nicebot(Router, BotAPI):
                     except Exception:  # noqa: BLE001 - created concurrently
                         await Stat.filter(day=day, name=name).update(count=F("count") + n)
             except Exception:  # noqa: BLE001
-                log.debug("Statistikani yozib bo'lmadi", exc_info=True)
+                log.debug("Could not save statistics", exc_info=True)
 
     async def _handle_error(self, ctx: Context, exc: BaseException) -> None:
         for exc_type, func in self._errors:
@@ -551,15 +953,15 @@ class Nicebot(Router, BotAPI):
                 try:
                     result = await call_handler(func, ctx)
                 except Exception:  # noqa: BLE001
-                    log.exception("Error handler'ning o'zida xato")
+                    log.exception("The error handler itself failed")
                     break
                 if result is not False:
                     return
         if isinstance(exc, Forbidden) and ctx.is_private and ctx.user is not None:
             await ctx.user.update(is_blocked=True)
             return
-        log.error("Handler xatosi (%s): %s", ctx, exc, exc_info=exc)
-        if self.error_message and ctx.chat_id and ctx.event_name in ("message", "callback_query"):
+        log.error("Handler error (%s): %s", ctx, exc, exc_info=exc)
+        if self.error_message and ctx._chat_id_or_none() and ctx.event_name in ("message", "callback_query"):
             text = self.error_message if isinstance(self.error_message, str) else ctx.t("nb.error")
             try:
                 if ctx.is_callback:
@@ -576,14 +978,20 @@ class Nicebot(Router, BotAPI):
             tb = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))[-3000:]
             who = f"{ctx.user_id} ({escape(ctx.name)})" if ctx.user_id else "-"
             text = (
-                f"🚨 <b>Xatolik</b>\n<b>Update:</b> {ctx.event_name}\n<b>Foydalanuvchi:</b> {who}\n"
-                f"<b>Matn:</b> {escape((ctx.text or ctx.data or '')[:200])}\n\n<pre>{escape(tb)}</pre>"
+                f"🚨 <b>{escape(ctx.t('nb.admin.error_title'))}</b>\n<b>Update:</b> {ctx.event_name}\n<b>{escape(ctx.t('nb.admin.user'))}:</b> {who}\n"
+                f"<b>{escape(ctx.t('nb.admin.text'))}:</b> {escape((ctx.text or ctx.data or '')[:200])}\n\n<pre>{escape(tb)}</pre>"
             )
             await self.notify_admins(text)
 
     # ===================================================================== lifecycle
     async def setup(self) -> None:
-        """Connect the database, read bot info, register commands. Called by ``start``/``run`` and tests."""
+        """Connect the database, read the bot's info and register commands. Called by ``start``/``run`` and tests.
+
+        Example::
+
+            await bot.setup()
+            print(bot.username)
+        """
         if self._ready:
             return
         from .features import register_commands
@@ -602,12 +1010,21 @@ class Nicebot(Router, BotAPI):
         self._ready = True
         self.started_at = time.time()
 
-    async def close(self) -> None:
+    async def shutdown(self) -> None:
+        """Stop gracefully: run ``on_shutdown`` hooks, wait for tasks, close the database and HTTP sessions.
+
+        Example::
+
+            try:
+                await bot.run()
+            finally:
+                await bot.shutdown()     # run() already does this for you
+        """
         for f in self._shutdown:
             try:
                 await maybe_await(f(self) if _takes_arg(f) else f())
             except Exception:  # noqa: BLE001
-                log.exception("on_shutdown xatosi")
+                log.exception("on_shutdown hook failed")
         for t in list(self._tasks):
             if getattr(t, "_nb_later", False):
                 t.cancel()
@@ -619,10 +1036,44 @@ class Nicebot(Router, BotAPI):
         await self.client.close()
         self._ready = False
 
-    async def run(self, *, webhook: str | None = None, port: int | None = None, host: str = "0.0.0.0", drop_pending: bool = False,
-                  handle_signals: bool = True, stop: asyncio.Event | None = None) -> None:
-        """Async entry point. Polling by default; ``webhook="https://domain/path"`` to use webhooks."""
+    async def close(self) -> None:  # type: ignore[override]
+        """Same as ``shutdown()`` (kept for compatibility).
+
+        Telegram's own ``close`` method (moving a bot between local Bot API servers) is ``bot.close_bot_instance()``.
+
+        Example::
+
+            await bot.close()
+        """
+        await self.shutdown()
+
+    async def close_bot_instance(self) -> bool:
+        """Telegram's ``close`` method: close the bot instance before moving it to another local Bot API server.
+
+        Example::
+
+            await bot.close_bot_instance()
+        """
+        return await BotAPI.close(self)
+
+    async def run(self, *, webhook: str | bool | None = None, port: int | None = None, host: str = "0.0.0.0", drop_pending: bool = False,
+                  handle_signals: bool = True, stop: asyncio.Event | None = None, tunnel: "bool | str | Sequence[str]" = False) -> None:
+        """Async entry point (``bot.start()`` calls it). Polling by default.
+
+        * ``webhook="https://domain/path"`` — receive updates by webhook (``True`` uses ``public_url``/the tunnel)
+        * ``port`` — web server port for Mini Apps/webhooks (default ``$PORT`` or 8080)
+        * ``tunnel=True`` — free public HTTPS address for development
+        * ``drop_pending=True`` — skip updates that arrived while the bot was off
+
+        Example::
+
+            async def main():
+                await bot.run(tunnel=True)
+
+            asyncio.run(main())
+        """
         self._stop = stop or asyncio.Event()
+        self._drop_pending = drop_pending
         if handle_signals:
             loop = asyncio.get_running_loop()
             for sig in (signal.SIGINT, signal.SIGTERM):
@@ -637,23 +1088,45 @@ class Nicebot(Router, BotAPI):
         jobs = self._track(asyncio.create_task(run_jobs(self, self._jobs)))
         flusher = self._track(asyncio.create_task(self._flush_loop()))
         server = None
+        tun = None
+        port = port or int(os.environ.get("PORT", 8080))
         try:
-            if webhook or self._api_routes or self._static:
-                server = await run_server(self, webhook=webhook, host=host, port=port or int(os.environ.get("PORT", 8080)))
+            needs_server = bool(webhook or self._api_routes or self._static or tunnel or self.debug)
+            if tunnel:
+                from .tunnel import Tunnel
+
+                tun = await Tunnel.open(port, tunnel)
+                self.public_url = tun.url
+            if webhook is True:
+                if not self.public_url:
+                    raise ValueError("webhook=True needs a public HTTPS address: pass tunnel=True or Nicebot(public_url=...)")
+                webhook = self.public_url + "/nicebot/webhook"
+            if needs_server:
+                server = await run_server(self, webhook=webhook or None, host=host, port=port)
+                if self._static:
+                    log.info("📱 Mini App: %s  (browser: http://localhost:%d%s)", self.public_url or "set public_url or use tunnel=True",
+                             port, "" if self.debug else " — add debug=True to test without Telegram")
+            if self._menu_app and self.public_url:
+                try:
+                    await self.set_menu_app(*self._menu_app)
+                except (ValueError, TelegramError) as e:
+                    log.warning("Could not set the Mini App menu button: %s", e)
             if webhook:
-                log.info("✅ @%s webhook rejimida ishga tushdi: %s", self.username, webhook)
+                log.info("✅ @%s is running (webhook): %s", self.username, webhook)
                 await self._stop.wait()
             else:
                 await self.delete_webhook(drop_pending_updates=drop_pending)
-                log.info("✅ @%s ishga tushdi (polling). To'xtatish: Ctrl+C", self.username)
+                log.info("✅ @%s is running (polling). Stop with Ctrl+C", self.username)
                 await self._polling()
         finally:
             jobs.cancel()
             flusher.cancel()
             if server is not None:
                 await server.cleanup()
-            await self.close()
-            log.info("👋 @%s to'xtatildi", self.username)
+            if tun is not None:
+                await tun.close()
+            await self.shutdown()
+            log.info("👋 @%s stopped", self.username)
 
     async def _flush_loop(self) -> None:
         while True:
@@ -677,14 +1150,14 @@ class Nicebot(Router, BotAPI):
                     raws = fetch.result()
                     backoff = 1.0
                 except Unauthorized:
-                    log.critical("Token noto'g'ri yoki bekor qilingan (401). @BotFather'dan yangisini oling.")
+                    log.critical("The token is wrong or revoked (401). Get a new one from @BotFather.")
                     raise
                 except Conflict:
-                    log.error("Boshqa joyda shu token bilan bot ishlayapti (409). 5 soniyadan keyin qayta urinaman...")
+                    log.error("Another process is running with this token (409). Retrying in 5 seconds...")
                     await asyncio.sleep(5)
                     continue
                 except Exception as e:  # noqa: BLE001
-                    log.warning("getUpdates xatosi: %s — %.0fs kutib qayta urinaman", e, backoff)
+                    log.warning("getUpdates failed: %s — retrying in %.0fs", e, backoff)
                     await asyncio.sleep(backoff)
                     backoff = min(backoff * 2, 30)
                     continue
@@ -694,7 +1167,7 @@ class Nicebot(Router, BotAPI):
                     except msgspec.ValidationError as e:
                         loose = _LOOSE.decode(raw)
                         offset = int(loose.get("update_id", offset or 0)) + 1
-                        log.warning("Noma'lum update turi o'tkazib yuborildi (%s)", e)
+                        log.warning("Skipped an unknown update type (%s)", e)
                         continue
                     offset = upd.update_id + 1
                     self._track(asyncio.create_task(self.process_update(upd)))
@@ -702,7 +1175,7 @@ class Nicebot(Router, BotAPI):
             stop_task.cancel()
             pending = [t for t in self._tasks if not t.done() and t.get_coro().__name__ == "process_update"]  # type: ignore[union-attr]
             if pending:
-                log.info("Ishlayotgan %d ta handler tugashini kutyapman...", len(pending))
+                log.info("Waiting for %d running handlers to finish...", len(pending))
                 await asyncio.wait(pending, timeout=15)
             if offset is not None:
                 try:  # confirm processed updates so they are not delivered again
@@ -711,12 +1184,33 @@ class Nicebot(Router, BotAPI):
                     pass
 
     def stop(self) -> None:
+        """Ask a running bot to stop (same as Ctrl+C).
+
+        Example::
+
+            @bot.command("shutdown", admin=True)
+            async def shutdown(ctx: Context):
+                ctx.bot.stop()
+        """
         if self._stop is not None:
             self._stop.set()
 
-    def start(self, *, reload: bool = False, webhook: str | None = None, port: int | None = None, host: str = "0.0.0.0", drop_pending: bool = False,
-              log_level: str | int = "INFO") -> None:
-        """Blocking entry point. ``reload=True`` restarts the bot when your code changes."""
+    def start(self, *, reload: bool = False, webhook: str | bool | None = None, port: int | None = None, host: str = "0.0.0.0", drop_pending: bool = False,
+              tunnel: "bool | str | Sequence[str]" = False, log_level: str | int = "INFO") -> None:
+        """Run the bot until Ctrl+C (blocking).
+
+        * ``reload=True`` — restart automatically when your code changes
+        * ``tunnel=True`` — free HTTPS address for Mini Apps/webhooks while developing
+        * ``webhook=`` — ``"https://domain/path"`` or ``True`` (uses ``public_url``/the tunnel)
+        * ``port`` — web server port (default ``$PORT`` or 8080)
+
+        Example::
+
+            bot.start()                     # polling
+            bot.start(reload=True)          # development
+            bot.start(tunnel=True)          # Mini App development, no domain needed
+            bot.start(webhook="https://bot.example.com/tg", port=8080)
+        """
         from .logs import setup_logging
 
         setup_logging(log_level)
@@ -728,13 +1222,18 @@ class Nicebot(Router, BotAPI):
         if sys.platform == "win32":  # pragma: no cover
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())  # type: ignore[attr-defined]
         try:
-            asyncio.run(self.run(webhook=webhook, port=port, host=host, drop_pending=drop_pending))
+            asyncio.run(self.run(webhook=webhook, port=port, host=host, drop_pending=drop_pending, tunnel=tunnel))
         except KeyboardInterrupt:
             pass
 
     @staticmethod
     def run_all(*bots: "Nicebot", log_level: str | int = "INFO") -> None:
-        """Run several bots in one process: ``Nicebot.run_all(shop_bot, support_bot)``."""
+        """Run several bots in one process.
+
+        Example::
+
+            Nicebot.run_all(shop_bot, support_bot)
+        """
         from .logs import setup_logging
 
         setup_logging(log_level)
@@ -754,14 +1253,37 @@ class Nicebot(Router, BotAPI):
         except KeyboardInterrupt:
             pass
 
-    def test(self, **kw: Any) -> Any:
-        """``async with bot.test() as t: user = t.user(); await user.send("/start")`` — no Telegram needed."""
+    def test(self, **kw: Any) -> "TestSession":
+        """Test the bot without Telegram: fake users send messages and press buttons.
+
+        Example::
+
+            async def test_start():
+                async with bot.test() as t:
+                    ali = t.user(first_name="Ali")
+                    await ali.send("/start")
+                    assert t.last.text == "Hello, Ali!"
+        """
         from .testing import TestSession
 
         return TestSession(self, **kw)
 
     def __repr__(self) -> str:
         return f"<Nicebot @{self.username or '?'} handlers={len(self.all_handlers())}>"
+
+
+class _LinkDecorator(str):
+    """A ``str`` (the t.me link) that also works as the ``@bot.deep_link(...)`` decorator."""
+
+    _deco: Callable[[Callable[..., Any]], Callable[..., Any]]
+
+    def __new__(cls, link: str, deco: Callable[[Callable[..., Any]], Callable[..., Any]]) -> "_LinkDecorator":
+        obj = super().__new__(cls, link)
+        obj._deco = deco
+        return obj
+
+    def __call__(self, func: Callable[..., Any]) -> Callable[..., Any]:
+        return self._deco(func)
 
 
 def _takes_arg(func: Callable[..., Any]) -> bool:

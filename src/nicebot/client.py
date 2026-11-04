@@ -61,6 +61,7 @@ class Client:
         token: str,
         *,
         api_url: str = "https://api.telegram.org",
+        test_server: bool = False,
         timeout: float = 30.0,
         retries: int = 3,
         flood_wait_max: float = 60.0,
@@ -68,6 +69,7 @@ class Client:
     ):
         self.token = token
         self.api_url = api_url.rstrip("/")
+        self.test_server = test_server
         self.timeout = timeout
         self.retries = retries
         self.flood_wait_max = flood_wait_max
@@ -161,7 +163,7 @@ class Client:
         payload, files, cache_keys = await self._prepare(params or {})
         if self.on_request:
             self.on_request(method, payload)
-        url = f"{self.api_url}/bot{self.token}/{method}"
+        url = self.method_url(method)
         attempt = 0
         flood_waited = 0.0
         while True:
@@ -178,7 +180,7 @@ class Client:
                 wait = e.retry_after
                 if flood_waited + wait > self.flood_wait_max:
                     raise
-                log.warning("Flood control on %s: kutilyapti %.0fs", method, wait)
+                log.warning("Flood control on %s: waiting %.0fs", method, wait)
                 flood_waited += wait
                 await asyncio.sleep(wait)
             except ServerError:
@@ -216,8 +218,77 @@ class Client:
         async with session.post(url, data=_ENCODER.encode(payload), headers={"Content-Type": "application/json"}, timeout=to) as resp:
             return await resp.read()
 
+    @property
+    def is_cloud(self) -> bool:
+        """``True`` when talking to Telegram's cloud Bot API (20 MB download limit), ``False`` for a local server.
+
+        Example::
+
+            Client("123:ABC").is_cloud                                   # True
+            Client("123:ABC", api_url="http://localhost:8081").is_cloud  # False
+        """
+        return "api.telegram.org" in self.api_url
+
+    def method_url(self, method: str) -> str:
+        """Full URL of a Bot API method (``/test/`` is added on the test server).
+
+        Example::
+
+            client.method_url("getMe")   # https://api.telegram.org/bot<token>/getMe
+        """
+        return f"{self.api_url}/bot{self.token}/{'test/' if self.test_server else ''}{method}"
+
+    def file_url(self, file_path: str) -> str:
+        """Download URL of a file returned by ``getFile``.
+
+        Example::
+
+            info = await bot.get_file(file_id)
+            url = bot.client.file_url(info.file_path)
+        """
+        return f"{self.api_url}/file/bot{self.token}/{'test/' if self.test_server else ''}{file_path}"
+
     async def download(self, file_path: str) -> bytes:
+        """Download a file by its ``file_path`` (from ``getFile``) into memory.
+
+        With a local Bot API server started with ``--local``, ``file_path`` is an absolute path on disk and is read directly.
+
+        Example::
+
+            info = await bot.get_file(file_id)
+            data = await bot.client.download(info.file_path)
+        """
+        import os
+
+        if os.path.isabs(file_path) and os.path.isfile(file_path):
+            return await asyncio.to_thread(_read_bytes, file_path)
         session = await self.session()
-        async with session.get(f"{self.api_url}/file/bot{self.token}/{file_path}") as resp:
+        async with session.get(self.file_url(file_path)) as resp:
             resp.raise_for_status()
             return await resp.read()
+
+    async def download_to(self, file_path: str, dest: Any, chunk_size: int = 256 * 1024) -> None:
+        """Stream a file to ``dest`` on disk in chunks (big files never sit in memory).
+
+        Example::
+
+            info = await bot.get_file(file_id)
+            await bot.client.download_to(info.file_path, "video.mp4")
+        """
+        import os
+        import shutil
+
+        if os.path.isabs(file_path) and os.path.isfile(file_path):
+            await asyncio.to_thread(shutil.copyfile, file_path, dest)
+            return
+        session = await self.session()
+        async with session.get(self.file_url(file_path), timeout=aiohttp.ClientTimeout(total=None, sock_read=120)) as resp:
+            resp.raise_for_status()
+            with open(dest, "wb") as fh:
+                async for chunk in resp.content.iter_chunked(chunk_size):
+                    fh.write(chunk)
+
+
+def _read_bytes(path: str) -> bytes:
+    with open(path, "rb") as fh:
+        return fh.read()

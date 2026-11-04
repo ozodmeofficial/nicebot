@@ -640,7 +640,7 @@ PAGES["api"] = ("Bot API", """
 
 | | |
 |---|---|
-| nicebot | 0.1.1 |
+| nicebot | 0.1.2 |
 | Bot API | 10.3 |
 | Python | 3.10+ |
 | Лицензия | MIT |

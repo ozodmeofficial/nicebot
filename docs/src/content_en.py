@@ -640,7 +640,7 @@ Types are available via `from nicebot import types`, for example `types.Message`
 
 | | |
 |---|---|
-| nicebot | 0.1.1 |
+| nicebot | 0.1.2 |
 | Bot API | 10.3 |
 | Python | 3.10+ |
 | License | MIT |

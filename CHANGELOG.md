@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2 — 2026-11-04
+
+Kutubxona kodi o'zgarmagan.
+
+- README boshidagi badge'lar olib tashlandi
+
 ## 0.1.1 — 2026-11-04
 
 Kutubxona kodi o'zgarmagan.

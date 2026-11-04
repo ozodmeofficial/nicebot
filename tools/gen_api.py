@@ -126,6 +126,8 @@ def field_doc(desc) -> str:
     if isinstance(desc, list):
         desc = " ".join(desc)
     desc = (desc or "").replace('"""', "'").replace("\\", "/").strip()
+    if desc.startswith("Optional. "):
+        desc = desc[len("Optional. "):]
     first = desc.split(". ")[0].strip().rstrip(".")
     return first + "." if first else ""
 

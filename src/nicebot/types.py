@@ -23,33 +23,42 @@ class Update(TelegramObject, kw_only=True):
 
     Attributes:
         update_id: The update's unique identifier.
-        message (optional): Optional.
-        edited_message (optional): Optional.
-        channel_post (optional): Optional.
-        edited_channel_post (optional): Optional.
-        business_connection (optional): Optional.
-        business_message (optional): Optional.
-        edited_business_message (optional): Optional.
-        deleted_business_messages (optional): Optional.
-        guest_message (optional): Optional.
-        message_reaction (optional): Optional.
-        message_reaction_count (optional): Optional.
-        inline_query (optional): Optional.
-        chosen_inline_result (optional): Optional.
-        callback_query (optional): Optional.
-        shipping_query (optional): Optional.
-        pre_checkout_query (optional): Optional.
-        purchased_paid_media (optional): Optional.
-        poll (optional): Optional.
-        poll_answer (optional): Optional.
-        my_chat_member (optional): Optional.
-        chat_member (optional): Optional.
-        chat_join_request (optional): Optional.
-        chat_boost (optional): Optional.
-        removed_chat_boost (optional): Optional.
-        managed_bot (optional): Optional.
-        subscription (optional): Optional.
-        stopped_message_generation (optional): Optional.
+        message (optional): New incoming message of any kind - text, photo, sticker, etc.
+        edited_message (optional): New version of a message that is known to the bot and was edited.
+        channel_post (optional): New incoming channel post of any kind - text, photo, sticker, etc.
+        edited_channel_post (optional): New version of a channel post that is known to the bot and
+            was edited.
+        business_connection (optional): The bot was connected to or disconnected from a business
+            account, or a user edited an existing connection with the bot.
+        business_message (optional): New message from a connected business account.
+        edited_business_message (optional): New version of a message from a connected business
+            account.
+        deleted_business_messages (optional): Messages were deleted from a connected business
+            account.
+        guest_message (optional): New guest message.
+        message_reaction (optional): A reaction to a message was changed by a user.
+        message_reaction_count (optional): Reactions to a message with anonymous reactions were
+            changed.
+        inline_query (optional): New incoming inline query.
+        chosen_inline_result (optional): The result of an inline query that was chosen by a user and
+            sent to their chat partner.
+        callback_query (optional): New incoming callback query.
+        shipping_query (optional): New incoming shipping query.
+        pre_checkout_query (optional): New incoming pre-checkout query.
+        purchased_paid_media (optional): A user purchased paid media with a non-empty payload sent
+            by the bot in a non-channel chat.
+        poll (optional): New poll state.
+        poll_answer (optional): A user changed their answer in a non-anonymous poll.
+        my_chat_member (optional): The bot's chat member status was updated in a chat.
+        chat_member (optional): A chat member's status was updated in a chat.
+        chat_join_request (optional): A request to join the chat has been sent.
+        chat_boost (optional): A chat boost was added or changed.
+        removed_chat_boost (optional): A boost was removed from a chat.
+        managed_bot (optional): A new bot was created to be managed by the bot, or token or owner of
+            a managed bot was changed.
+        subscription (optional): User payment subscription has changed.
+        stopped_message_generation (optional): A user asked the bot to stop the generation of a
+            message.
 
     Example::
 
@@ -95,12 +104,16 @@ class WebhookInfo(TelegramObject, kw_only=True):
         has_custom_certificate: True, if a custom certificate was provided for webhook certificate
             checks.
         pending_update_count: Number of updates awaiting delivery.
-        ip_address (optional): Optional.
-        last_error_date (optional): Optional.
-        last_error_message (optional): Optional.
-        last_synchronization_error_date (optional): Optional.
-        max_connections (optional): Optional.
-        allowed_updates (optional): Optional.
+        ip_address (optional): Currently used webhook IP address.
+        last_error_date (optional): Unix time for the most recent error that happened when trying to
+            deliver an update via webhook.
+        last_error_message (optional): Error message in human-readable format for the most recent
+            error that happened when trying to deliver an update via webhook.
+        last_synchronization_error_date (optional): Unix time of the most recent error that happened
+            when trying to synchronize available updates with Telegram datacenters.
+        max_connections (optional): The maximum allowed number of simultaneous HTTPS connections to
+            the webhook for update delivery.
+        allowed_updates (optional): A list of update types the bot is subscribed to.
 
     Example::
 
@@ -126,21 +139,27 @@ class User(TelegramObject, kw_only=True):
         id: Unique identifier for this user or bot.
         is_bot: True, if this user is a bot.
         first_name: User's or bot's first name.
-        last_name (optional): Optional.
-        username (optional): Optional.
-        language_code (optional): Optional.
-        is_premium (optional): Optional.
-        added_to_attachment_menu (optional): Optional.
-        can_join_groups (optional): Optional.
-        can_read_all_group_messages (optional): Optional.
-        supports_guest_queries (optional): Optional.
-        supports_inline_queries (optional): Optional.
-        can_connect_to_business (optional): Optional.
-        has_main_web_app (optional): Optional.
-        has_topics_enabled (optional): Optional.
-        allows_users_to_create_topics (optional): Optional.
-        can_manage_bots (optional): Optional.
-        supports_join_request_queries (optional): Optional.
+        last_name (optional): User's or bot's last name.
+        username (optional): User's or bot's username.
+        language_code (optional): IETF language tag of the user's language.
+        is_premium (optional): True, if this user is a Telegram Premium user.
+        added_to_attachment_menu (optional): True, if this user added the bot to the attachment
+            menu.
+        can_join_groups (optional): True, if the bot can be invited to groups.
+        can_read_all_group_messages (optional): True, if privacy mode is disabled for the bot.
+        supports_guest_queries (optional): True, if the bot supports guest queries from chats it is
+            not a member of.
+        supports_inline_queries (optional): True, if the bot supports inline queries.
+        can_connect_to_business (optional): True, if the bot can be connected to a user account to
+            manage it.
+        has_main_web_app (optional): True, if the bot has a main Web App.
+        has_topics_enabled (optional): True, if the bot has forum topic mode enabled in private
+            chats.
+        allows_users_to_create_topics (optional): True, if the bot allows users to create and delete
+            topics in private chats.
+        can_manage_bots (optional): True, if other bots can be created to be controlled by the bot.
+        supports_join_request_queries (optional): True, if the bot supports join request queries and
+            can be assigned to process them.
 
     Example::
 
@@ -174,12 +193,12 @@ class Chat(TelegramObject, kw_only=True):
     Attributes:
         id: Unique identifier for this chat.
         type: Type of the chat, can be either "private", "group", "supergroup" or "channel".
-        title (optional): Optional.
-        username (optional): Optional.
-        first_name (optional): Optional.
-        last_name (optional): Optional.
-        is_forum (optional): Optional.
-        is_direct_messages (optional): Optional.
+        title (optional): Title, for supergroups, channels and group chats.
+        username (optional): Username, for private chats, supergroups and channels if available.
+        first_name (optional): First name of the other party in a private chat.
+        last_name (optional): Last name of the other party in a private chat.
+        is_forum (optional): True, if the supergroup chat is a forum (has topics enabled).
+        is_direct_messages (optional): True, if the chat is the direct messages chat of a channel.
 
     Example::
 
@@ -203,60 +222,86 @@ class ChatFullInfo(TelegramObject, kw_only=True):
     Attributes:
         id: Unique identifier for this chat.
         type: Type of the chat, can be either "private", "group", "supergroup" or "channel".
-        title (optional): Optional.
-        username (optional): Optional.
-        first_name (optional): Optional.
-        last_name (optional): Optional.
-        is_forum (optional): Optional.
-        is_direct_messages (optional): Optional.
+        title (optional): Title, for supergroups, channels and group chats.
+        username (optional): Username, for private chats, supergroups and channels if available.
+        first_name (optional): First name of the other party in a private chat.
+        last_name (optional): Last name of the other party in a private chat.
+        is_forum (optional): True, if the supergroup chat is a forum (has topics enabled).
+        is_direct_messages (optional): True, if the chat is the direct messages chat of a channel.
         accent_color_id: Identifier of the accent color for the chat name and backgrounds of the
             chat photo, reply header, and link preview.
         max_reaction_count: The maximum number of reactions that can be set on a message in the
             chat.
-        photo (optional): Optional.
-        active_usernames (optional): Optional.
-        birthdate (optional): Optional.
-        business_intro (optional): Optional.
-        business_location (optional): Optional.
-        business_opening_hours (optional): Optional.
-        personal_chat (optional): Optional.
-        parent_chat (optional): Optional.
-        available_reactions (optional): Optional.
-        background_custom_emoji_id (optional): Optional.
-        profile_accent_color_id (optional): Optional.
-        profile_background_custom_emoji_id (optional): Optional.
-        emoji_status_custom_emoji_id (optional): Optional.
-        emoji_status_expiration_date (optional): Optional.
-        bio (optional): Optional.
-        has_private_forwards (optional): Optional.
-        has_restricted_voice_and_video_messages (optional): Optional.
-        join_to_send_messages (optional): Optional.
-        join_by_request (optional): Optional.
-        description (optional): Optional.
-        invite_link (optional): Optional.
-        pinned_message (optional): Optional.
-        permissions (optional): Optional.
+        photo (optional): Chat photo.
+        active_usernames (optional): If non-empty, the list of all active chat usernames; for
+            private chats, supergroups and channels.
+        birthdate (optional): For private chats, the date of birth of the user.
+        business_intro (optional): For private chats with business accounts, the intro of the
+            business.
+        business_location (optional): For private chats with business accounts, the location of the
+            business.
+        business_opening_hours (optional): For private chats with business accounts, the opening
+            hours of the business.
+        personal_chat (optional): For private chats, the personal channel of the user.
+        parent_chat (optional): Information about the corresponding channel chat; for direct
+            messages chats only.
+        available_reactions (optional): List of available reactions allowed in the chat.
+        background_custom_emoji_id (optional): Custom emoji identifier of the emoji chosen by the
+            chat for the reply header and link preview background.
+        profile_accent_color_id (optional): Identifier of the accent color for the chat's profile
+            background.
+        profile_background_custom_emoji_id (optional): Custom emoji identifier of the emoji chosen
+            by the chat for its profile background.
+        emoji_status_custom_emoji_id (optional): Custom emoji identifier of the emoji status of the
+            chat or the other party in a private chat.
+        emoji_status_expiration_date (optional): Expiration date of the emoji status of the chat or
+            the other party in a private chat, in Unix time, if any.
+        bio (optional): Bio of the other party in a private chat.
+        has_private_forwards (optional): True, if privacy settings of the other party in the private
+            chat allows to use tg://user?id=<user_id> links only in chats with the user.
+        has_restricted_voice_and_video_messages (optional): True, if the privacy settings of the
+            other party restrict sending voice and video note messages in the private chat.
+        join_to_send_messages (optional): True, if users need to join the supergroup before they can
+            send messages.
+        join_by_request (optional): True, if all users directly joining the supergroup without using
+            an invite link need to be approved by supergroup administrators.
+        description (optional): Description, for groups, supergroups and channel chats.
+        invite_link (optional): Primary invite link, for groups, supergroups and channel chats.
+        pinned_message (optional): The most recent pinned message (by sending date).
+        permissions (optional): Default chat member permissions, for groups and supergroups.
         accepted_gift_types: Information about types of gifts that are accepted by the chat or by
             the corresponding user for private chats.
-        can_send_paid_media (optional): Optional.
-        slow_mode_delay (optional): Optional.
-        unrestrict_boost_count (optional): Optional.
-        message_auto_delete_time (optional): Optional.
-        has_aggressive_anti_spam_enabled (optional): Optional.
-        has_hidden_members (optional): Optional.
-        has_protected_content (optional): Optional.
-        has_visible_history (optional): Optional.
-        sticker_set_name (optional): Optional.
-        can_set_sticker_set (optional): Optional.
-        custom_emoji_sticker_set_name (optional): Optional.
-        linked_chat_id (optional): Optional.
-        location (optional): Optional.
-        rating (optional): Optional.
-        first_profile_audio (optional): Optional.
-        unique_gift_colors (optional): Optional.
-        paid_message_star_count (optional): Optional.
-        guard_bot (optional): Optional.
-        community (optional): Optional.
+        can_send_paid_media (optional): True, if paid media messages can be sent or forwarded to the
+            channel chat.
+        slow_mode_delay (optional): For supergroups, the minimum allowed delay between consecutive
+            messages sent by each unprivileged user; in seconds.
+        unrestrict_boost_count (optional): For supergroups, the minimum number of boosts that a non-
+            administrator user needs to add in order to ignore slow mode and chat permissions.
+        message_auto_delete_time (optional): The time after which all messages sent to the chat will
+            be automatically deleted; in seconds.
+        has_aggressive_anti_spam_enabled (optional): True, if aggressive anti-spam checks are
+            enabled in the supergroup.
+        has_hidden_members (optional): True, if non-administrators can only get the list of bots and
+            administrators in the chat.
+        has_protected_content (optional): True, if messages from the chat can't be forwarded to
+            other chats.
+        has_visible_history (optional): True, if new chat members will have access to old messages;
+            available only to chat administrators.
+        sticker_set_name (optional): For supergroups, name of the group sticker set.
+        can_set_sticker_set (optional): True, if the bot can change the group sticker set.
+        custom_emoji_sticker_set_name (optional): For supergroups, the name of the group's custom
+            emoji sticker set.
+        linked_chat_id (optional): Unique identifier for the linked chat, i.e.
+        location (optional): For supergroups, the location to which the supergroup is connected.
+        rating (optional): For private chats, the rating of the user if any.
+        first_profile_audio (optional): For private chats, the first audio added to the profile of
+            the user.
+        unique_gift_colors (optional): The color scheme based on a unique gift that must be used for
+            the chat's name, message replies and link previews.
+        paid_message_star_count (optional): The number of Telegram Stars a general user has to pay
+            to send a message to the chat.
+        guard_bot (optional): The bot that processes join request queries in the chat.
+        community (optional): The Community to which the chat belongs.
 
     Example::
 
@@ -324,125 +369,173 @@ class Message(TelegramObject, kw_only=True):
 
     Attributes:
         message_id: Unique message identifier inside this chat; 0 for ephemeral messages.
-        message_thread_id (optional): Optional.
-        direct_messages_topic (optional): Optional.
-        from_ (optional): Optional.
-        sender_chat (optional): Optional.
-        sender_boost_count (optional): Optional.
-        sender_business_bot (optional): Optional.
-        sender_tag (optional): Optional.
-        receiver_user (optional): Optional.
-        ephemeral_message_id (optional): Optional.
+        message_thread_id (optional): Unique identifier of a message thread or forum topic to which
+            the message belongs; for supergroups and private chats only.
+        direct_messages_topic (optional): Information about the direct messages chat topic that
+            contains the message.
+        from_ (optional): Sender of the message; may be empty for messages sent to channels.
+        sender_chat (optional): Sender of the message when sent on behalf of a chat.
+        sender_boost_count (optional): If the sender of the message boosted the chat, the number of
+            boosts added by the user.
+        sender_business_bot (optional): The bot that actually sent the message on behalf of the
+            business account.
+        sender_tag (optional): Tag or custom title of the sender of the message; for supergroups
+            only.
+        receiver_user (optional): For ephemeral messages, the user who received the message.
+        ephemeral_message_id (optional): For ephemeral messages, identifier of the ephemeral message
+            inside this chat.
         date: Date the message was sent in Unix time.
-        guest_query_id (optional): Optional.
-        business_connection_id (optional): Optional.
+        guest_query_id (optional): The unique identifier for the guest query.
+        business_connection_id (optional): Unique identifier of the business connection from which
+            the message was received.
         chat: Chat the message belongs to.
-        forward_origin (optional): Optional.
-        is_topic_message (optional): Optional.
-        is_automatic_forward (optional): Optional.
-        reply_to_message (optional): Optional.
-        external_reply (optional): Optional.
-        quote (optional): Optional.
-        reply_to_story (optional): Optional.
-        reply_to_checklist_task_id (optional): Optional.
-        reply_to_poll_option_id (optional): Optional.
-        via_bot (optional): Optional.
-        guest_bot_caller_user (optional): Optional.
-        guest_bot_caller_chat (optional): Optional.
-        edit_date (optional): Optional.
-        has_protected_content (optional): Optional.
-        is_from_offline (optional): Optional.
-        is_paid_post (optional): Optional.
-        media_group_id (optional): Optional.
-        author_signature (optional): Optional.
-        paid_star_count (optional): Optional.
-        text (optional): Optional.
-        entities (optional): Optional.
-        link_preview_options (optional): Optional.
-        suggested_post_info (optional): Optional.
-        effect_id (optional): Optional.
-        rich_message (optional): Optional.
-        animation (optional): Optional.
-        audio (optional): Optional.
-        document (optional): Optional.
-        live_photo (optional): Optional.
-        paid_media (optional): Optional.
-        photo (optional): Optional.
-        sticker (optional): Optional.
-        story (optional): Optional.
-        video (optional): Optional.
-        video_note (optional): Optional.
-        voice (optional): Optional.
-        caption (optional): Optional.
-        caption_entities (optional): Optional.
-        show_caption_above_media (optional): Optional.
-        has_media_spoiler (optional): Optional.
-        checklist (optional): Optional.
-        contact (optional): Optional.
-        dice (optional): Optional.
-        game (optional): Optional.
-        poll (optional): Optional.
-        venue (optional): Optional.
-        location (optional): Optional.
-        new_chat_members (optional): Optional.
-        left_chat_member (optional): Optional.
-        chat_owner_left (optional): Optional.
-        chat_owner_changed (optional): Optional.
-        new_chat_title (optional): Optional.
-        new_chat_photo (optional): Optional.
-        delete_chat_photo (optional): Optional.
-        group_chat_created (optional): Optional.
-        supergroup_chat_created (optional): Optional.
-        channel_chat_created (optional): Optional.
-        message_auto_delete_timer_changed (optional): Optional.
-        migrate_to_chat_id (optional): Optional.
-        migrate_from_chat_id (optional): Optional.
-        pinned_message (optional): Optional.
-        invoice (optional): Optional.
-        successful_payment (optional): Optional.
-        refunded_payment (optional): Optional.
-        users_shared (optional): Optional.
-        chat_shared (optional): Optional.
-        gift (optional): Optional.
-        unique_gift (optional): Optional.
-        gift_upgrade_sent (optional): Optional.
-        connected_website (optional): Optional.
-        write_access_allowed (optional): Optional.
-        passport_data (optional): Optional.
-        proximity_alert_triggered (optional): Optional.
-        boost_added (optional): Optional.
-        chat_background_set (optional): Optional.
-        checklist_tasks_done (optional): Optional.
-        checklist_tasks_added (optional): Optional.
-        community_chat_added (optional): Optional.
-        community_chat_joined (optional): Optional.
-        community_chat_removed (optional): Optional.
-        direct_message_price_changed (optional): Optional.
-        forum_topic_created (optional): Optional.
-        forum_topic_edited (optional): Optional.
-        forum_topic_closed (optional): Optional.
-        forum_topic_reopened (optional): Optional.
-        general_forum_topic_hidden (optional): Optional.
-        general_forum_topic_unhidden (optional): Optional.
-        giveaway_created (optional): Optional.
-        giveaway (optional): Optional.
-        giveaway_winners (optional): Optional.
-        giveaway_completed (optional): Optional.
-        managed_bot_created (optional): Optional.
-        paid_message_price_changed (optional): Optional.
-        poll_option_added (optional): Optional.
-        poll_option_deleted (optional): Optional.
-        suggested_post_approved (optional): Optional.
-        suggested_post_approval_failed (optional): Optional.
-        suggested_post_declined (optional): Optional.
-        suggested_post_paid (optional): Optional.
-        suggested_post_refunded (optional): Optional.
-        video_chat_scheduled (optional): Optional.
-        video_chat_started (optional): Optional.
-        video_chat_ended (optional): Optional.
-        video_chat_participants_invited (optional): Optional.
-        web_app_data (optional): Optional.
-        reply_markup (optional): Optional.
+        forward_origin (optional): Information about the original message for forwarded messages.
+        is_topic_message (optional): True, if the message is sent to a topic in a forum supergroup
+            or a private chat with the bot.
+        is_automatic_forward (optional): True, if the message is a channel post that was
+            automatically forwarded to the connected discussion group.
+        reply_to_message (optional): For replies in the same chat and message thread, the original
+            message.
+        external_reply (optional): Information about the message that is being replied to, which may
+            come from another chat or forum topic.
+        quote (optional): For replies that quote part of the original message, the quoted part of
+            the message.
+        reply_to_story (optional): For replies to a story, the original story.
+        reply_to_checklist_task_id (optional): Identifier of the specific checklist task that is
+            being replied to.
+        reply_to_poll_option_id (optional): Persistent identifier of the specific poll option that
+            is being replied to.
+        via_bot (optional): Bot through which the message was sent.
+        guest_bot_caller_user (optional): For a message sent by a guest bot, this is the user whose
+            original message triggered the bot's response.
+        guest_bot_caller_chat (optional): For a message sent by a guest bot, this is the chat whose
+            original message triggered the bot's response.
+        edit_date (optional): Date the message was last edited in Unix time.
+        has_protected_content (optional): True, if the message can't be forwarded.
+        is_from_offline (optional): True, if the message was sent by an implicit action, for
+            example, as an away or a greeting business message, or as a scheduled message.
+        is_paid_post (optional): True, if the message is a paid post.
+        media_group_id (optional): The unique identifier inside this chat of a media message group
+            this message belongs to.
+        author_signature (optional): Signature of the post author for messages in channels, or the
+            custom title of an anonymous group administrator.
+        paid_star_count (optional): The number of Telegram Stars that were paid by the sender of the
+            message to send it.
+        text (optional): For text messages, the actual UTF-8 text of the message.
+        entities (optional): For text messages, special entities like usernames, URLs, bot commands,
+            etc.
+        link_preview_options (optional): Options used for link preview generation for the message,
+            if it is a text message and link preview options were changed.
+        suggested_post_info (optional): Information about suggested post parameters if the message
+            is a suggested post in a channel direct messages chat.
+        effect_id (optional): Unique identifier of the message effect added to the message.
+        rich_message (optional): Message is a rich formatted message.
+        animation (optional): Message is an animation, information about the animation.
+        audio (optional): Message is an audio file, information about the file.
+        document (optional): Message is a general file, information about the file.
+        live_photo (optional): Message is a live photo, information about the live photo.
+        paid_media (optional): Message contains paid media; information about the paid media.
+        photo (optional): Message is a photo, available sizes of the photo.
+        sticker (optional): Message is a sticker, information about the sticker.
+        story (optional): Message is a forwarded story.
+        video (optional): Message is a video, information about the video.
+        video_note (optional): Message is a video note, information about the video message.
+        voice (optional): Message is a voice message, information about the file.
+        caption (optional): Caption for the animation, audio, document, paid media, photo, video or
+            voice.
+        caption_entities (optional): For messages with a caption, special entities like usernames,
+            URLs, bot commands, etc.
+        show_caption_above_media (optional): True, if the caption must be shown above the message
+            media.
+        has_media_spoiler (optional): True, if the message media is covered by a spoiler animation.
+        checklist (optional): Message is a checklist.
+        contact (optional): Message is a shared contact, information about the contact.
+        dice (optional): Message is a dice with random value.
+        game (optional): Message is a game, information about the game.
+        poll (optional): Message is a native poll, information about the poll.
+        venue (optional): Message is a venue, information about the venue.
+        location (optional): Message is a shared location, information about the location.
+        new_chat_members (optional): New members that were added to the group or supergroup and
+            information about them (the bot itself may be one of these members).
+        left_chat_member (optional): A member was removed from the group, information about them
+            (this member may be the bot itself).
+        chat_owner_left (optional): Service message: chat owner has left.
+        chat_owner_changed (optional): Service message: chat owner has changed.
+        new_chat_title (optional): A chat title was changed to this value.
+        new_chat_photo (optional): A chat photo was change to this value.
+        delete_chat_photo (optional): Service message: the chat photo was deleted.
+        group_chat_created (optional): Service message: the group has been created.
+        supergroup_chat_created (optional): Service message: the supergroup has been created.
+        channel_chat_created (optional): Service message: the channel has been created.
+        message_auto_delete_timer_changed (optional): Service message: auto-delete timer settings
+            changed in the chat.
+        migrate_to_chat_id (optional): The group has been migrated to a supergroup with the
+            specified identifier.
+        migrate_from_chat_id (optional): The supergroup has been migrated from a group with the
+            specified identifier.
+        pinned_message (optional): Specified message was pinned.
+        invoice (optional): Message is an invoice for a payment, information about the invoice.
+        successful_payment (optional): Message is a service message about a successful payment,
+            information about the payment.
+        refunded_payment (optional): Message is a service message about a refunded payment,
+            information about the payment.
+        users_shared (optional): Service message: users were shared with the bot.
+        chat_shared (optional): Service message: a chat was shared with the bot.
+        gift (optional): Service message: a regular gift was sent or received.
+        unique_gift (optional): Service message: a unique gift was sent or received.
+        gift_upgrade_sent (optional): Service message: upgrade of a gift was purchased after the
+            gift was sent.
+        connected_website (optional): The domain name of the website on which the user has logged
+            in.
+        write_access_allowed (optional): Service message: the user allowed the bot to write messages
+            after adding it to the attachment or side menu, launching a Web App from a link, or
+            accepting an explicit request from a Web App sent by the method requestWriteAccess.
+        passport_data (optional): Telegram Passport data.
+        proximity_alert_triggered (optional): Service message: a user in the chat triggered another
+            user's proximity alert while sharing Live Location.
+        boost_added (optional): Service message: user boosted the chat.
+        chat_background_set (optional): Service message: chat background set.
+        checklist_tasks_done (optional): Service message: some tasks in a checklist were marked as
+            done or not done.
+        checklist_tasks_added (optional): Service message: tasks were added to a checklist.
+        community_chat_added (optional): Service message: chat or bot added to a Community.
+        community_chat_joined (optional): Service message: chat was joined by a user from a
+            Community.
+        community_chat_removed (optional): Service message: chat or bot removed from a Community.
+        direct_message_price_changed (optional): Service message: the price for paid messages in the
+            corresponding direct messages chat of a channel has changed.
+        forum_topic_created (optional): Service message: forum topic created.
+        forum_topic_edited (optional): Service message: forum topic edited.
+        forum_topic_closed (optional): Service message: forum topic closed.
+        forum_topic_reopened (optional): Service message: forum topic reopened.
+        general_forum_topic_hidden (optional): Service message: the 'General' forum topic hidden.
+        general_forum_topic_unhidden (optional): Service message: the 'General' forum topic
+            unhidden.
+        giveaway_created (optional): Service message: a scheduled giveaway was created.
+        giveaway (optional): The message is a scheduled giveaway message.
+        giveaway_winners (optional): A giveaway with public winners was completed.
+        giveaway_completed (optional): Service message: a giveaway without public winners was
+            completed.
+        managed_bot_created (optional): Service message: user created a bot that will be managed by
+            the current bot.
+        paid_message_price_changed (optional): Service message: the price for paid messages has
+            changed in the chat.
+        poll_option_added (optional): Service message: answer option was added to a poll.
+        poll_option_deleted (optional): Service message: answer option was deleted from a poll.
+        suggested_post_approved (optional): Service message: a suggested post was approved.
+        suggested_post_approval_failed (optional): Service message: approval of a suggested post has
+            failed.
+        suggested_post_declined (optional): Service message: a suggested post was declined.
+        suggested_post_paid (optional): Service message: payment for a suggested post was received.
+        suggested_post_refunded (optional): Service message: payment for a suggested post was
+            refunded.
+        video_chat_scheduled (optional): Service message: video chat scheduled.
+        video_chat_started (optional): Service message: video chat started.
+        video_chat_ended (optional): Service message: video chat ended.
+        video_chat_participants_invited (optional): Service message: new participants invited to a
+            video chat.
+        web_app_data (optional): Service message: data sent by a Web App.
+        reply_markup (optional): Inline keyboard attached to the message.
 
     Example::
 
@@ -613,12 +706,13 @@ class MessageEntity(TelegramObject, kw_only=True):
         type: Type of the entity.
         offset: Offset in UTF-16 code units to the start of the entity.
         length: Length of the entity in UTF-16 code units.
-        url (optional): Optional.
-        user (optional): Optional.
-        language (optional): Optional.
-        custom_emoji_id (optional): Optional.
-        unix_time (optional): Optional.
-        date_time_format (optional): Optional.
+        url (optional): For "text_link" only, URL that will be opened after user taps on the text.
+        user (optional): For "text_mention" only, the mentioned user.
+        language (optional): For "pre" only, the programming language of the entity text.
+        custom_emoji_id (optional): For "custom_emoji" only, unique identifier of the custom emoji.
+        unix_time (optional): For "date_time" only, the Unix time associated with the entity.
+        date_time_format (optional): For "date_time" only, the string that defines the formatting of
+            the date and time.
 
     Example::
 
@@ -642,10 +736,10 @@ class TextQuote(TelegramObject, kw_only=True):
 
     Attributes:
         text: Text of the quoted part of a message that is replied to by the given message.
-        entities (optional): Optional.
+        entities (optional): Special entities that appear in the quote.
         position: Approximate quote position in the original message in UTF-16 code units as
             specified by the sender.
-        is_manual (optional): Optional.
+        is_manual (optional): True, if the quote was chosen manually by the message sender.
 
     Example::
 
@@ -664,31 +758,32 @@ class ExternalReplyInfo(TelegramObject, kw_only=True):
 
     Attributes:
         origin: Origin of the message replied to by the given message.
-        chat (optional): Optional.
-        message_id (optional): Optional.
-        link_preview_options (optional): Optional.
-        animation (optional): Optional.
-        audio (optional): Optional.
-        document (optional): Optional.
-        live_photo (optional): Optional.
-        paid_media (optional): Optional.
-        photo (optional): Optional.
-        sticker (optional): Optional.
-        story (optional): Optional.
-        video (optional): Optional.
-        video_note (optional): Optional.
-        voice (optional): Optional.
-        has_media_spoiler (optional): Optional.
-        checklist (optional): Optional.
-        contact (optional): Optional.
-        dice (optional): Optional.
-        game (optional): Optional.
-        giveaway (optional): Optional.
-        giveaway_winners (optional): Optional.
-        invoice (optional): Optional.
-        location (optional): Optional.
-        poll (optional): Optional.
-        venue (optional): Optional.
+        chat (optional): Chat the original message belongs to.
+        message_id (optional): Unique message identifier inside the original chat.
+        link_preview_options (optional): Options used for link preview generation for the original
+            message, if it is a text message.
+        animation (optional): Message is an animation, information about the animation.
+        audio (optional): Message is an audio file, information about the file.
+        document (optional): Message is a general file, information about the file.
+        live_photo (optional): Message is a live photo, information about the live photo.
+        paid_media (optional): Message contains paid media; information about the paid media.
+        photo (optional): Message is a photo, available sizes of the photo.
+        sticker (optional): Message is a sticker, information about the sticker.
+        story (optional): Message is a forwarded story.
+        video (optional): Message is a video, information about the video.
+        video_note (optional): Message is a video note, information about the video message.
+        voice (optional): Message is a voice message, information about the file.
+        has_media_spoiler (optional): True, if the message media is covered by a spoiler animation.
+        checklist (optional): Message is a checklist.
+        contact (optional): Message is a shared contact, information about the contact.
+        dice (optional): Message is a dice with random value.
+        game (optional): Message is a game, information about the game.
+        giveaway (optional): Message is a scheduled giveaway, information about the giveaway.
+        giveaway_winners (optional): A giveaway with public winners was completed.
+        invoice (optional): Message is an invoice for a payment, information about the invoice.
+        location (optional): Message is a shared location, information about the location.
+        poll (optional): Message is a native poll, information about the poll.
+        venue (optional): Message is a venue, information about the venue.
 
     Example::
 
@@ -728,16 +823,25 @@ class ReplyParameters(TelegramObject, kw_only=True):
     """Describes reply parameters for the message that is being sent.
 
     Attributes:
-        message_id (optional): Optional.
-        chat_id (optional): Optional.
-        ephemeral_message_id (optional): Optional.
-        allow_sending_without_reply (optional): Optional.
-        quote (optional): Optional.
-        quote_parse_mode (optional): Optional.
-        quote_entities (optional): Optional.
-        quote_position (optional): Optional.
-        checklist_task_id (optional): Optional.
-        poll_option_id (optional): Optional.
+        message_id (optional): Identifier of the message that will be replied to in the current
+            chat, or in the chat chat_id if it is specified.
+        chat_id (optional): If the message to be replied to is from a different chat, unique
+            identifier for the chat or username of the bot, supergroup or channel in the format
+            @username.
+        ephemeral_message_id (optional): Identifier of the incoming ephemeral message that will be
+            replied to in the current chat.
+        allow_sending_without_reply (optional): Pass True if the message should be sent even if the
+            specified message to be replied to is not found.
+        quote (optional): Quoted part of the message to be replied to; 0-1024 characters after
+            entities parsing.
+        quote_parse_mode (optional): Mode for parsing entities in the quote.
+        quote_entities (optional): A JSON-serialized list of special entities that appear in the
+            quote.
+        quote_position (optional): Position of the quote in the original message in UTF-16 code
+            units.
+        checklist_task_id (optional): Identifier of the specific checklist task to be replied to.
+        poll_option_id (optional): Persistent identifier of the specific poll option to be replied
+            to.
 
     Example::
 
@@ -762,8 +866,10 @@ class EphemeralMessageParameters(TelegramObject, kw_only=True):
 
     Attributes:
         receiver_user_id: Identifier of the user who will receive the message.
-        callback_query_id (optional): Optional.
-        replace_callback_query_message (optional): Optional.
+        callback_query_id (optional): Identifier of the callback query which triggered the message,
+            if any.
+        replace_callback_query_message (optional): Pass True if the ephemeral message must be shown
+            in place of the original message.
 
     Example::
 
@@ -828,7 +934,8 @@ class MessageOriginChat(TelegramObject, kw_only=True, tag_field="type", tag="cha
     Attributes:
         date: Date the message was sent originally in Unix time.
         sender_chat: Chat that sent the message originally.
-        author_signature (optional): Optional.
+        author_signature (optional): For messages originally sent by an anonymous chat
+            administrator, original message author signature.
 
     Example::
 
@@ -854,7 +961,7 @@ class MessageOriginChannel(TelegramObject, kw_only=True, tag_field="type", tag="
         date: Date the message was sent originally in Unix time.
         chat: Channel chat to which the message was originally sent.
         message_id: Unique message identifier inside the chat.
-        author_signature (optional): Optional.
+        author_signature (optional): Signature of the original post author.
 
     Example::
 
@@ -883,7 +990,7 @@ class PhotoSize(TelegramObject, kw_only=True):
             and for different bots.
         width: Photo width.
         height: Photo height.
-        file_size (optional): Optional.
+        file_size (optional): File size in bytes.
 
     Example::
 
@@ -908,10 +1015,10 @@ class Animation(TelegramObject, kw_only=True):
         width: Video width as defined by the sender.
         height: Video height as defined by the sender.
         duration: Duration of the video in seconds as defined by the sender.
-        thumbnail (optional): Optional.
-        file_name (optional): Optional.
-        mime_type (optional): Optional.
-        file_size (optional): Optional.
+        thumbnail (optional): Animation thumbnail as defined by the sender.
+        file_name (optional): Original animation filename as defined by the sender.
+        mime_type (optional): MIME type of the file as defined by the sender.
+        file_size (optional): File size in bytes.
 
     Example::
 
@@ -938,12 +1045,12 @@ class Audio(TelegramObject, kw_only=True):
         file_unique_id: Unique identifier for this file, which is supposed to be the same over time
             and for different bots.
         duration: Duration of the audio in seconds as defined by the sender.
-        performer (optional): Optional.
-        title (optional): Optional.
-        file_name (optional): Optional.
-        mime_type (optional): Optional.
-        file_size (optional): Optional.
-        thumbnail (optional): Optional.
+        performer (optional): Performer of the audio as defined by the sender or by audio tags.
+        title (optional): Title of the audio as defined by the sender or by audio tags.
+        file_name (optional): Original filename as defined by the sender.
+        mime_type (optional): MIME type of the file as defined by the sender.
+        file_size (optional): File size in bytes.
+        thumbnail (optional): Thumbnail of the album cover to which the music file belongs.
 
     Example::
 
@@ -969,10 +1076,10 @@ class Document(TelegramObject, kw_only=True):
         file_id: Identifier for this file, which can be used to download or reuse the file.
         file_unique_id: Unique identifier for this file, which is supposed to be the same over time
             and for different bots.
-        thumbnail (optional): Optional.
-        file_name (optional): Optional.
-        mime_type (optional): Optional.
-        file_size (optional): Optional.
+        thumbnail (optional): Document thumbnail as defined by the sender.
+        file_name (optional): Original filename as defined by the sender.
+        mime_type (optional): MIME type of the file as defined by the sender.
+        file_size (optional): File size in bytes.
 
     Example::
 
@@ -992,15 +1099,15 @@ class LivePhoto(TelegramObject, kw_only=True):
     """This object represents a live photo.
 
     Attributes:
-        photo (optional): Optional.
+        photo (optional): Available sizes of the corresponding static photo.
         file_id: Identifier for the video file which can be used to download or reuse the file.
         file_unique_id: Unique identifier for the video file which is supposed to be the same over
             time and for different bots.
         width: Video width as defined by the sender.
         height: Video height as defined by the sender.
         duration: Duration of the video in seconds as defined by the sender.
-        mime_type (optional): Optional.
-        file_size (optional): Optional.
+        mime_type (optional): MIME type of the file as defined by the sender.
+        file_size (optional): File size in bytes.
 
     Example::
 
@@ -1045,7 +1152,7 @@ class VideoQuality(TelegramObject, kw_only=True):
         width: Video width.
         height: Video height.
         codec: Codec that was used to encode the video, for example, "h264", "h265", or "av01".
-        file_size (optional): Optional.
+        file_size (optional): File size in bytes.
 
     Example::
 
@@ -1071,13 +1178,14 @@ class Video(TelegramObject, kw_only=True):
         width: Video width as defined by the sender.
         height: Video height as defined by the sender.
         duration: Duration of the video in seconds as defined by the sender.
-        thumbnail (optional): Optional.
-        cover (optional): Optional.
-        start_timestamp (optional): Optional.
-        qualities (optional): Optional.
-        file_name (optional): Optional.
-        mime_type (optional): Optional.
-        file_size (optional): Optional.
+        thumbnail (optional): Video thumbnail.
+        cover (optional): Available sizes of the cover of the video in the message.
+        start_timestamp (optional): Timestamp in seconds from which the video will play in the
+            message.
+        qualities (optional): List of available qualities of the video.
+        file_name (optional): Original filename as defined by the sender.
+        mime_type (optional): MIME type of the file as defined by the sender.
+        file_size (optional): File size in bytes.
 
     Example::
 
@@ -1108,8 +1216,8 @@ class VideoNote(TelegramObject, kw_only=True):
             and for different bots.
         length: Video width and height (diameter of the video message) as defined by the sender.
         duration: Duration of the video in seconds as defined by the sender.
-        thumbnail (optional): Optional.
-        file_size (optional): Optional.
+        thumbnail (optional): Video thumbnail.
+        file_size (optional): File size in bytes.
 
     Example::
 
@@ -1133,8 +1241,8 @@ class Voice(TelegramObject, kw_only=True):
         file_unique_id: Unique identifier for this file, which is supposed to be the same over time
             and for different bots.
         duration: Duration of the audio in seconds as defined by the sender.
-        mime_type (optional): Optional.
-        file_size (optional): Optional.
+        mime_type (optional): MIME type of the file as defined by the sender.
+        file_size (optional): File size in bytes.
 
     Example::
 
@@ -1212,9 +1320,9 @@ class PaidMediaPreview(TelegramObject, kw_only=True, tag_field="type", tag="prev
     """The paid media isn't available before the payment.
 
     Attributes:
-        width (optional): Optional.
-        height (optional): Optional.
-        duration (optional): Optional.
+        width (optional): Media width as defined by the sender.
+        height (optional): Media height as defined by the sender.
+        duration (optional): Duration of the media in seconds as defined by the sender.
 
     Example::
 
@@ -1260,9 +1368,9 @@ class Contact(TelegramObject, kw_only=True):
     Attributes:
         phone_number: Contact's phone number.
         first_name: Contact's first name.
-        last_name (optional): Optional.
-        user_id (optional): Optional.
-        vcard (optional): Optional.
+        last_name (optional): Contact's last name.
+        user_id (optional): Contact's user identifier in Telegram.
+        vcard (optional): Additional data about the contact in the form of a vCard.
 
     Example::
 
@@ -1314,16 +1422,19 @@ class PollMedia(TelegramObject, kw_only=True):
     """At most one of the optional fields can be present in any given object.
 
     Attributes:
-        animation (optional): Optional.
-        audio (optional): Optional.
-        document (optional): Optional.
-        link (optional): Optional.
-        live_photo (optional): Optional.
-        location (optional): Optional.
-        photo (optional): Optional.
-        sticker (optional): Optional.
-        venue (optional): Optional.
-        video (optional): Optional.
+        animation (optional): Media is an animation, information about the animation.
+        audio (optional): Media is an audio file, information about the file; currently, can't be
+            received in a poll option.
+        document (optional): Media is a general file, information about the file; currently, can't
+            be received in a poll option.
+        link (optional): The HTTP link attached to the poll option.
+        live_photo (optional): Media is a live photo, information about the live photo.
+        location (optional): Media is a shared location, information about the location.
+        photo (optional): Media is a photo, available sizes of the photo.
+        sticker (optional): Media is a sticker, information about the sticker; currently, for poll
+            options only.
+        venue (optional): Media is a venue, information about the venue.
+        video (optional): Media is a video, information about the video.
 
     Example::
 
@@ -1349,12 +1460,15 @@ class PollOption(TelegramObject, kw_only=True):
     Attributes:
         persistent_id: Unique identifier of the option, persistent on option addition and deletion.
         text: Option text, 1-100 characters.
-        text_entities (optional): Optional.
-        media (optional): Optional.
+        text_entities (optional): Special entities that appear in the option text.
+        media (optional): Media added to the poll option.
         voter_count: Number of users who voted for this option; may be 0 if unknown.
-        added_by_user (optional): Optional.
-        added_by_chat (optional): Optional.
-        addition_date (optional): Optional.
+        added_by_user (optional): User who added the option; omitted if the option wasn't added by a
+            user after poll creation.
+        added_by_chat (optional): Chat that added the option; omitted if the option wasn't added by
+            a chat after poll creation.
+        addition_date (optional): Point in time (Unix timestamp) when the option was added; omitted
+            if the option existed in the original poll.
 
     Example::
 
@@ -1377,9 +1491,10 @@ class InputPollOption(TelegramObject, kw_only=True):
 
     Attributes:
         text: Option text, 1-100 characters.
-        text_parse_mode (optional): Optional.
-        text_entities (optional): Optional.
-        media (optional): Optional.
+        text_parse_mode (optional): Mode for parsing entities in the text.
+        text_entities (optional): A JSON-serialized list of special entities that appear in the poll
+            option text.
+        media (optional): Media added to the poll option.
 
     Example::
 
@@ -1398,8 +1513,9 @@ class PollAnswer(TelegramObject, kw_only=True):
 
     Attributes:
         poll_id: Unique poll identifier.
-        voter_chat (optional): Optional.
-        user (optional): Optional.
+        voter_chat (optional): The chat that changed the answer to the poll, if the voter is
+            anonymous.
+        user (optional): The user that changed the answer to the poll, if the voter isn't anonymous.
         option_ids: 0-based identifiers of chosen answer options.
         option_persistent_ids: Persistent identifiers of the chosen answer options.
 
@@ -1422,7 +1538,7 @@ class Poll(TelegramObject, kw_only=True):
     Attributes:
         id: Unique poll identifier.
         question: Poll question, 1-300 characters.
-        question_entities (optional): Optional.
+        question_entities (optional): Special entities that appear in the question.
         options: List of poll options.
         total_voter_count: Total number of users that voted in the poll.
         is_closed: True, if the poll is closed.
@@ -1432,16 +1548,20 @@ class Poll(TelegramObject, kw_only=True):
         allows_revoting: True, if the poll allows to change the chosen answer options.
         members_only: True if voting is limited to users who have been members of the chat where the
             poll was originally sent for more than 24 hours.
-        country_codes (optional): Optional.
-        correct_option_ids (optional): Optional.
-        explanation (optional): Optional.
-        explanation_entities (optional): Optional.
-        explanation_media (optional): Optional.
-        open_period (optional): Optional.
-        close_date (optional): Optional.
-        description (optional): Optional.
-        description_entities (optional): Optional.
-        media (optional): Optional.
+        country_codes (optional): A list of two-letter ISO 3166-1 alpha-2 country codes indicating
+            the countries from which users can vote in the poll.
+        correct_option_ids (optional): Array of 0-based identifiers of the correct answer options.
+        explanation (optional): Text that is shown when a user chooses an incorrect answer or taps
+            on the lamp icon in a quiz-style poll, 0-200 characters.
+        explanation_entities (optional): Special entities like usernames, URLs, bot commands, etc.
+        explanation_media (optional): Media added to the quiz explanation.
+        open_period (optional): Amount of time in seconds the poll will be active after creation.
+        close_date (optional): Point in time (Unix timestamp) when the poll will be automatically
+            closed.
+        description (optional): Description of the poll; for polls inside the Message object only.
+        description_entities (optional): Special entities like usernames, URLs, bot commands, etc.
+        media (optional): Media added to the poll description; for polls inside the Message object
+            only.
 
     Example::
 
@@ -1478,10 +1598,13 @@ class ChecklistTask(TelegramObject, kw_only=True):
     Attributes:
         id: Unique identifier of the task.
         text: Text of the task.
-        text_entities (optional): Optional.
-        completed_by_user (optional): Optional.
-        completed_by_chat (optional): Optional.
-        completion_date (optional): Optional.
+        text_entities (optional): Special entities that appear in the task text.
+        completed_by_user (optional): User that completed the task; omitted if the task wasn't
+            completed by a user.
+        completed_by_chat (optional): Chat that completed the task; omitted if the task wasn't
+            completed by a chat.
+        completion_date (optional): Point in time (Unix timestamp) when the task was completed; 0 if
+            the task wasn't completed.
 
     Example::
 
@@ -1502,10 +1625,12 @@ class Checklist(TelegramObject, kw_only=True):
 
     Attributes:
         title: Title of the checklist.
-        title_entities (optional): Optional.
+        title_entities (optional): Special entities that appear in the checklist title.
         tasks: List of tasks in the checklist.
-        others_can_add_tasks (optional): Optional.
-        others_can_mark_tasks_as_done (optional): Optional.
+        others_can_add_tasks (optional): True, if users other than the creator of the list can add
+            tasks to the list.
+        others_can_mark_tasks_as_done (optional): True, if users other than the creator of the list
+            can mark tasks as done or not done.
 
     Example::
 
@@ -1527,8 +1652,9 @@ class InputChecklistTask(TelegramObject, kw_only=True):
         id: Unique identifier of the task; must be positive and unique among all task identifiers
             currently present in the checklist.
         text: Text of the task; 1-100 characters after entities parsing.
-        parse_mode (optional): Optional.
-        text_entities (optional): Optional.
+        parse_mode (optional): Mode for parsing entities in the text.
+        text_entities (optional): List of special entities that appear in the text, which can be
+            specified instead of parse_mode.
 
     Example::
 
@@ -1547,11 +1673,13 @@ class InputChecklist(TelegramObject, kw_only=True):
 
     Attributes:
         title: Title of the checklist; 1-255 characters after entities parsing.
-        parse_mode (optional): Optional.
-        title_entities (optional): Optional.
+        parse_mode (optional): Mode for parsing entities in the title.
+        title_entities (optional): List of special entities that appear in the title, which can be
+            specified instead of parse_mode.
         tasks: List of 1-30 tasks in the checklist.
-        others_can_add_tasks (optional): Optional.
-        others_can_mark_tasks_as_done (optional): Optional.
+        others_can_add_tasks (optional): Pass True if other users can add tasks to the checklist.
+        others_can_mark_tasks_as_done (optional): Pass True if other users can mark tasks as done or
+            not done in the checklist.
 
     Example::
 
@@ -1573,10 +1701,13 @@ class Location(TelegramObject, kw_only=True):
     Attributes:
         latitude: Latitude as defined by the sender.
         longitude: Longitude as defined by the sender.
-        horizontal_accuracy (optional): Optional.
-        live_period (optional): Optional.
-        heading (optional): Optional.
-        proximity_alert_radius (optional): Optional.
+        horizontal_accuracy (optional): The radius of uncertainty for the location, measured in
+            meters; 0-1500.
+        live_period (optional): Time relative to the message sending date, during which the location
+            can be updated; in seconds.
+        heading (optional): The direction in which user is moving, in degrees; 1-360.
+        proximity_alert_radius (optional): The maximum distance for proximity alerts about
+            approaching another chat member, in meters.
 
     Example::
 
@@ -1599,10 +1730,10 @@ class Venue(TelegramObject, kw_only=True):
         location: Venue location.
         title: Name of the venue.
         address: Address of the venue.
-        foursquare_id (optional): Optional.
-        foursquare_type (optional): Optional.
-        google_place_id (optional): Optional.
-        google_place_type (optional): Optional.
+        foursquare_id (optional): Foursquare identifier of the venue.
+        foursquare_type (optional): Foursquare type of the venue.
+        google_place_id (optional): Google Places identifier of the venue.
+        google_place_type (optional): Google Places type of the venue.
 
     Example::
 
@@ -1726,7 +1857,8 @@ class MessageGenerationStopped(TelegramObject, kw_only=True):
 
     Attributes:
         chat: Chat in which the message is generated.
-        message_thread_id (optional): Optional.
+        message_thread_id (optional): Unique identifier of the message thread in which the message
+            is generated.
         draft_id: Unique identifier of the message draft which was stopped.
 
     Example::
@@ -1744,10 +1876,11 @@ class PollOptionAdded(TelegramObject, kw_only=True):
     """Describes a service message about an option added to a poll.
 
     Attributes:
-        poll_message (optional): Optional.
+        poll_message (optional): Message containing the poll to which the option was added, if
+            known.
         option_persistent_id: Unique identifier of the added option.
         option_text: Option text.
-        option_text_entities (optional): Optional.
+        option_text_entities (optional): Special entities that appear in the option_text.
 
     Example::
 
@@ -1765,10 +1898,11 @@ class PollOptionDeleted(TelegramObject, kw_only=True):
     """Describes a service message about an option deleted from a poll.
 
     Attributes:
-        poll_message (optional): Optional.
+        poll_message (optional): Message containing the poll from which the option was deleted, if
+            known.
         option_persistent_id: Unique identifier of the deleted option.
         option_text: Option text.
-        option_text_entities (optional): Optional.
+        option_text_entities (optional): Special entities that appear in the option_text.
 
     Example::
 
@@ -1894,8 +2028,9 @@ class BackgroundTypeWallpaper(TelegramObject, kw_only=True, tag_field="type", ta
     Attributes:
         document: Document with the wallpaper.
         dark_theme_dimming: Dimming of the background in dark themes, as a percentage; 0-100.
-        is_blurred (optional): Optional.
-        is_moving (optional): Optional.
+        is_blurred (optional): True, if the wallpaper is downscaled to fit in a 450x450 square and
+            then box-blurred with radius 12.
+        is_moving (optional): True, if the background moves slightly when the device is tilted.
 
     Example::
 
@@ -1922,8 +2057,9 @@ class BackgroundTypePattern(TelegramObject, kw_only=True, tag_field="type", tag=
         document: Document with the pattern.
         fill: The background fill that is combined with the pattern.
         intensity: Intensity of the pattern when it is shown above the filled background; 0-100.
-        is_inverted (optional): Optional.
-        is_moving (optional): Optional.
+        is_inverted (optional): True, if the background fill must be applied only to the pattern
+            itself.
+        is_moving (optional): True, if the background moves slightly when the device is tilted.
 
     Example::
 
@@ -1984,9 +2120,11 @@ class ChecklistTasksDone(TelegramObject, kw_only=True):
     """Describes a service message about checklist tasks marked as done or not done.
 
     Attributes:
-        checklist_message (optional): Optional.
-        marked_as_done_task_ids (optional): Optional.
-        marked_as_not_done_task_ids (optional): Optional.
+        checklist_message (optional): Message containing the checklist whose tasks were marked as
+            done or not done.
+        marked_as_done_task_ids (optional): Identifiers of the tasks that were marked as done.
+        marked_as_not_done_task_ids (optional): Identifiers of the tasks that were marked as not
+            done.
 
     Example::
 
@@ -2003,7 +2141,8 @@ class ChecklistTasksAdded(TelegramObject, kw_only=True):
     """Describes a service message about tasks added to a checklist.
 
     Attributes:
-        checklist_message (optional): Optional.
+        checklist_message (optional): Message containing the checklist to which the tasks were
+            added.
         tasks: List of tasks added to the checklist.
 
     Example::
@@ -2063,8 +2202,10 @@ class ForumTopicCreated(TelegramObject, kw_only=True):
     Attributes:
         name: Name of the topic.
         icon_color: Color of the topic icon in RGB format.
-        icon_custom_emoji_id (optional): Optional.
-        is_name_implicit (optional): Optional.
+        icon_custom_emoji_id (optional): Unique identifier of the custom emoji shown as the topic
+            icon.
+        is_name_implicit (optional): True, if the name of the topic wasn't specified explicitly by
+            its creator and likely needs to be changed by the bot.
 
     Example::
 
@@ -2093,8 +2234,9 @@ class ForumTopicEdited(TelegramObject, kw_only=True):
     """This object represents a service message about an edited forum topic.
 
     Attributes:
-        name (optional): Optional.
-        icon_custom_emoji_id (optional): Optional.
+        name (optional): New name of the topic, if it was edited.
+        icon_custom_emoji_id (optional): New identifier of the custom emoji shown as the topic icon,
+            if it was edited; an empty string if the icon was removed.
 
     Example::
 
@@ -2144,10 +2286,10 @@ class SharedUser(TelegramObject, kw_only=True):
 
     Attributes:
         user_id: Identifier of the shared user.
-        first_name (optional): Optional.
-        last_name (optional): Optional.
-        username (optional): Optional.
-        photo (optional): Optional.
+        first_name (optional): First name of the user, if the name was requested by the bot.
+        last_name (optional): Last name of the user, if the name was requested by the bot.
+        username (optional): Username of the user, if the username was requested by the bot.
+        photo (optional): Available sizes of the chat photo, if the photo was requested by the bot.
 
     Example::
 
@@ -2185,9 +2327,10 @@ class ChatShared(TelegramObject, kw_only=True):
     Attributes:
         request_id: Identifier of the request.
         chat_id: Identifier of the shared chat.
-        title (optional): Optional.
-        username (optional): Optional.
-        photo (optional): Optional.
+        title (optional): Title of the chat, if the title was requested by the bot.
+        username (optional): Username of the chat, if the username was requested by the bot and
+            available.
+        photo (optional): Available sizes of the chat photo, if the photo was requested by the bot.
 
     Example::
 
@@ -2206,9 +2349,12 @@ class WriteAccessAllowed(TelegramObject, kw_only=True):
     """This object represents a service message about a user allowing a bot to write messages after adding it to the attachment menu, launching a Web App from a link, or accepting an explicit request from a Web App sent by the method requestWriteAccess.
 
     Attributes:
-        from_request (optional): Optional.
-        web_app_name (optional): Optional.
-        from_attachment_menu (optional): Optional.
+        from_request (optional): True, if the access was granted after the user accepted an explicit
+            request from a Web App sent by the method requestWriteAccess.
+        web_app_name (optional): Name of the Web App, if the access was granted when the Web App was
+            launched from a link.
+        from_attachment_menu (optional): True, if the access was granted when the bot was added to
+            the attachment or side menu.
 
     Example::
 
@@ -2300,7 +2446,8 @@ class DirectMessagePriceChanged(TelegramObject, kw_only=True):
     Attributes:
         are_direct_messages_enabled: True, if direct messages are enabled for the channel chat;
             False otherwise.
-        direct_message_star_count (optional): Optional.
+        direct_message_star_count (optional): The new number of Telegram Stars that must be paid by
+            users for each direct message sent to the channel.
 
     Example::
 
@@ -2316,8 +2463,8 @@ class SuggestedPostApproved(TelegramObject, kw_only=True):
     """Describes a service message about the approval of a suggested post.
 
     Attributes:
-        suggested_post_message (optional): Optional.
-        price (optional): Optional.
+        suggested_post_message (optional): Message containing the suggested post.
+        price (optional): Amount paid for the post.
         send_date: Date when the post will be published.
 
     Example::
@@ -2335,7 +2482,8 @@ class SuggestedPostApprovalFailed(TelegramObject, kw_only=True):
     """Describes a service message about the failed approval of a suggested post.
 
     Attributes:
-        suggested_post_message (optional): Optional.
+        suggested_post_message (optional): Message containing the suggested post whose approval has
+            failed.
         price: Expected price of the post.
 
     Example::
@@ -2352,8 +2500,8 @@ class SuggestedPostDeclined(TelegramObject, kw_only=True):
     """Describes a service message about the rejection of a suggested post.
 
     Attributes:
-        suggested_post_message (optional): Optional.
-        comment (optional): Optional.
+        suggested_post_message (optional): Message containing the suggested post.
+        comment (optional): Comment with which the post was declined.
 
     Example::
 
@@ -2369,10 +2517,12 @@ class SuggestedPostPaid(TelegramObject, kw_only=True):
     """Describes a service message about a successful payment for a suggested post.
 
     Attributes:
-        suggested_post_message (optional): Optional.
+        suggested_post_message (optional): Message containing the suggested post.
         currency: Currency in which the payment was made.
-        amount (optional): Optional.
-        star_amount (optional): Optional.
+        amount (optional): The amount of the currency that was received by the channel in nanograms;
+            for payments in TON grams only.
+        star_amount (optional): The amount of Telegram Stars that was received by the channel; for
+            payments in Telegram Stars only.
 
     Example::
 
@@ -2390,7 +2540,7 @@ class SuggestedPostRefunded(TelegramObject, kw_only=True):
     """Describes a service message about a payment refund for a suggested post.
 
     Attributes:
-        suggested_post_message (optional): Optional.
+        suggested_post_message (optional): Message containing the suggested post.
         reason: Reason for the refund.
 
     Example::
@@ -2407,7 +2557,8 @@ class GiveawayCreated(TelegramObject, kw_only=True):
     """This object represents a service message about the creation of a scheduled giveaway.
 
     Attributes:
-        prize_star_count (optional): Optional.
+        prize_star_count (optional): The number of Telegram Stars to be split between giveaway
+            winners; for Telegram Star giveaways only.
 
     Example::
 
@@ -2427,12 +2578,18 @@ class Giveaway(TelegramObject, kw_only=True):
             selected.
         winner_count: The number of users which are supposed to be selected as winners of the
             giveaway.
-        only_new_members (optional): Optional.
-        has_public_winners (optional): Optional.
-        prize_description (optional): Optional.
-        country_codes (optional): Optional.
-        prize_star_count (optional): Optional.
-        premium_subscription_month_count (optional): Optional.
+        only_new_members (optional): True, if only users who join the chats after the giveaway
+            started should be eligible to win.
+        has_public_winners (optional): True, if the list of giveaway winners will be visible to
+            everyone.
+        prize_description (optional): Description of additional giveaway prize.
+        country_codes (optional): A list of two-letter ISO 3166-1 alpha-2 country codes indicating
+            the countries from which eligible users for the giveaway must come.
+        prize_star_count (optional): The number of Telegram Stars to be split between giveaway
+            winners; for Telegram Star giveaways only.
+        premium_subscription_month_count (optional): The number of months the Telegram Premium
+            subscription won from the giveaway will be active for; for Telegram Premium giveaways
+            only.
 
     Example::
 
@@ -2461,13 +2618,19 @@ class GiveawayWinners(TelegramObject, kw_only=True):
             selected.
         winner_count: Total number of winners in the giveaway.
         winners: List of up to 100 winners of the giveaway.
-        additional_chat_count (optional): Optional.
-        prize_star_count (optional): Optional.
-        premium_subscription_month_count (optional): Optional.
-        unclaimed_prize_count (optional): Optional.
-        only_new_members (optional): Optional.
-        was_refunded (optional): Optional.
-        prize_description (optional): Optional.
+        additional_chat_count (optional): The number of other chats the user had to join in order to
+            be eligible for the giveaway.
+        prize_star_count (optional): The number of Telegram Stars that were split between giveaway
+            winners; for Telegram Star giveaways only.
+        premium_subscription_month_count (optional): The number of months the Telegram Premium
+            subscription won from the giveaway will be active for; for Telegram Premium giveaways
+            only.
+        unclaimed_prize_count (optional): Number of undistributed prizes.
+        only_new_members (optional): True, if only users who had joined the chats after the giveaway
+            started were eligible to win.
+        was_refunded (optional): True, if the giveaway was canceled because the payment for it was
+            refunded.
+        prize_description (optional): Description of additional giveaway prize.
 
     Example::
 
@@ -2494,9 +2657,10 @@ class GiveawayCompleted(TelegramObject, kw_only=True):
 
     Attributes:
         winner_count: Number of winners in the giveaway.
-        unclaimed_prize_count (optional): Optional.
-        giveaway_message (optional): Optional.
-        is_star_giveaway (optional): Optional.
+        unclaimed_prize_count (optional): Number of undistributed prizes.
+        giveaway_message (optional): Message with the giveaway that was completed, if it wasn't
+            deleted.
+        is_star_giveaway (optional): True, if the giveaway is a Telegram Star giveaway.
 
     Example::
 
@@ -2514,11 +2678,16 @@ class LinkPreviewOptions(TelegramObject, kw_only=True):
     """Describes the options used for link preview generation.
 
     Attributes:
-        is_disabled (optional): Optional.
-        url (optional): Optional.
-        prefer_small_media (optional): Optional.
-        prefer_large_media (optional): Optional.
-        show_above_text (optional): Optional.
+        is_disabled (optional): True, if the link preview is disabled.
+        url (optional): URL to use for the link preview.
+        prefer_small_media (optional): True, if the media in the link preview is supposed to be
+            shrunk; ignored if the URL isn't explicitly specified or media size change isn't
+            supported for the preview.
+        prefer_large_media (optional): True, if the media in the link preview is supposed to be
+            enlarged; ignored if the URL isn't explicitly specified or media size change isn't
+            supported for the preview.
+        show_above_text (optional): True, if the link preview must be shown above the message text;
+            otherwise, the link preview will be shown below the message text.
 
     Example::
 
@@ -2556,8 +2725,8 @@ class SuggestedPostInfo(TelegramObject, kw_only=True):
 
     Attributes:
         state: State of the suggested post.
-        price (optional): Optional.
-        send_date (optional): Optional.
+        price (optional): Proposed price of the post.
+        send_date (optional): Proposed send date of the post.
 
     Example::
 
@@ -2574,8 +2743,8 @@ class SuggestedPostParameters(TelegramObject, kw_only=True):
     """Contains parameters of a post that is being suggested by the bot.
 
     Attributes:
-        price (optional): Optional.
-        send_date (optional): Optional.
+        price (optional): Proposed price for the post.
+        send_date (optional): Proposed send date of the post.
 
     Example::
 
@@ -2592,7 +2761,7 @@ class DirectMessagesTopic(TelegramObject, kw_only=True):
 
     Attributes:
         topic_id: Unique identifier of the topic.
-        user (optional): Optional.
+        user (optional): Information about the user that created the topic.
 
     Example::
 
@@ -2645,8 +2814,8 @@ class File(TelegramObject, kw_only=True):
         file_id: Identifier for this file, which can be used to download or reuse the file.
         file_unique_id: Unique identifier for this file, which is supposed to be the same over time
             and for different bots.
-        file_size (optional): Optional.
-        file_path (optional): Optional.
+        file_size (optional): File size in bytes.
+        file_path (optional): File path.
 
     Example::
 
@@ -2681,12 +2850,18 @@ class ReplyKeyboardMarkup(TelegramObject, kw_only=True):
 
     Attributes:
         keyboard: Array of button rows, each represented by an Array of KeyboardButton objects.
-        is_persistent (optional): Optional.
-        resize_keyboard (optional): Optional.
-        one_time_keyboard (optional): Optional.
-        input_field_placeholder (optional): Optional.
-        selective (optional): Optional.
-        force_reply (optional): Optional.
+        is_persistent (optional): Requests clients to always show the keyboard when the regular
+            keyboard is hidden.
+        resize_keyboard (optional): Requests clients to resize the keyboard vertically for optimal
+            fit (e.g., make the keyboard smaller if there are just two rows of buttons).
+        one_time_keyboard (optional): Requests clients to hide the keyboard as soon as it's been
+            used.
+        input_field_placeholder (optional): The placeholder to be shown in the input field when the
+            keyboard is active; 1-64 characters.
+        selective (optional): Use this parameter if you want to show the keyboard to specific users
+            only.
+        force_reply (optional): Pass True if the reply interface must be shown to the user, as if
+            they had manually selected the bot's message and tapped 'Reply'.
 
     Example::
 
@@ -2708,15 +2883,23 @@ class KeyboardButton(TelegramObject, kw_only=True):
 
     Attributes:
         text: Text of the button.
-        icon_custom_emoji_id (optional): Optional.
-        style (optional): Optional.
-        request_users (optional): Optional.
-        request_chat (optional): Optional.
-        request_managed_bot (optional): Optional.
-        request_contact (optional): Optional.
-        request_location (optional): Optional.
-        request_poll (optional): Optional.
-        web_app (optional): Optional.
+        icon_custom_emoji_id (optional): Unique identifier of the custom emoji shown before the text
+            of the button.
+        style (optional): Style of the button.
+        request_users (optional): If specified, pressing the button will open a list of suitable
+            users.
+        request_chat (optional): If specified, pressing the button will open a list of suitable
+            chats.
+        request_managed_bot (optional): If specified, pressing the button will ask the user to
+            create and share a bot that will be managed by the current bot.
+        request_contact (optional): If True, the user's phone number will be sent as a contact when
+            the button is pressed.
+        request_location (optional): If True, the user's current location will be sent when the
+            button is pressed.
+        request_poll (optional): If specified, the user will be asked to create a poll and send it
+            to the bot when the button is pressed.
+        web_app (optional): If specified, the described Web App will be launched when the button is
+            pressed.
 
     Example::
 
@@ -2742,12 +2925,13 @@ class KeyboardButtonRequestUsers(TelegramObject, kw_only=True):
     Attributes:
         request_id: Signed 32-bit identifier of the request that will be received back in the
             UsersShared object.
-        user_is_bot (optional): Optional.
-        user_is_premium (optional): Optional.
-        max_quantity (optional): Optional.
-        request_name (optional): Optional.
-        request_username (optional): Optional.
-        request_photo (optional): Optional.
+        user_is_bot (optional): Pass True to request bots, pass False to request regular users.
+        user_is_premium (optional): Pass True to request premium users, pass False to request non-
+            premium users.
+        max_quantity (optional): The maximum number of users to be selected; 1-10.
+        request_name (optional): Pass True to request the users' first and last names.
+        request_username (optional): Pass True to request the users' usernames.
+        request_photo (optional): Pass True to request the users' photos.
 
     Example::
 
@@ -2772,15 +2956,19 @@ class KeyboardButtonRequestChat(TelegramObject, kw_only=True):
             ChatShared object.
         chat_is_channel: Pass True to request a channel chat, pass False to request a group or a
             supergroup chat.
-        chat_is_forum (optional): Optional.
-        chat_has_username (optional): Optional.
-        chat_is_created (optional): Optional.
-        user_administrator_rights (optional): Optional.
-        bot_administrator_rights (optional): Optional.
-        bot_is_member (optional): Optional.
-        request_title (optional): Optional.
-        request_username (optional): Optional.
-        request_photo (optional): Optional.
+        chat_is_forum (optional): Pass True to request a forum supergroup, pass False to request a
+            non-forum chat.
+        chat_has_username (optional): Pass True to request a supergroup or a channel with a
+            username, pass False to request a chat without a username.
+        chat_is_created (optional): Pass True to request a chat owned by the user.
+        user_administrator_rights (optional): A JSON-serialized object listing the required
+            administrator rights of the user in the chat.
+        bot_administrator_rights (optional): A JSON-serialized object listing the required
+            administrator rights of the bot in the chat.
+        bot_is_member (optional): Pass True to request a chat with the bot as a member.
+        request_title (optional): Pass True to request the chat's title.
+        request_username (optional): Pass True to request the chat's username.
+        request_photo (optional): Pass True to request the chat's photo.
 
     Example::
 
@@ -2806,8 +2994,8 @@ class KeyboardButtonRequestManagedBot(TelegramObject, kw_only=True):
 
     Attributes:
         request_id: Signed 32-bit identifier of the request.
-        suggested_name (optional): Optional.
-        suggested_username (optional): Optional.
+        suggested_name (optional): Suggested name for the bot.
+        suggested_username (optional): Suggested username for the bot.
 
     Example::
 
@@ -2824,7 +3012,8 @@ class KeyboardButtonPollType(TelegramObject, kw_only=True):
     """This object represents type of a poll, which is allowed to be created and sent when the corresponding button is pressed.
 
     Attributes:
-        type (optional): Optional.
+        type (optional): If quiz is passed, the user will be allowed to create only polls in the
+            quiz mode.
 
     Example::
 
@@ -2842,7 +3031,8 @@ class ReplyKeyboardRemove(TelegramObject, kw_only=True):
         remove_keyboard: Requests clients to remove the custom keyboard (user will not be able to
             summon this keyboard; if you want to hide the keyboard from sight but keep it
             accessible, use one_time_keyboard in ReplyKeyboardMarkup).
-        selective (optional): Optional.
+        selective (optional): Use this parameter if you want to remove the keyboard for specific
+            users only.
 
     Example::
 
@@ -2860,7 +3050,8 @@ class InlineKeyboardMarkup(TelegramObject, kw_only=True):
     Attributes:
         inline_keyboard: Array of button rows, each represented by an Array of InlineKeyboardButton
             objects.
-        force_reply (optional): Optional.
+        force_reply (optional): Pass True if the reply interface must be shown to the user, as if
+            they had manually selected the bot's message and tapped 'Reply'.
 
     Example::
 
@@ -2877,19 +3068,29 @@ class InlineKeyboardButton(TelegramObject, kw_only=True):
 
     Attributes:
         text: Label text on the button.
-        icon_custom_emoji_id (optional): Optional.
-        style (optional): Optional.
-        url (optional): Optional.
-        callback_data (optional): Optional.
-        web_app (optional): Optional.
-        login_url (optional): Optional.
-        switch_inline_query (optional): Optional.
-        switch_inline_query_current_chat (optional): Optional.
-        switch_inline_query_chosen_chat (optional): Optional.
-        copy_text (optional): Optional.
-        callback_game (optional): Optional.
-        pay (optional): Optional.
-        disabled (optional): Optional.
+        icon_custom_emoji_id (optional): Unique identifier of the custom emoji shown before the text
+            of the button.
+        style (optional): Style of the button.
+        url (optional): HTTP or tg:// URL to be opened when the button is pressed.
+        callback_data (optional): Data to be sent in a callback query to the bot when the button is
+            pressed, 1-64 bytes.
+        web_app (optional): Description of the Web App that will be launched when the user presses
+            the button.
+        login_url (optional): An HTTPS URL used to automatically authorize the user.
+        switch_inline_query (optional): If set, pressing the button will prompt the user to select
+            one of their chats, open that chat and insert the bot's username and the specified
+            inline query in the input field.
+        switch_inline_query_current_chat (optional): If set, pressing the button will insert the
+            bot's username and the specified inline query in the current chat's input field.
+        switch_inline_query_chosen_chat (optional): If set, pressing the button will prompt the user
+            to select one of their chats of the specified type, open that chat and insert the bot's
+            username and the specified inline query in the input field.
+        copy_text (optional): Description of the button that copies the specified text to the
+            clipboard.
+        callback_game (optional): Description of the game that will be launched when the user
+            presses the button.
+        pay (optional): Specify True, to send a Pay button.
+        disabled (optional): If set, then the button is disabled and does nothing.
 
     Example::
 
@@ -2919,9 +3120,11 @@ class LoginUrl(TelegramObject, kw_only=True):
     Attributes:
         url: An HTTPS URL to be opened with user authorization data added to the query string when
             the button is pressed.
-        forward_text (optional): Optional.
-        bot_username (optional): Optional.
-        request_write_access (optional): Optional.
+        forward_text (optional): New text of the button in forwarded messages.
+        bot_username (optional): Username of a bot, which will be used for user authorization; not
+            supported in RichMessageButton.
+        request_write_access (optional): Pass True to request the permission for your bot to send
+            messages to the user.
 
     Example::
 
@@ -2939,11 +3142,11 @@ class SwitchInlineQueryChosenChat(TelegramObject, kw_only=True):
     """This object represents an inline button that switches the current user to inline mode in a chosen chat, with an optional default inline query.
 
     Attributes:
-        query (optional): Optional.
-        allow_user_chats (optional): Optional.
-        allow_bot_chats (optional): Optional.
-        allow_group_chats (optional): Optional.
-        allow_channel_chats (optional): Optional.
+        query (optional): The default inline query to be inserted in the input field.
+        allow_user_chats (optional): True, if private chats with users can be chosen.
+        allow_bot_chats (optional): True, if private chats with bots can be chosen.
+        allow_group_chats (optional): True, if group and supergroup chats can be chosen.
+        allow_channel_chats (optional): True, if channel chats can be chosen.
 
     Example::
 
@@ -2990,12 +3193,15 @@ class CallbackQuery(TelegramObject, kw_only=True):
     Attributes:
         id: Unique identifier for this query.
         from_: Sender.
-        message (optional): Optional.
-        inline_message_id (optional): Optional.
+        message (optional): Message sent by the bot with the callback button that originated the
+            query.
+        inline_message_id (optional): Identifier of the message sent via the bot in inline mode,
+            that originated the query.
         chat_instance: Global identifier, uniquely corresponding to the chat to which the message
             with the callback button was sent.
-        data (optional): Optional.
-        game_short_name (optional): Optional.
+        data (optional): Data associated with the callback button.
+        game_short_name (optional): Short name of a Game to be returned, serves as the unique
+            identifier for the game.
 
     Example::
 
@@ -3018,8 +3224,10 @@ class ForceReply(TelegramObject, kw_only=True):
     Attributes:
         force_reply: Shows reply interface to the user, as if they had manually selected the bot's
             message and tapped 'Reply'.
-        input_field_placeholder (optional): Optional.
-        selective (optional): Optional.
+        input_field_placeholder (optional): The placeholder to be shown in the input field when the
+            reply is active; 1-64 characters.
+        selective (optional): Use this parameter if you want to force reply from specific users
+            only.
 
     Example::
 
@@ -3082,12 +3290,17 @@ class ChatInviteLink(TelegramObject, kw_only=True):
             chat administrators.
         is_primary: True, if the link is primary.
         is_revoked: True, if the link is revoked.
-        name (optional): Optional.
-        expire_date (optional): Optional.
-        member_limit (optional): Optional.
-        pending_join_request_count (optional): Optional.
-        subscription_period (optional): Optional.
-        subscription_price (optional): Optional.
+        name (optional): Invite link name.
+        expire_date (optional): Point in time (Unix timestamp) when the link will expire or has been
+            expired.
+        member_limit (optional): The maximum number of users that can be members of the chat
+            simultaneously after joining the chat via this invite link; 1-99999.
+        pending_join_request_count (optional): Number of pending join requests created using this
+            link.
+        subscription_period (optional): The number of seconds the subscription will be active for
+            before the next payment.
+        subscription_price (optional): The amount of Telegram Stars a user must pay initially and
+            after each subsequent subscription period to be a member of the chat using the link.
 
     Example::
 
@@ -3130,12 +3343,18 @@ class ChatAdministratorRights(TelegramObject, kw_only=True):
         can_edit_stories: True, if the administrator can edit stories posted by other users, post
             stories to the chat page, pin chat stories, and access the chat's story archive.
         can_delete_stories: True, if the administrator can delete stories posted by other users.
-        can_post_messages (optional): Optional.
-        can_edit_messages (optional): Optional.
-        can_pin_messages (optional): Optional.
-        can_manage_topics (optional): Optional.
-        can_manage_direct_messages (optional): Optional.
-        can_manage_tags (optional): Optional.
+        can_post_messages (optional): True, if the administrator can post messages in the channel,
+            approve suggested posts, or access channel statistics; for channels only.
+        can_edit_messages (optional): True, if the administrator can edit messages of other users
+            and can pin messages; for channels only.
+        can_pin_messages (optional): True, if the user is allowed to pin messages; for groups and
+            supergroups only.
+        can_manage_topics (optional): True, if the user is allowed to create, rename, close, and
+            reopen forum topics; for supergroups only.
+        can_manage_direct_messages (optional): True, if the administrator can manage direct messages
+            of the channel and decline suggested posts; for channels only.
+        can_manage_tags (optional): True, if the administrator can edit the tags of regular members;
+            for groups and supergroups only.
         can_send_welcome_messages: True, if the administrator can manage chat welcome messages or
             directly send them in the case of bots.
 
@@ -3174,9 +3393,12 @@ class ChatMemberUpdated(TelegramObject, kw_only=True):
         date: Date the change was done in Unix time.
         old_chat_member: Previous information about the chat member.
         new_chat_member: New information about the chat member.
-        invite_link (optional): Optional.
-        via_join_request (optional): Optional.
-        via_chat_folder_invite_link (optional): Optional.
+        invite_link (optional): Chat invite link, which was used by the user to join the chat; for
+            joining by invite link events only.
+        via_join_request (optional): True, if the user joined the chat after sending a direct join
+            request without using an invite link and being approved by an administrator.
+        via_chat_folder_invite_link (optional): True, if the user joined the chat via a chat folder
+            invite link.
 
     Example::
 
@@ -3200,7 +3422,7 @@ class ChatMemberOwner(TelegramObject, kw_only=True, tag_field="status", tag="cre
     Attributes:
         user: Information about the user.
         is_anonymous: True, if the user's presence in the chat is hidden.
-        custom_title (optional): Optional.
+        custom_title (optional): Custom title for this user.
 
     Example::
 
@@ -3243,15 +3465,21 @@ class ChatMemberAdministrator(TelegramObject, kw_only=True, tag_field="status", 
         can_edit_stories: True, if the administrator can edit stories posted by other users, post
             stories to the chat page, pin chat stories, and access the chat's story archive.
         can_delete_stories: True, if the administrator can delete stories posted by other users.
-        can_post_messages (optional): Optional.
-        can_edit_messages (optional): Optional.
-        can_pin_messages (optional): Optional.
-        can_manage_topics (optional): Optional.
-        can_manage_direct_messages (optional): Optional.
-        can_manage_tags (optional): Optional.
+        can_post_messages (optional): True, if the administrator can post messages in the channel,
+            approve suggested posts, or access channel statistics; for channels only.
+        can_edit_messages (optional): True, if the administrator can edit messages of other users
+            and can pin messages; for channels only.
+        can_pin_messages (optional): True, if the user is allowed to pin messages; for groups and
+            supergroups only.
+        can_manage_topics (optional): True, if the user is allowed to create, rename, close, and
+            reopen forum topics; for supergroups only.
+        can_manage_direct_messages (optional): True, if the administrator can manage direct messages
+            of the channel and decline suggested posts; for channels only.
+        can_manage_tags (optional): True, if the administrator can edit the tags of regular members;
+            for groups and supergroups only.
         can_send_welcome_messages: True, if the administrator can manage chat welcome messages or
             directly send them in the case of bots.
-        custom_title (optional): Optional.
+        custom_title (optional): Custom title for this user.
 
     Example::
 
@@ -3292,9 +3520,9 @@ class ChatMemberMember(TelegramObject, kw_only=True, tag_field="status", tag="me
     """Represents a chat member that has no additional privileges or restrictions.
 
     Attributes:
-        tag (optional): Optional.
+        tag (optional): Tag of the member.
         user: Information about the user.
-        until_date (optional): Optional.
+        until_date (optional): Date when the user's subscription will expire; Unix time.
 
     Example::
 
@@ -3317,7 +3545,7 @@ class ChatMemberRestricted(TelegramObject, kw_only=True, tag_field="status", tag
     """Represents a chat member that is under certain restrictions in the chat.
 
     Attributes:
-        tag (optional): Optional.
+        tag (optional): Tag of the member.
         user: Information about the user.
         is_member: True, if the user is a member of the chat at the moment of the request.
         can_send_messages: True, if the user is allowed to send text messages, rich messages,
@@ -3428,9 +3656,10 @@ class ChatJoinRequest(TelegramObject, kw_only=True):
         from_: User that sent the join request.
         user_chat_id: Identifier of a private chat with the user who sent the join request.
         date: Date the request was sent in Unix time.
-        bio (optional): Optional.
-        invite_link (optional): Optional.
-        query_id (optional): Optional.
+        bio (optional): Bio of the user.
+        invite_link (optional): Chat invite link that was used by the user to send the join request.
+        query_id (optional): Identifier of the join request query; for bots assigned to process join
+            requests only.
 
     Example::
 
@@ -3451,22 +3680,26 @@ class ChatPermissions(TelegramObject, kw_only=True):
     """Describes actions that a non-administrator user is allowed to take in a chat.
 
     Attributes:
-        can_send_messages (optional): Optional.
-        can_send_audios (optional): Optional.
-        can_send_documents (optional): Optional.
-        can_send_photos (optional): Optional.
-        can_send_videos (optional): Optional.
-        can_send_video_notes (optional): Optional.
-        can_send_voice_notes (optional): Optional.
-        can_send_polls (optional): Optional.
-        can_send_other_messages (optional): Optional.
-        can_add_web_page_previews (optional): Optional.
-        can_react_to_messages (optional): Optional.
-        can_edit_tag (optional): Optional.
-        can_change_info (optional): Optional.
-        can_invite_users (optional): Optional.
-        can_pin_messages (optional): Optional.
-        can_manage_topics (optional): Optional.
+        can_send_messages (optional): True, if the user is allowed to send text messages, rich
+            messages, contacts, giveaways, giveaway winners, invoices, locations and venues.
+        can_send_audios (optional): True, if the user is allowed to send audios.
+        can_send_documents (optional): True, if the user is allowed to send documents.
+        can_send_photos (optional): True, if the user is allowed to send photos.
+        can_send_videos (optional): True, if the user is allowed to send videos.
+        can_send_video_notes (optional): True, if the user is allowed to send video notes.
+        can_send_voice_notes (optional): True, if the user is allowed to send voice notes.
+        can_send_polls (optional): True, if the user is allowed to send polls and checklists.
+        can_send_other_messages (optional): True, if the user is allowed to send animations, games,
+            stickers and use inline bots.
+        can_add_web_page_previews (optional): True, if the user is allowed to add web page previews
+            to their messages.
+        can_react_to_messages (optional): True, if the user is allowed to react to messages.
+        can_edit_tag (optional): True, if the user is allowed to edit their own tag.
+        can_change_info (optional): True, if the user is allowed to change the chat title, photo and
+            other settings.
+        can_invite_users (optional): True, if the user is allowed to invite new users to the chat.
+        can_pin_messages (optional): True, if the user is allowed to pin messages.
+        can_manage_topics (optional): True, if the user is allowed to create forum topics.
 
     Example::
 
@@ -3498,7 +3731,7 @@ class Birthdate(TelegramObject, kw_only=True):
     Attributes:
         day: Day of the user's birth; 1-31.
         month: Month of the user's birth; 1-12.
-        year (optional): Optional.
+        year (optional): Year of the user's birth.
 
     Example::
 
@@ -3515,9 +3748,9 @@ class BusinessIntro(TelegramObject, kw_only=True):
     """Contains information about the start page settings of a Telegram Business account.
 
     Attributes:
-        title (optional): Optional.
-        message (optional): Optional.
-        sticker (optional): Optional.
+        title (optional): Title text of the business intro.
+        message (optional): Message text of the business intro.
+        sticker (optional): Sticker of the business intro.
 
     Example::
 
@@ -3535,7 +3768,7 @@ class BusinessLocation(TelegramObject, kw_only=True):
 
     Attributes:
         address: Address of the business.
-        location (optional): Optional.
+        location (optional): Location of the business.
 
     Example::
 
@@ -3591,7 +3824,8 @@ class UserRating(TelegramObject, kw_only=True):
             and services.
         rating: Numerical value of the user's rating; the higher the rating, the better.
         current_level_rating: The rating value required to get the current level.
-        next_level_rating (optional): Optional.
+        next_level_rating (optional): The rating value required to get to the next level; omitted if
+            the maximum level was reached.
 
     Example::
 
@@ -3637,9 +3871,9 @@ class LocationAddress(TelegramObject, kw_only=True):
     Attributes:
         country_code: The two-letter ISO 3166-1 alpha-2 country code of the country where the
             location is located.
-        state (optional): Optional.
-        city (optional): Optional.
-        street (optional): Optional.
+        state (optional): State of the location.
+        city (optional): City of the location.
+        street (optional): Street address of the location.
 
     Example::
 
@@ -3659,7 +3893,7 @@ class StoryAreaTypeLocation(TelegramObject, kw_only=True, tag_field="type", tag=
     Attributes:
         latitude: Location latitude in degrees.
         longitude: Location longitude in degrees.
-        address (optional): Optional.
+        address (optional): Address of the location.
 
     Example::
 
@@ -3683,8 +3917,8 @@ class StoryAreaTypeSuggestedReaction(TelegramObject, kw_only=True, tag_field="ty
 
     Attributes:
         reaction_type: Type of the reaction.
-        is_dark (optional): Optional.
-        is_flipped (optional): Optional.
+        is_dark (optional): Pass True if the reaction area has a dark background.
+        is_flipped (optional): Pass True if reaction area corner is flipped.
 
     Example::
 
@@ -3885,8 +4119,9 @@ class MessageReactionUpdated(TelegramObject, kw_only=True):
     Attributes:
         chat: The chat containing the message the user reacted to.
         message_id: Unique identifier of the message inside the chat.
-        user (optional): Optional.
-        actor_chat (optional): Optional.
+        user (optional): The user that changed the reaction, if the user isn't anonymous.
+        actor_chat (optional): The chat on behalf of which the reaction was changed, if the user is
+            anonymous.
         date: Date of the change in Unix time.
         old_reaction: Previous list of reaction types that were set by the user.
         new_reaction: New list of reaction types that have been set by the user.
@@ -3934,8 +4169,10 @@ class ForumTopic(TelegramObject, kw_only=True):
         message_thread_id: Unique identifier of the forum topic.
         name: Name of the topic.
         icon_color: Color of the topic icon in RGB format.
-        icon_custom_emoji_id (optional): Optional.
-        is_name_implicit (optional): Optional.
+        icon_custom_emoji_id (optional): Unique identifier of the custom emoji shown as the topic
+            icon.
+        is_name_implicit (optional): True, if the name of the topic wasn't specified explicitly by
+            its creator and likely needs to be changed by the bot.
 
     Example::
 
@@ -3976,16 +4213,24 @@ class Gift(TelegramObject, kw_only=True):
         id: Unique identifier of the gift.
         sticker: The sticker that represents the gift.
         star_count: The number of Telegram Stars that must be paid to send the sticker.
-        upgrade_star_count (optional): Optional.
-        is_premium (optional): Optional.
-        has_colors (optional): Optional.
-        total_count (optional): Optional.
-        remaining_count (optional): Optional.
-        personal_total_count (optional): Optional.
-        personal_remaining_count (optional): Optional.
-        background (optional): Optional.
-        unique_gift_variant_count (optional): Optional.
-        publisher_chat (optional): Optional.
+        upgrade_star_count (optional): The number of Telegram Stars that must be paid to upgrade the
+            gift to a unique one.
+        is_premium (optional): True, if the gift can only be purchased by Telegram Premium
+            subscribers.
+        has_colors (optional): True, if the gift can be used (after being upgraded) to customize a
+            user's appearance.
+        total_count (optional): The total number of gifts of this type that can be sent by all
+            users; for limited gifts only.
+        remaining_count (optional): The number of remaining gifts of this type that can be sent by
+            all users; for limited gifts only.
+        personal_total_count (optional): The total number of gifts of this type that can be sent by
+            the bot; for limited gifts only.
+        personal_remaining_count (optional): The number of remaining gifts of this type that can be
+            sent by the bot; for limited gifts only.
+        background (optional): Background of the gift.
+        unique_gift_variant_count (optional): The total number of different unique gifts that can be
+            obtained by upgrading the gift.
+        publisher_chat (optional): Information about the chat that published the gift.
 
     Example::
 
@@ -4031,7 +4276,7 @@ class UniqueGiftModel(TelegramObject, kw_only=True):
         sticker: The sticker that represents the unique gift.
         rarity_per_mille: The number of unique gifts that receive this model for every 1000 gift
             upgrades.
-        rarity (optional): Optional.
+        rarity (optional): Rarity of the model if it is a crafted model.
 
     Example::
 
@@ -4142,11 +4387,16 @@ class UniqueGift(TelegramObject, kw_only=True):
         model: Model of the gift.
         symbol: Symbol of the gift.
         backdrop: Backdrop of the gift.
-        is_premium (optional): Optional.
-        is_burned (optional): Optional.
-        is_from_blockchain (optional): Optional.
-        colors (optional): Optional.
-        publisher_chat (optional): Optional.
+        is_premium (optional): True, if the original regular gift was exclusively purchaseable by
+            Telegram Premium subscribers.
+        is_burned (optional): True, if the gift was used to craft another gift and isn't available
+            anymore.
+        is_from_blockchain (optional): True, if the gift is assigned from the TON blockchain and
+            can't be resold or transferred in Telegram.
+        colors (optional): The color scheme that can be used by the gift's owner for the chat's
+            name, replies to messages and link previews; for business account gifts and gifts that
+            are currently on sale only.
+        publisher_chat (optional): Information about the chat that published the gift.
 
     Example::
 
@@ -4173,15 +4423,20 @@ class GiftInfo(TelegramObject, kw_only=True):
 
     Attributes:
         gift: Information about the gift.
-        owned_gift_id (optional): Optional.
-        convert_star_count (optional): Optional.
-        prepaid_upgrade_star_count (optional): Optional.
-        is_upgrade_separate (optional): Optional.
-        can_be_upgraded (optional): Optional.
-        text (optional): Optional.
-        entities (optional): Optional.
-        is_private (optional): Optional.
-        unique_gift_number (optional): Optional.
+        owned_gift_id (optional): Unique identifier of the received gift for the bot; only present
+            for gifts received on behalf of business accounts.
+        convert_star_count (optional): Number of Telegram Stars that can be claimed by the receiver
+            by converting the gift; omitted if conversion to Telegram Stars is impossible.
+        prepaid_upgrade_star_count (optional): Number of Telegram Stars that were prepaid for the
+            ability to upgrade the gift.
+        is_upgrade_separate (optional): True, if the gift's upgrade was purchased after the gift was
+            sent.
+        can_be_upgraded (optional): True, if the gift can be upgraded to a unique gift.
+        text (optional): Text of the message that was added to the gift.
+        entities (optional): Special entities that appear in the text.
+        is_private (optional): True, if the sender and gift text are shown only to the gift
+            receiver; otherwise, everyone will be able to see them.
+        unique_gift_number (optional): Unique number reserved for this gift when upgraded.
 
     Example::
 
@@ -4207,14 +4462,20 @@ class UniqueGiftInfo(TelegramObject, kw_only=True):
     Attributes:
         gift: Information about the gift.
         origin: Origin of the gift.
-        text (optional): Optional.
-        entities (optional): Optional.
-        is_private (optional): Optional.
-        last_resale_currency (optional): Optional.
-        last_resale_amount (optional): Optional.
-        owned_gift_id (optional): Optional.
-        transfer_star_count (optional): Optional.
-        next_transfer_date (optional): Optional.
+        text (optional): Text of the message that was added to the gift.
+        entities (optional): Special entities that appear in the text.
+        is_private (optional): True, if the sender and gift text are shown only to the gift
+            receiver; otherwise, everyone will be able to see them.
+        last_resale_currency (optional): For gifts bought from other users, the currency in which
+            the payment for the gift was done.
+        last_resale_amount (optional): For gifts bought from other users, the price paid for the
+            gift in either Telegram Stars or nanograms.
+        owned_gift_id (optional): Unique identifier of the received gift for the bot; only present
+            for gifts received on behalf of business accounts.
+        transfer_star_count (optional): Number of Telegram Stars that must be paid to transfer the
+            gift; omitted if the bot cannot transfer the gift.
+        next_transfer_date (optional): Point in time (Unix timestamp) when the gift can be
+            transferred.
 
     Example::
 
@@ -4239,19 +4500,27 @@ class OwnedGiftRegular(TelegramObject, kw_only=True, tag_field="type", tag="regu
 
     Attributes:
         gift: Information about the regular gift.
-        owned_gift_id (optional): Optional.
-        sender_user (optional): Optional.
+        owned_gift_id (optional): Unique identifier of the gift for the bot; for gifts received on
+            behalf of business accounts only.
+        sender_user (optional): Sender of the gift if it is a known user.
         send_date: Date the gift was sent in Unix time.
-        text (optional): Optional.
-        entities (optional): Optional.
-        is_private (optional): Optional.
-        is_saved (optional): Optional.
-        can_be_upgraded (optional): Optional.
-        was_refunded (optional): Optional.
-        convert_star_count (optional): Optional.
-        prepaid_upgrade_star_count (optional): Optional.
-        is_upgrade_separate (optional): Optional.
-        unique_gift_number (optional): Optional.
+        text (optional): Text of the message that was added to the gift.
+        entities (optional): Special entities that appear in the text.
+        is_private (optional): True, if the sender and gift text are shown only to the gift
+            receiver; otherwise, everyone will be able to see them.
+        is_saved (optional): True, if the gift is displayed on the account's profile page; for gifts
+            received on behalf of business accounts only.
+        can_be_upgraded (optional): True, if the gift can be upgraded to a unique gift; for gifts
+            received on behalf of business accounts only.
+        was_refunded (optional): True, if the gift was refunded and isn't available anymore.
+        convert_star_count (optional): Number of Telegram Stars that can be claimed by the receiver
+            instead of the gift; omitted if the gift cannot be converted to Telegram Stars; for
+            gifts received on behalf of business accounts only.
+        prepaid_upgrade_star_count (optional): Number of Telegram Stars that were paid for the
+            ability to upgrade the gift.
+        is_upgrade_separate (optional): True, if the gift's upgrade was purchased after the gift was
+            sent; for gifts received on behalf of business accounts only.
+        unique_gift_number (optional): Unique number reserved for this gift when upgraded.
 
     Example::
 
@@ -4286,13 +4555,18 @@ class OwnedGiftUnique(TelegramObject, kw_only=True, tag_field="type", tag="uniqu
 
     Attributes:
         gift: Information about the unique gift.
-        owned_gift_id (optional): Optional.
-        sender_user (optional): Optional.
+        owned_gift_id (optional): Unique identifier of the received gift for the bot; for gifts
+            received on behalf of business accounts only.
+        sender_user (optional): Sender of the gift if it is a known user.
         send_date: Date the gift was sent in Unix time.
-        is_saved (optional): Optional.
-        can_be_transferred (optional): Optional.
-        transfer_star_count (optional): Optional.
-        next_transfer_date (optional): Optional.
+        is_saved (optional): True, if the gift is displayed on the account's profile page; for gifts
+            received on behalf of business accounts only.
+        can_be_transferred (optional): True, if the gift can be transferred to another owner; for
+            gifts received on behalf of business accounts only.
+        transfer_star_count (optional): Number of Telegram Stars that must be paid to transfer the
+            gift; omitted if the bot cannot transfer the gift.
+        next_transfer_date (optional): Point in time (Unix timestamp) when the gift can be
+            transferred.
 
     Example::
 
@@ -4322,7 +4596,7 @@ class OwnedGifts(TelegramObject, kw_only=True):
     Attributes:
         total_count: The total number of gifts owned by the user or the chat.
         gifts: The list of gifts.
-        next_offset (optional): Optional.
+        next_offset (optional): Offset for the next request.
 
     Example::
 
@@ -4340,7 +4614,8 @@ class BotAccessSettings(TelegramObject, kw_only=True):
 
     Attributes:
         is_access_restricted: True, if only selected users can access the bot.
-        added_users (optional): Optional.
+        added_users (optional): The list of other users who have access to the bot if the access is
+            restricted.
 
     Example::
 
@@ -4381,7 +4656,8 @@ class StarAmount(TelegramObject, kw_only=True):
 
     Attributes:
         amount: Integer amount of Telegram Stars, rounded to 0; can be negative.
-        nanostar_amount (optional): Optional.
+        nanostar_amount (optional): The number of 1/1000000000 shares of Telegram Stars; from
+            -999999999 to 999999999; can be negative if and only if amount is non-positive.
 
     Example::
 
@@ -4399,7 +4675,8 @@ class BotCommand(TelegramObject, kw_only=True):
     Attributes:
         command: Text of the command; 1-32 characters.
         description: Description of the command; 1-256 characters.
-        is_ephemeral (optional): Optional.
+        is_ephemeral (optional): True, if the command sends an ephemeral message, which can be seen
+            only by the sender of the message and the bot.
 
     Example::
 
@@ -4692,9 +4969,12 @@ class ChatBoostSourceGiveaway(TelegramObject, kw_only=True, tag_field="source", 
     Attributes:
         giveaway_message_id: Identifier of a message in the chat with the giveaway; the message
             could have been deleted already.
-        user (optional): Optional.
-        prize_star_count (optional): Optional.
-        is_unclaimed (optional): Optional.
+        user (optional): User that won the prize in the giveaway if any; for Telegram Premium
+            giveaways only.
+        prize_star_count (optional): The number of Telegram Stars to be split between giveaway
+            winners; for Telegram Star giveaways only.
+        is_unclaimed (optional): True, if the giveaway was completed, but there was no user to win
+            the prize.
 
     Example::
 
@@ -4778,7 +5058,8 @@ class ChatOwnerLeft(TelegramObject, kw_only=True):
     """Describes a service message about the chat owner leaving the chat.
 
     Attributes:
-        new_owner (optional): Optional.
+        new_owner (optional): The user who will become the new owner of the chat if the previous
+            owner does not return to the chat.
 
     Example::
 
@@ -4823,20 +5104,31 @@ class BusinessBotRights(TelegramObject, kw_only=True):
     """Represents the rights of a business bot.
 
     Attributes:
-        can_reply (optional): Optional.
-        can_read_messages (optional): Optional.
-        can_delete_sent_messages (optional): Optional.
-        can_delete_all_messages (optional): Optional.
-        can_edit_name (optional): Optional.
-        can_edit_bio (optional): Optional.
-        can_edit_profile_photo (optional): Optional.
-        can_edit_username (optional): Optional.
-        can_change_gift_settings (optional): Optional.
-        can_view_gifts_and_stars (optional): Optional.
-        can_convert_gifts_to_stars (optional): Optional.
-        can_transfer_and_upgrade_gifts (optional): Optional.
-        can_transfer_stars (optional): Optional.
-        can_manage_stories (optional): Optional.
+        can_reply (optional): True, if the bot can send and edit messages in the private chats that
+            had incoming messages in the last 24 hours.
+        can_read_messages (optional): True, if the bot can mark incoming private messages as read.
+        can_delete_sent_messages (optional): True, if the bot can delete messages sent by the bot.
+        can_delete_all_messages (optional): True, if the bot can delete all private messages in
+            managed chats.
+        can_edit_name (optional): True, if the bot can edit the first and last name of the business
+            account.
+        can_edit_bio (optional): True, if the bot can edit the bio of the business account.
+        can_edit_profile_photo (optional): True, if the bot can edit the profile photo of the
+            business account.
+        can_edit_username (optional): True, if the bot can edit the username of the business
+            account.
+        can_change_gift_settings (optional): True, if the bot can change the privacy settings
+            pertaining to gifts for the business account.
+        can_view_gifts_and_stars (optional): True, if the bot can view gifts and the amount of
+            Telegram Stars owned by the business account.
+        can_convert_gifts_to_stars (optional): True, if the bot can convert regular gifts owned by
+            the business account to Telegram Stars.
+        can_transfer_and_upgrade_gifts (optional): True, if the bot can transfer and upgrade gifts
+            owned by the business account.
+        can_transfer_stars (optional): True, if the bot can transfer Telegram Stars received by the
+            business account to its own account, or use them to upgrade and transfer gifts.
+        can_manage_stories (optional): True, if the bot can post, edit and delete stories on behalf
+            of the business account.
 
     Example::
 
@@ -4869,7 +5161,7 @@ class BusinessConnection(TelegramObject, kw_only=True):
         user_chat_id: Identifier of a private chat with the user who created the business
             connection.
         date: Date the connection was established in Unix time.
-        rights (optional): Optional.
+        rights (optional): Rights of the business bot.
         is_enabled: True, if the connection is active.
 
     Example::
@@ -4910,7 +5202,7 @@ class SentWebAppMessage(TelegramObject, kw_only=True):
     """Describes an inline message sent by a Web App on behalf of a user.
 
     Attributes:
-        inline_message_id (optional): Optional.
+        inline_message_id (optional): Identifier of the sent inline message.
 
     Example::
 
@@ -4972,8 +5264,10 @@ class ResponseParameters(TelegramObject, kw_only=True):
     """Describes why a request was unsuccessful.
 
     Attributes:
-        migrate_to_chat_id (optional): Optional.
-        retry_after (optional): Optional.
+        migrate_to_chat_id (optional): The group has been migrated to a supergroup with the
+            specified identifier.
+        retry_after (optional): In case of exceeding flood control, the number of seconds left to
+            wait before the request can be repeated.
 
     Example::
 
@@ -4990,15 +5284,20 @@ class InputMediaAnimation(TelegramObject, kw_only=True, tag_field="type", tag="a
 
     Attributes:
         media: File to send.
-        thumbnail (optional): Optional.
-        caption (optional): Optional.
-        parse_mode (optional): Optional.
-        caption_entities (optional): Optional.
-        show_caption_above_media (optional): Optional.
-        width (optional): Optional.
-        height (optional): Optional.
-        duration (optional): Optional.
-        has_spoiler (optional): Optional.
+        thumbnail (optional): Thumbnail of the file sent; can be ignored if thumbnail generation for
+            the file is supported server-side.
+        caption (optional): Caption of the animation to be sent, 0-1024 characters after entities
+            parsing.
+        parse_mode (optional): Mode for parsing entities in the animation caption.
+        caption_entities (optional): List of special entities that appear in the caption, which can
+            be specified instead of parse_mode.
+        show_caption_above_media (optional): Pass True if the caption must be shown above the
+            message media.
+        width (optional): Animation width.
+        height (optional): Animation height.
+        duration (optional): Animation duration in seconds.
+        has_spoiler (optional): Pass True if the animation needs to be covered with a spoiler
+            animation.
 
     Example::
 
@@ -5029,13 +5328,16 @@ class InputMediaAudio(TelegramObject, kw_only=True, tag_field="type", tag="audio
 
     Attributes:
         media: File to send.
-        thumbnail (optional): Optional.
-        caption (optional): Optional.
-        parse_mode (optional): Optional.
-        caption_entities (optional): Optional.
-        duration (optional): Optional.
-        performer (optional): Optional.
-        title (optional): Optional.
+        thumbnail (optional): Thumbnail of the file sent; can be ignored if thumbnail generation for
+            the file is supported server-side.
+        caption (optional): Caption of the audio to be sent, 0-1024 characters after entities
+            parsing.
+        parse_mode (optional): Mode for parsing entities in the audio caption.
+        caption_entities (optional): List of special entities that appear in the caption, which can
+            be specified instead of parse_mode.
+        duration (optional): Duration of the audio in seconds.
+        performer (optional): Performer of the audio.
+        title (optional): Title of the audio.
 
     Example::
 
@@ -5064,11 +5366,15 @@ class InputMediaDocument(TelegramObject, kw_only=True, tag_field="type", tag="do
 
     Attributes:
         media: File to send.
-        thumbnail (optional): Optional.
-        caption (optional): Optional.
-        parse_mode (optional): Optional.
-        caption_entities (optional): Optional.
-        disable_content_type_detection (optional): Optional.
+        thumbnail (optional): Thumbnail of the file sent; can be ignored if thumbnail generation for
+            the file is supported server-side.
+        caption (optional): Caption of the document to be sent, 0-1024 characters after entities
+            parsing.
+        parse_mode (optional): Mode for parsing entities in the document caption.
+        caption_entities (optional): List of special entities that appear in the caption, which can
+            be specified instead of parse_mode.
+        disable_content_type_detection (optional): Disables automatic server-side content type
+            detection for files uploaded using multipart/form-data.
 
     Example::
 
@@ -5117,11 +5423,15 @@ class InputMediaLivePhoto(TelegramObject, kw_only=True, tag_field="type", tag="l
     Attributes:
         media: Video of the live photo to send.
         photo: The static photo to send.
-        caption (optional): Optional.
-        parse_mode (optional): Optional.
-        caption_entities (optional): Optional.
-        show_caption_above_media (optional): Optional.
-        has_spoiler (optional): Optional.
+        caption (optional): Caption of the live photo to be sent, 0-1024 characters after entities
+            parsing.
+        parse_mode (optional): Mode for parsing entities in the live photo caption.
+        caption_entities (optional): List of special entities that appear in the caption, which can
+            be specified instead of parse_mode.
+        show_caption_above_media (optional): Pass True if the caption must be shown above the
+            message media.
+        has_spoiler (optional): Pass True if the live photo needs to be covered with a spoiler
+            animation.
 
     Example::
 
@@ -5150,7 +5460,8 @@ class InputMediaLocation(TelegramObject, kw_only=True, tag_field="type", tag="lo
     Attributes:
         latitude: Latitude of the location.
         longitude: Longitude of the location.
-        horizontal_accuracy (optional): Optional.
+        horizontal_accuracy (optional): The radius of uncertainty for the location, measured in
+            meters; 0-1500.
 
     Example::
 
@@ -5174,11 +5485,14 @@ class InputMediaPhoto(TelegramObject, kw_only=True, tag_field="type", tag="photo
 
     Attributes:
         media: File to send.
-        caption (optional): Optional.
-        parse_mode (optional): Optional.
-        caption_entities (optional): Optional.
-        show_caption_above_media (optional): Optional.
-        has_spoiler (optional): Optional.
+        caption (optional): Caption of the photo to be sent, 0-1024 characters after entities
+            parsing.
+        parse_mode (optional): Mode for parsing entities in the photo caption.
+        caption_entities (optional): List of special entities that appear in the caption, which can
+            be specified instead of parse_mode.
+        show_caption_above_media (optional): Pass True if the caption must be shown above the
+            message media.
+        has_spoiler (optional): Pass True if the photo needs to be covered with a spoiler animation.
 
     Example::
 
@@ -5205,7 +5519,7 @@ class InputMediaSticker(TelegramObject, kw_only=True, tag_field="type", tag="sti
 
     Attributes:
         media: File to send.
-        emoji (optional): Optional.
+        emoji (optional): Emoji associated with the sticker; only for just uploaded stickers.
 
     Example::
 
@@ -5231,10 +5545,10 @@ class InputMediaVenue(TelegramObject, kw_only=True, tag_field="type", tag="venue
         longitude: Longitude of the location.
         title: Name of the venue.
         address: Address of the venue.
-        foursquare_id (optional): Optional.
-        foursquare_type (optional): Optional.
-        google_place_id (optional): Optional.
-        google_place_type (optional): Optional.
+        foursquare_id (optional): Foursquare identifier of the venue.
+        foursquare_type (optional): Foursquare type of the venue, if known.
+        google_place_id (optional): Google Places identifier of the venue.
+        google_place_type (optional): Google Places type of the venue.
 
     Example::
 
@@ -5263,18 +5577,22 @@ class InputMediaVideo(TelegramObject, kw_only=True, tag_field="type", tag="video
 
     Attributes:
         media: File to send.
-        thumbnail (optional): Optional.
-        cover (optional): Optional.
-        start_timestamp (optional): Optional.
-        caption (optional): Optional.
-        parse_mode (optional): Optional.
-        caption_entities (optional): Optional.
-        show_caption_above_media (optional): Optional.
-        width (optional): Optional.
-        height (optional): Optional.
-        duration (optional): Optional.
-        supports_streaming (optional): Optional.
-        has_spoiler (optional): Optional.
+        thumbnail (optional): Thumbnail of the file sent; can be ignored if thumbnail generation for
+            the file is supported server-side.
+        cover (optional): Cover for the video in the message.
+        start_timestamp (optional): Start timestamp for the video in the message.
+        caption (optional): Caption of the video to be sent, 0-1024 characters after entities
+            parsing.
+        parse_mode (optional): Mode for parsing entities in the video caption.
+        caption_entities (optional): List of special entities that appear in the caption, which can
+            be specified instead of parse_mode.
+        show_caption_above_media (optional): Pass True if the caption must be shown above the
+            message media.
+        width (optional): Video width.
+        height (optional): Video height.
+        duration (optional): Video duration in seconds.
+        supports_streaming (optional): Pass True if the uploaded video is suitable for streaming.
+        has_spoiler (optional): Pass True if the video needs to be covered with a spoiler animation.
 
     Example::
 
@@ -5309,10 +5627,12 @@ class InputMediaVoiceNote(TelegramObject, kw_only=True):
     Attributes:
         type: Type of the media, must be voice_note.
         media: File to send.
-        caption (optional): Optional.
-        parse_mode (optional): Optional.
-        caption_entities (optional): Optional.
-        duration (optional): Optional.
+        caption (optional): Caption of the voice message to be sent, 0-1024 characters after
+            entities parsing.
+        parse_mode (optional): Mode for parsing entities in the voice message caption.
+        caption_entities (optional): List of special entities that appear in the caption, which can
+            be specified instead of parse_mode.
+        duration (optional): Duration of the voice message in seconds.
 
     Example::
 
@@ -5388,13 +5708,14 @@ class InputPaidMediaVideo(TelegramObject, kw_only=True, tag_field="type", tag="v
 
     Attributes:
         media: File to send.
-        thumbnail (optional): Optional.
-        cover (optional): Optional.
-        start_timestamp (optional): Optional.
-        width (optional): Optional.
-        height (optional): Optional.
-        duration (optional): Optional.
-        supports_streaming (optional): Optional.
+        thumbnail (optional): Thumbnail of the file sent; can be ignored if thumbnail generation for
+            the file is supported server-side.
+        cover (optional): Cover for the video in the message.
+        start_timestamp (optional): Start timestamp for the video in the message.
+        width (optional): Video width.
+        height (optional): Video height.
+        duration (optional): Video duration in seconds.
+        supports_streaming (optional): Pass True if the uploaded video is suitable for streaming.
 
     Example::
 
@@ -5444,7 +5765,8 @@ class InputProfilePhotoAnimated(TelegramObject, kw_only=True, tag_field="type", 
 
     Attributes:
         animation: The animated profile photo.
-        main_frame_timestamp (optional): Optional.
+        main_frame_timestamp (optional): Timestamp in seconds of the frame that will be used as the
+            static profile photo.
 
     Example::
 
@@ -5488,9 +5810,10 @@ class InputStoryContentVideo(TelegramObject, kw_only=True, tag_field="type", tag
 
     Attributes:
         video: The video to post as a story.
-        duration (optional): Optional.
-        cover_frame_timestamp (optional): Optional.
-        is_animation (optional): Optional.
+        duration (optional): Precise duration of the video in seconds; 0-60.
+        cover_frame_timestamp (optional): Timestamp in seconds of the frame that will be used as the
+            static cover for the story.
+        is_animation (optional): Pass True if the video has no sound.
 
     Example::
 
@@ -5522,14 +5845,18 @@ class Sticker(TelegramObject, kw_only=True):
         height: Sticker height.
         is_animated: True, if the sticker is animated.
         is_video: True, if the sticker is a video sticker.
-        thumbnail (optional): Optional.
-        emoji (optional): Optional.
-        set_name (optional): Optional.
-        premium_animation (optional): Optional.
-        mask_position (optional): Optional.
-        custom_emoji_id (optional): Optional.
-        needs_repainting (optional): Optional.
-        file_size (optional): Optional.
+        thumbnail (optional): Sticker thumbnail in the .WEBP or .JPG format.
+        emoji (optional): Emoji associated with the sticker.
+        set_name (optional): Name of the sticker set to which the sticker belongs.
+        premium_animation (optional): For premium regular stickers, premium animation for the
+            sticker.
+        mask_position (optional): For mask stickers, the position where the mask should be placed.
+        custom_emoji_id (optional): For custom emoji stickers, unique identifier of the custom
+            emoji.
+        needs_repainting (optional): True, if the sticker must be repainted to a text color in
+            messages, the color of the Telegram Premium badge in emoji status, white color on chat
+            photos, or another appropriate color in other places.
+        file_size (optional): File size in bytes.
 
     Example::
 
@@ -5563,7 +5890,7 @@ class StickerSet(TelegramObject, kw_only=True):
         sticker_type: Type of stickers in the set, currently one of "regular", "mask",
             "custom_emoji".
         stickers: List of all set stickers.
-        thumbnail (optional): Optional.
+        thumbnail (optional): Sticker set thumbnail in the .WEBP, .TGS, or .WEBM format.
 
     Example::
 
@@ -5609,8 +5936,9 @@ class InputSticker(TelegramObject, kw_only=True):
         format: Format of the added sticker, must be one of "static" for a .WEBP or .PNG image,
             "animated" for a .TGS animation, "video" for a .WEBM video.
         emoji_list: List of 1-20 emoji associated with the sticker.
-        mask_position (optional): Optional.
-        keywords (optional): Optional.
+        mask_position (optional): Position where the mask should be placed on faces.
+        keywords (optional): List of 0-20 search keywords for the sticker with total length of up to
+            64 characters.
 
     Example::
 
@@ -5630,7 +5958,7 @@ class RichMessage(TelegramObject, kw_only=True):
 
     Attributes:
         blocks: Content of the message.
-        is_rtl (optional): Optional.
+        is_rtl (optional): True, if the rich message must be shown right-to-left.
 
     Example::
 
@@ -5646,12 +5974,16 @@ class InputRichMessage(TelegramObject, kw_only=True):
     """Describes a rich message to be sent.
 
     Attributes:
-        blocks (optional): Optional.
-        html (optional): Optional.
-        markdown (optional): Optional.
-        media (optional): Optional.
-        is_rtl (optional): Optional.
-        skip_entity_detection (optional): Optional.
+        blocks (optional): Content of the rich message to send described as a list of blocks.
+        html (optional): Content of the rich message to send described using HTML formatting.
+        markdown (optional): Content of the rich message to send described using Markdown
+            formatting.
+        media (optional): List of media that are specified in the markdown or html fields using
+            tg://photo?id=, tg://video?id=, tg://document?id=, and tg://audio?id= links.
+        is_rtl (optional): Pass True if the rich message must be shown right-to-left.
+        skip_entity_detection (optional): Pass True to skip automatic detection of entities (e.g.,
+            URLs, email addresses, username mentions, hashtags, cashtags, bot commands, or phone
+            numbers) in the text.
 
     Example::
 
@@ -5690,16 +6022,23 @@ class RichMessageButton(TelegramObject, kw_only=True):
 
     Attributes:
         text: Text of the button.
-        style (optional): Optional.
-        url (optional): Optional.
-        callback_data (optional): Optional.
-        web_app (optional): Optional.
-        login_url (optional): Optional.
-        switch_inline_query (optional): Optional.
-        switch_inline_query_current_chat (optional): Optional.
-        switch_inline_query_chosen_chat (optional): Optional.
-        copy_text (optional): Optional.
-        disabled (optional): Optional.
+        style (optional): Style of the button.
+        url (optional): HTTP or tg:// URL to be opened when the button is pressed.
+        callback_data (optional): Data to be sent in a callback query to the bot when the button is
+            pressed, 1-64 bytes.
+        web_app (optional): Description of the Web App that will be launched when the user presses
+            the button.
+        login_url (optional): An HTTPS URL used to automatically authorize the user.
+        switch_inline_query (optional): If set, pressing the button will prompt the user to select
+            one of their chats, open that chat and insert the bot's username and the specified
+            inline query in the input field.
+        switch_inline_query_current_chat (optional): If set, pressing the button will insert the
+            bot's username and the specified inline query in the current chat's input field.
+        switch_inline_query_chosen_chat (optional): If set, pressing the button will prompt the user
+            to select one of their chats of the specified type, open that chat and insert the bot's
+            username and the specified inline query in the input field.
+        copy_text (optional): A button that copies the specified text to the clipboard.
+        disabled (optional): If set, then the button is disabled and does nothing.
 
     Example::
 
@@ -6197,7 +6536,7 @@ class RichBlockCaption(TelegramObject, kw_only=True):
 
     Attributes:
         text: Block caption.
-        credit (optional): Optional.
+        credit (optional): Block credit which corresponds to the HTML tag <cite>.
 
     Example::
 
@@ -6213,10 +6552,10 @@ class RichBlockTableCell(TelegramObject, kw_only=True):
     """Cell in a table.
 
     Attributes:
-        text (optional): Optional.
-        is_header (optional): Optional.
-        colspan (optional): Optional.
-        rowspan (optional): Optional.
+        text (optional): Text in the cell.
+        is_header (optional): True, if the cell is a header cell.
+        colspan (optional): The number of columns the cell spans if it is bigger than 1.
+        rowspan (optional): The number of rows the cell spans if it is bigger than 1.
         align: Horizontal cell content alignment.
         valign: Vertical cell content alignment.
 
@@ -6240,10 +6579,12 @@ class RichBlockListItem(TelegramObject, kw_only=True):
     Attributes:
         label: Label of the item.
         blocks: The content of the item.
-        has_checkbox (optional): Optional.
-        is_checked (optional): Optional.
-        value (optional): Optional.
-        type (optional): Optional.
+        has_checkbox (optional): True, if the item has a checkbox.
+        is_checked (optional): True, if the item has a checked checkbox.
+        value (optional): For ordered lists, the numeric value of the item label.
+        type (optional): For ordered lists, the type of the item label; must be one of "a" for
+            lowercase letters, "A" for uppercase letters, "i" for lowercase Roman numerals, "I" for
+            uppercase Roman numerals, or "1" for decimal numbers.
 
     Example::
 
@@ -6308,7 +6649,7 @@ class RichBlockPreformatted(TelegramObject, kw_only=True, tag_field="type", tag=
 
     Attributes:
         text: Text of the block.
-        language (optional): Optional.
+        language (optional): The programming language of the text.
 
     Example::
 
@@ -6431,7 +6772,7 @@ class RichBlockBlockQuotation(TelegramObject, kw_only=True, tag_field="type", ta
 
     Attributes:
         blocks: Content of the block.
-        credit (optional): Optional.
+        credit (optional): Credit of the block.
 
     Example::
 
@@ -6454,7 +6795,7 @@ class RichBlockExpandableBlockQuotation(TelegramObject, kw_only=True, tag_field=
 
     Attributes:
         text: Content of the block.
-        credit (optional): Optional.
+        credit (optional): Credit of the block.
 
     Example::
 
@@ -6477,7 +6818,7 @@ class RichBlockPullQuotation(TelegramObject, kw_only=True, tag_field="type", tag
 
     Attributes:
         text: Text of the block.
-        credit (optional): Optional.
+        credit (optional): Credit of the block.
 
     Example::
 
@@ -6500,7 +6841,7 @@ class RichBlockCollage(TelegramObject, kw_only=True, tag_field="type", tag="coll
 
     Attributes:
         blocks: Elements of the collage.
-        caption (optional): Optional.
+        caption (optional): Caption of the block.
 
     Example::
 
@@ -6523,7 +6864,7 @@ class RichBlockSlideshow(TelegramObject, kw_only=True, tag_field="type", tag="sl
 
     Attributes:
         blocks: Elements of the slideshow.
-        caption (optional): Optional.
+        caption (optional): Caption of the block.
 
     Example::
 
@@ -6546,10 +6887,10 @@ class RichBlockTable(TelegramObject, kw_only=True, tag_field="type", tag="table"
 
     Attributes:
         cells: Cells of the table.
-        is_bordered (optional): Optional.
-        is_striped (optional): Optional.
-        is_compact (optional): Optional.
-        caption (optional): Optional.
+        is_bordered (optional): True, if the table has borders.
+        is_striped (optional): True, if the table is striped.
+        is_compact (optional): True, if table cells have smaller indents.
+        caption (optional): Caption of the table.
 
     Example::
 
@@ -6576,7 +6917,7 @@ class RichBlockDetails(TelegramObject, kw_only=True, tag_field="type", tag="deta
     Attributes:
         summary: Always shown summary of the block.
         blocks: Content of the block.
-        is_open (optional): Optional.
+        is_open (optional): True, if the content of the block is visible by default.
 
     Example::
 
@@ -6603,7 +6944,7 @@ class RichBlockMap(TelegramObject, kw_only=True, tag_field="type", tag="map"):
         zoom: Map zoom level.
         width: Expected width of the map.
         height: Expected height of the map.
-        caption (optional): Optional.
+        caption (optional): Caption of the block.
 
     Example::
 
@@ -6629,7 +6970,7 @@ class RichBlockButtons(TelegramObject, kw_only=True, tag_field="type", tag="butt
 
     Attributes:
         buttons: The buttons.
-        align (optional): Optional.
+        align (optional): Horizontal alignment of the buttons.
 
     Example::
 
@@ -6652,8 +6993,8 @@ class RichBlockAnimation(TelegramObject, kw_only=True, tag_field="type", tag="an
 
     Attributes:
         animation: The animation.
-        has_spoiler (optional): Optional.
-        caption (optional): Optional.
+        has_spoiler (optional): True, if the media preview is covered by a spoiler animation.
+        caption (optional): Caption of the block.
 
     Example::
 
@@ -6677,7 +7018,7 @@ class RichBlockAudio(TelegramObject, kw_only=True, tag_field="type", tag="audio"
 
     Attributes:
         audio: The audio.
-        caption (optional): Optional.
+        caption (optional): Caption of the block.
 
     Example::
 
@@ -6700,7 +7041,7 @@ class RichBlockDocument(TelegramObject, kw_only=True, tag_field="type", tag="doc
 
     Attributes:
         document: The document.
-        caption (optional): Optional.
+        caption (optional): Caption of the block.
 
     Example::
 
@@ -6723,8 +7064,8 @@ class RichBlockPhoto(TelegramObject, kw_only=True, tag_field="type", tag="photo"
 
     Attributes:
         photo: Available sizes of the photo.
-        has_spoiler (optional): Optional.
-        caption (optional): Optional.
+        has_spoiler (optional): True, if the media preview is covered by a spoiler animation.
+        caption (optional): Caption of the block.
 
     Example::
 
@@ -6748,8 +7089,8 @@ class RichBlockVideo(TelegramObject, kw_only=True, tag_field="type", tag="video"
 
     Attributes:
         video: The video.
-        has_spoiler (optional): Optional.
-        caption (optional): Optional.
+        has_spoiler (optional): True, if the media preview is covered by a spoiler animation.
+        caption (optional): Caption of the block.
 
     Example::
 
@@ -6773,7 +7114,7 @@ class RichBlockVoiceNote(TelegramObject, kw_only=True, tag_field="type", tag="vo
 
     Attributes:
         voice_note: The voice note.
-        caption (optional): Optional.
+        caption (optional): Caption of the block.
 
     Example::
 
@@ -6817,10 +7158,12 @@ class InputRichBlockListItem(TelegramObject, kw_only=True):
 
     Attributes:
         blocks: The content of the item.
-        has_checkbox (optional): Optional.
-        is_checked (optional): Optional.
-        value (optional): Optional.
-        type (optional): Optional.
+        has_checkbox (optional): Pass True if the item has a checkbox.
+        is_checked (optional): Pass True if the item has a checked checkbox.
+        value (optional): For ordered lists, the numeric value of the item label.
+        type (optional): For ordered lists, the type of the item label; must be one of "a" for
+            lowercase letters, "A" for uppercase letters, "i" for lowercase Roman numerals, "I" for
+            uppercase Roman numerals, or "1" for decimal numbers.
 
     Example::
 
@@ -6884,7 +7227,7 @@ class InputRichBlockPreformatted(TelegramObject, kw_only=True, tag_field="type",
 
     Attributes:
         text: Text of the block.
-        language (optional): Optional.
+        language (optional): The programming language of the text.
 
     Example::
 
@@ -7007,7 +7350,7 @@ class InputRichBlockBlockQuotation(TelegramObject, kw_only=True, tag_field="type
 
     Attributes:
         blocks: Content of the block.
-        credit (optional): Optional.
+        credit (optional): Credit of the block.
 
     Example::
 
@@ -7030,7 +7373,7 @@ class InputRichBlockExpandableBlockQuotation(TelegramObject, kw_only=True, tag_f
 
     Attributes:
         text: Content of the block.
-        credit (optional): Optional.
+        credit (optional): Credit of the block.
 
     Example::
 
@@ -7053,7 +7396,7 @@ class InputRichBlockPullQuotation(TelegramObject, kw_only=True, tag_field="type"
 
     Attributes:
         text: Text of the block.
-        credit (optional): Optional.
+        credit (optional): Credit of the block.
 
     Example::
 
@@ -7076,7 +7419,7 @@ class InputRichBlockCollage(TelegramObject, kw_only=True, tag_field="type", tag=
 
     Attributes:
         blocks: Elements of the collage.
-        caption (optional): Optional.
+        caption (optional): Caption of the block.
 
     Example::
 
@@ -7099,7 +7442,7 @@ class InputRichBlockSlideshow(TelegramObject, kw_only=True, tag_field="type", ta
 
     Attributes:
         blocks: Elements of the slideshow.
-        caption (optional): Optional.
+        caption (optional): Caption of the block.
 
     Example::
 
@@ -7122,10 +7465,10 @@ class InputRichBlockTable(TelegramObject, kw_only=True, tag_field="type", tag="t
 
     Attributes:
         cells: Cells of the table.
-        is_bordered (optional): Optional.
-        is_striped (optional): Optional.
-        is_compact (optional): Optional.
-        caption (optional): Optional.
+        is_bordered (optional): Pass True if the table has borders.
+        is_striped (optional): Pass True if the table is striped.
+        is_compact (optional): Pass True if table cells must have smaller indents.
+        caption (optional): Caption of the table.
 
     Example::
 
@@ -7152,7 +7495,7 @@ class InputRichBlockDetails(TelegramObject, kw_only=True, tag_field="type", tag=
     Attributes:
         summary: Always shown summary of the block.
         blocks: Content of the block.
-        is_open (optional): Optional.
+        is_open (optional): Pass True if the content of the block is visible by default.
 
     Example::
 
@@ -7176,10 +7519,10 @@ class InputRichBlockMap(TelegramObject, kw_only=True, tag_field="type", tag="map
 
     Attributes:
         location: Location of the center of the map.
-        zoom (optional): Optional.
-        width (optional): Optional.
-        height (optional): Optional.
-        caption (optional): Optional.
+        zoom (optional): Map zoom level; 0-24.
+        width (optional): Map width; 0-10000.
+        height (optional): Map height; 0-10000.
+        caption (optional): Caption of the block.
 
     Example::
 
@@ -7205,7 +7548,7 @@ class InputRichBlockButtons(TelegramObject, kw_only=True, tag_field="type", tag=
 
     Attributes:
         buttons: List of 1-8 buttons to send.
-        align (optional): Optional.
+        align (optional): Horizontal alignment of the buttons.
 
     Example::
 
@@ -7228,7 +7571,7 @@ class InputRichBlockAnimation(TelegramObject, kw_only=True, tag_field="type", ta
 
     Attributes:
         animation: The animation.
-        caption (optional): Optional.
+        caption (optional): Caption of the block.
 
     Example::
 
@@ -7251,7 +7594,7 @@ class InputRichBlockAudio(TelegramObject, kw_only=True, tag_field="type", tag="a
 
     Attributes:
         audio: The audio.
-        caption (optional): Optional.
+        caption (optional): Caption of the block.
 
     Example::
 
@@ -7274,7 +7617,7 @@ class InputRichBlockDocument(TelegramObject, kw_only=True, tag_field="type", tag
 
     Attributes:
         document: The document.
-        caption (optional): Optional.
+        caption (optional): Caption of the block.
 
     Example::
 
@@ -7297,7 +7640,7 @@ class InputRichBlockPhoto(TelegramObject, kw_only=True, tag_field="type", tag="p
 
     Attributes:
         photo: The photo.
-        caption (optional): Optional.
+        caption (optional): Caption of the block.
 
     Example::
 
@@ -7320,7 +7663,7 @@ class InputRichBlockVideo(TelegramObject, kw_only=True, tag_field="type", tag="v
 
     Attributes:
         video: The video.
-        caption (optional): Optional.
+        caption (optional): Caption of the block.
 
     Example::
 
@@ -7343,7 +7686,7 @@ class InputRichBlockVoiceNote(TelegramObject, kw_only=True, tag_field="type", ta
 
     Attributes:
         voice_note: The voice note.
-        caption (optional): Optional.
+        caption (optional): Caption of the block.
 
     Example::
 
@@ -7390,8 +7733,8 @@ class InlineQuery(TelegramObject, kw_only=True):
         from_: Sender.
         query: Text of the query (up to 256 characters).
         offset: Offset of the results to be returned, can be controlled by the bot.
-        chat_type (optional): Optional.
-        location (optional): Optional.
+        chat_type (optional): Type of the chat from which the inline query was sent.
+        location (optional): Sender location, only for bots that request user location.
 
     Example::
 
@@ -7412,8 +7755,10 @@ class InlineQueryResultsButton(TelegramObject, kw_only=True):
 
     Attributes:
         text: Label text on the button.
-        web_app (optional): Optional.
-        start_parameter (optional): Optional.
+        web_app (optional): Description of the Web App that will be launched when the user presses
+            the button.
+        start_parameter (optional): Deep-linking parameter for the /start message sent to the bot
+            when a user presses the button.
 
     Example::
 
@@ -7433,12 +7778,12 @@ class InlineQueryResultArticle(TelegramObject, kw_only=True, tag_field="type", t
         id: Unique identifier for this result, 1-64 Bytes.
         title: Title of the result.
         input_message_content: Content of the message to be sent.
-        reply_markup (optional): Optional.
-        url (optional): Optional.
-        description (optional): Optional.
-        thumbnail_url (optional): Optional.
-        thumbnail_width (optional): Optional.
-        thumbnail_height (optional): Optional.
+        reply_markup (optional): Inline keyboard attached to the message.
+        url (optional): URL of the result.
+        description (optional): Short description of the result.
+        thumbnail_url (optional): Url of the thumbnail for the result.
+        thumbnail_width (optional): Thumbnail width.
+        thumbnail_height (optional): Thumbnail height.
 
     Example::
 
@@ -7470,16 +7815,19 @@ class InlineQueryResultPhoto(TelegramObject, kw_only=True, tag_field="type", tag
         id: Unique identifier for this result, 1-64 bytes.
         photo_url: A valid URL of the photo.
         thumbnail_url: URL of the thumbnail for the photo.
-        photo_width (optional): Optional.
-        photo_height (optional): Optional.
-        title (optional): Optional.
-        description (optional): Optional.
-        caption (optional): Optional.
-        parse_mode (optional): Optional.
-        caption_entities (optional): Optional.
-        show_caption_above_media (optional): Optional.
-        reply_markup (optional): Optional.
-        input_message_content (optional): Optional.
+        photo_width (optional): Width of the photo.
+        photo_height (optional): Height of the photo.
+        title (optional): Title for the result.
+        description (optional): Short description of the result.
+        caption (optional): Caption of the photo to be sent, 0-1024 characters after entities
+            parsing.
+        parse_mode (optional): Mode for parsing entities in the photo caption.
+        caption_entities (optional): List of special entities that appear in the caption, which can
+            be specified instead of parse_mode.
+        show_caption_above_media (optional): Pass True if the caption must be shown above the
+            message media.
+        reply_markup (optional): Inline keyboard attached to the message.
+        input_message_content (optional): Content of the message to be sent instead of the photo.
 
     Example::
 
@@ -7514,18 +7862,23 @@ class InlineQueryResultGif(TelegramObject, kw_only=True, tag_field="type", tag="
     Attributes:
         id: Unique identifier for this result, 1-64 bytes.
         gif_url: A valid URL for the GIF file.
-        gif_width (optional): Optional.
-        gif_height (optional): Optional.
-        gif_duration (optional): Optional.
+        gif_width (optional): Width of the GIF.
+        gif_height (optional): Height of the GIF.
+        gif_duration (optional): Duration of the GIF in seconds.
         thumbnail_url: URL of the static (JPEG or GIF) or animated (MPEG4) thumbnail for the result.
-        thumbnail_mime_type (optional): Optional.
-        title (optional): Optional.
-        caption (optional): Optional.
-        parse_mode (optional): Optional.
-        caption_entities (optional): Optional.
-        show_caption_above_media (optional): Optional.
-        reply_markup (optional): Optional.
-        input_message_content (optional): Optional.
+        thumbnail_mime_type (optional): MIME type of the thumbnail, must be one of "image/jpeg",
+            "image/gif", or "video/mp4".
+        title (optional): Title for the result.
+        caption (optional): Caption of the GIF file to be sent, 0-1024 characters after entities
+            parsing.
+        parse_mode (optional): Mode for parsing entities in the caption.
+        caption_entities (optional): List of special entities that appear in the caption, which can
+            be specified instead of parse_mode.
+        show_caption_above_media (optional): Pass True if the caption must be shown above the
+            message media.
+        reply_markup (optional): Inline keyboard attached to the message.
+        input_message_content (optional): Content of the message to be sent instead of the GIF
+            animation.
 
     Example::
 
@@ -7561,18 +7914,23 @@ class InlineQueryResultMpeg4Gif(TelegramObject, kw_only=True, tag_field="type", 
     Attributes:
         id: Unique identifier for this result, 1-64 bytes.
         mpeg4_url: A valid URL for the MPEG4 file.
-        mpeg4_width (optional): Optional.
-        mpeg4_height (optional): Optional.
-        mpeg4_duration (optional): Optional.
+        mpeg4_width (optional): Video width.
+        mpeg4_height (optional): Video height.
+        mpeg4_duration (optional): Video duration in seconds.
         thumbnail_url: URL of the static (JPEG or GIF) or animated (MPEG4) thumbnail for the result.
-        thumbnail_mime_type (optional): Optional.
-        title (optional): Optional.
-        caption (optional): Optional.
-        parse_mode (optional): Optional.
-        caption_entities (optional): Optional.
-        show_caption_above_media (optional): Optional.
-        reply_markup (optional): Optional.
-        input_message_content (optional): Optional.
+        thumbnail_mime_type (optional): MIME type of the thumbnail, must be one of "image/jpeg",
+            "image/gif", or "video/mp4".
+        title (optional): Title for the result.
+        caption (optional): Caption of the MPEG-4 file to be sent, 0-1024 characters after entities
+            parsing.
+        parse_mode (optional): Mode for parsing entities in the caption.
+        caption_entities (optional): List of special entities that appear in the caption, which can
+            be specified instead of parse_mode.
+        show_caption_above_media (optional): Pass True if the caption must be shown above the
+            message media.
+        reply_markup (optional): Inline keyboard attached to the message.
+        input_message_content (optional): Content of the message to be sent instead of the video
+            animation.
 
     Example::
 
@@ -7611,16 +7969,19 @@ class InlineQueryResultVideo(TelegramObject, kw_only=True, tag_field="type", tag
         mime_type: MIME type of the content of the video URL, "text/html" or "video/mp4".
         thumbnail_url: URL of the thumbnail (JPEG only) for the video.
         title: Title for the result.
-        caption (optional): Optional.
-        parse_mode (optional): Optional.
-        caption_entities (optional): Optional.
-        show_caption_above_media (optional): Optional.
-        video_width (optional): Optional.
-        video_height (optional): Optional.
-        video_duration (optional): Optional.
-        description (optional): Optional.
-        reply_markup (optional): Optional.
-        input_message_content (optional): Optional.
+        caption (optional): Caption of the video to be sent, 0-1024 characters after entities
+            parsing.
+        parse_mode (optional): Mode for parsing entities in the video caption.
+        caption_entities (optional): List of special entities that appear in the caption, which can
+            be specified instead of parse_mode.
+        show_caption_above_media (optional): Pass True if the caption must be shown above the
+            message media.
+        video_width (optional): Video width.
+        video_height (optional): Video height.
+        video_duration (optional): Video duration in seconds.
+        description (optional): Short description of the result.
+        reply_markup (optional): Inline keyboard attached to the message.
+        input_message_content (optional): Content of the message to be sent instead of the video.
 
     Example::
 
@@ -7658,13 +8019,14 @@ class InlineQueryResultAudio(TelegramObject, kw_only=True, tag_field="type", tag
         id: Unique identifier for this result, 1-64 bytes.
         audio_url: A valid URL for the audio file.
         title: Title.
-        caption (optional): Optional.
-        parse_mode (optional): Optional.
-        caption_entities (optional): Optional.
-        performer (optional): Optional.
-        audio_duration (optional): Optional.
-        reply_markup (optional): Optional.
-        input_message_content (optional): Optional.
+        caption (optional): Caption, 0-1024 characters after entities parsing.
+        parse_mode (optional): Mode for parsing entities in the audio caption.
+        caption_entities (optional): List of special entities that appear in the caption, which can
+            be specified instead of parse_mode.
+        performer (optional): Performer.
+        audio_duration (optional): Audio duration in seconds.
+        reply_markup (optional): Inline keyboard attached to the message.
+        input_message_content (optional): Content of the message to be sent instead of the audio.
 
     Example::
 
@@ -7697,12 +8059,14 @@ class InlineQueryResultVoice(TelegramObject, kw_only=True, tag_field="type", tag
         id: Unique identifier for this result, 1-64 bytes.
         voice_url: A valid URL for the voice recording.
         title: Recording title.
-        caption (optional): Optional.
-        parse_mode (optional): Optional.
-        caption_entities (optional): Optional.
-        voice_duration (optional): Optional.
-        reply_markup (optional): Optional.
-        input_message_content (optional): Optional.
+        caption (optional): Caption, 0-1024 characters after entities parsing.
+        parse_mode (optional): Mode for parsing entities in the voice message caption.
+        caption_entities (optional): List of special entities that appear in the caption, which can
+            be specified instead of parse_mode.
+        voice_duration (optional): Recording duration in seconds.
+        reply_markup (optional): Inline keyboard attached to the message.
+        input_message_content (optional): Content of the message to be sent instead of the voice
+            recording.
 
     Example::
 
@@ -7733,18 +8097,20 @@ class InlineQueryResultDocument(TelegramObject, kw_only=True, tag_field="type", 
     Attributes:
         id: Unique identifier for this result, 1-64 bytes.
         title: Title for the result.
-        caption (optional): Optional.
-        parse_mode (optional): Optional.
-        caption_entities (optional): Optional.
+        caption (optional): Caption of the document to be sent, 0-1024 characters after entities
+            parsing.
+        parse_mode (optional): Mode for parsing entities in the document caption.
+        caption_entities (optional): List of special entities that appear in the caption, which can
+            be specified instead of parse_mode.
         document_url: A valid URL for the file.
         mime_type: MIME type of the content of the file, either "application/pdf" or
             "application/zip".
-        description (optional): Optional.
-        reply_markup (optional): Optional.
-        input_message_content (optional): Optional.
-        thumbnail_url (optional): Optional.
-        thumbnail_width (optional): Optional.
-        thumbnail_height (optional): Optional.
+        description (optional): Short description of the result.
+        reply_markup (optional): Inline keyboard attached to the message.
+        input_message_content (optional): Content of the message to be sent instead of the file.
+        thumbnail_url (optional): URL of the thumbnail (JPEG only) for the file.
+        thumbnail_width (optional): Thumbnail width.
+        thumbnail_height (optional): Thumbnail height.
 
     Example::
 
@@ -7781,15 +8147,18 @@ class InlineQueryResultLocation(TelegramObject, kw_only=True, tag_field="type", 
         latitude: Location latitude in degrees.
         longitude: Location longitude in degrees.
         title: Location title.
-        horizontal_accuracy (optional): Optional.
-        live_period (optional): Optional.
-        heading (optional): Optional.
-        proximity_alert_radius (optional): Optional.
-        reply_markup (optional): Optional.
-        input_message_content (optional): Optional.
-        thumbnail_url (optional): Optional.
-        thumbnail_width (optional): Optional.
-        thumbnail_height (optional): Optional.
+        horizontal_accuracy (optional): The radius of uncertainty for the location, measured in
+            meters; 0-1500.
+        live_period (optional): Period in seconds during which the location can be updated, must be
+            between 60 and 86400, or 0x7FFFFFFF for live locations that can be edited indefinitely.
+        heading (optional): For live locations, a direction in which the user is moving, in degrees.
+        proximity_alert_radius (optional): For live locations, a maximum distance for proximity
+            alerts about approaching another chat member, in meters.
+        reply_markup (optional): Inline keyboard attached to the message.
+        input_message_content (optional): Content of the message to be sent instead of the location.
+        thumbnail_url (optional): Url of the thumbnail for the result.
+        thumbnail_width (optional): Thumbnail width.
+        thumbnail_height (optional): Thumbnail height.
 
     Example::
 
@@ -7827,15 +8196,15 @@ class InlineQueryResultVenue(TelegramObject, kw_only=True, tag_field="type", tag
         longitude: Longitude of the venue location in degrees.
         title: Title of the venue.
         address: Address of the venue.
-        foursquare_id (optional): Optional.
-        foursquare_type (optional): Optional.
-        google_place_id (optional): Optional.
-        google_place_type (optional): Optional.
-        reply_markup (optional): Optional.
-        input_message_content (optional): Optional.
-        thumbnail_url (optional): Optional.
-        thumbnail_width (optional): Optional.
-        thumbnail_height (optional): Optional.
+        foursquare_id (optional): Foursquare identifier of the venue if known.
+        foursquare_type (optional): Foursquare type of the venue, if known.
+        google_place_id (optional): Google Places identifier of the venue.
+        google_place_type (optional): Google Places type of the venue.
+        reply_markup (optional): Inline keyboard attached to the message.
+        input_message_content (optional): Content of the message to be sent instead of the venue.
+        thumbnail_url (optional): Url of the thumbnail for the result.
+        thumbnail_width (optional): Thumbnail width.
+        thumbnail_height (optional): Thumbnail height.
 
     Example::
 
@@ -7872,13 +8241,13 @@ class InlineQueryResultContact(TelegramObject, kw_only=True, tag_field="type", t
         id: Unique identifier for this result, 1-64 Bytes.
         phone_number: Contact's phone number.
         first_name: Contact's first name.
-        last_name (optional): Optional.
-        vcard (optional): Optional.
-        reply_markup (optional): Optional.
-        input_message_content (optional): Optional.
-        thumbnail_url (optional): Optional.
-        thumbnail_width (optional): Optional.
-        thumbnail_height (optional): Optional.
+        last_name (optional): Contact's last name.
+        vcard (optional): Additional data about the contact in the form of a vCard, 0-2048 bytes.
+        reply_markup (optional): Inline keyboard attached to the message.
+        input_message_content (optional): Content of the message to be sent instead of the contact.
+        thumbnail_url (optional): Url of the thumbnail for the result.
+        thumbnail_width (optional): Thumbnail width.
+        thumbnail_height (optional): Thumbnail height.
 
     Example::
 
@@ -7910,7 +8279,7 @@ class InlineQueryResultGame(TelegramObject, kw_only=True, tag_field="type", tag=
     Attributes:
         id: Unique identifier for this result, 1-64 bytes.
         game_short_name: Short name of the game.
-        reply_markup (optional): Optional.
+        reply_markup (optional): Inline keyboard attached to the message.
 
     Example::
 
@@ -7935,14 +8304,17 @@ class InlineQueryResultCachedPhoto(TelegramObject, kw_only=True, tag_field="type
     Attributes:
         id: Unique identifier for this result, 1-64 bytes.
         photo_file_id: A valid file identifier of the photo.
-        title (optional): Optional.
-        description (optional): Optional.
-        caption (optional): Optional.
-        parse_mode (optional): Optional.
-        caption_entities (optional): Optional.
-        show_caption_above_media (optional): Optional.
-        reply_markup (optional): Optional.
-        input_message_content (optional): Optional.
+        title (optional): Title for the result.
+        description (optional): Short description of the result.
+        caption (optional): Caption of the photo to be sent, 0-1024 characters after entities
+            parsing.
+        parse_mode (optional): Mode for parsing entities in the photo caption.
+        caption_entities (optional): List of special entities that appear in the caption, which can
+            be specified instead of parse_mode.
+        show_caption_above_media (optional): Pass True if the caption must be shown above the
+            message media.
+        reply_markup (optional): Inline keyboard attached to the message.
+        input_message_content (optional): Content of the message to be sent instead of the photo.
 
     Example::
 
@@ -7974,13 +8346,17 @@ class InlineQueryResultCachedGif(TelegramObject, kw_only=True, tag_field="type",
     Attributes:
         id: Unique identifier for this result, 1-64 bytes.
         gif_file_id: A valid file identifier for the GIF file.
-        title (optional): Optional.
-        caption (optional): Optional.
-        parse_mode (optional): Optional.
-        caption_entities (optional): Optional.
-        show_caption_above_media (optional): Optional.
-        reply_markup (optional): Optional.
-        input_message_content (optional): Optional.
+        title (optional): Title for the result.
+        caption (optional): Caption of the GIF file to be sent, 0-1024 characters after entities
+            parsing.
+        parse_mode (optional): Mode for parsing entities in the caption.
+        caption_entities (optional): List of special entities that appear in the caption, which can
+            be specified instead of parse_mode.
+        show_caption_above_media (optional): Pass True if the caption must be shown above the
+            message media.
+        reply_markup (optional): Inline keyboard attached to the message.
+        input_message_content (optional): Content of the message to be sent instead of the GIF
+            animation.
 
     Example::
 
@@ -8011,13 +8387,17 @@ class InlineQueryResultCachedMpeg4Gif(TelegramObject, kw_only=True, tag_field="t
     Attributes:
         id: Unique identifier for this result, 1-64 bytes.
         mpeg4_file_id: A valid file identifier for the MPEG4 file.
-        title (optional): Optional.
-        caption (optional): Optional.
-        parse_mode (optional): Optional.
-        caption_entities (optional): Optional.
-        show_caption_above_media (optional): Optional.
-        reply_markup (optional): Optional.
-        input_message_content (optional): Optional.
+        title (optional): Title for the result.
+        caption (optional): Caption of the MPEG-4 file to be sent, 0-1024 characters after entities
+            parsing.
+        parse_mode (optional): Mode for parsing entities in the caption.
+        caption_entities (optional): List of special entities that appear in the caption, which can
+            be specified instead of parse_mode.
+        show_caption_above_media (optional): Pass True if the caption must be shown above the
+            message media.
+        reply_markup (optional): Inline keyboard attached to the message.
+        input_message_content (optional): Content of the message to be sent instead of the video
+            animation.
 
     Example::
 
@@ -8048,8 +8428,8 @@ class InlineQueryResultCachedSticker(TelegramObject, kw_only=True, tag_field="ty
     Attributes:
         id: Unique identifier for this result, 1-64 bytes.
         sticker_file_id: A valid file identifier of the sticker.
-        reply_markup (optional): Optional.
-        input_message_content (optional): Optional.
+        reply_markup (optional): Inline keyboard attached to the message.
+        input_message_content (optional): Content of the message to be sent instead of the sticker.
 
     Example::
 
@@ -8076,12 +8456,14 @@ class InlineQueryResultCachedDocument(TelegramObject, kw_only=True, tag_field="t
         id: Unique identifier for this result, 1-64 bytes.
         title: Title for the result.
         document_file_id: A valid file identifier for the file.
-        description (optional): Optional.
-        caption (optional): Optional.
-        parse_mode (optional): Optional.
-        caption_entities (optional): Optional.
-        reply_markup (optional): Optional.
-        input_message_content (optional): Optional.
+        description (optional): Short description of the result.
+        caption (optional): Caption of the document to be sent, 0-1024 characters after entities
+            parsing.
+        parse_mode (optional): Mode for parsing entities in the document caption.
+        caption_entities (optional): List of special entities that appear in the caption, which can
+            be specified instead of parse_mode.
+        reply_markup (optional): Inline keyboard attached to the message.
+        input_message_content (optional): Content of the message to be sent instead of the file.
 
     Example::
 
@@ -8113,13 +8495,16 @@ class InlineQueryResultCachedVideo(TelegramObject, kw_only=True, tag_field="type
         id: Unique identifier for this result, 1-64 bytes.
         video_file_id: A valid file identifier for the video file.
         title: Title for the result.
-        description (optional): Optional.
-        caption (optional): Optional.
-        parse_mode (optional): Optional.
-        caption_entities (optional): Optional.
-        show_caption_above_media (optional): Optional.
-        reply_markup (optional): Optional.
-        input_message_content (optional): Optional.
+        description (optional): Short description of the result.
+        caption (optional): Caption of the video to be sent, 0-1024 characters after entities
+            parsing.
+        parse_mode (optional): Mode for parsing entities in the video caption.
+        caption_entities (optional): List of special entities that appear in the caption, which can
+            be specified instead of parse_mode.
+        show_caption_above_media (optional): Pass True if the caption must be shown above the
+            message media.
+        reply_markup (optional): Inline keyboard attached to the message.
+        input_message_content (optional): Content of the message to be sent instead of the video.
 
     Example::
 
@@ -8152,11 +8537,13 @@ class InlineQueryResultCachedVoice(TelegramObject, kw_only=True, tag_field="type
         id: Unique identifier for this result, 1-64 bytes.
         voice_file_id: A valid file identifier for the voice message.
         title: Voice message title.
-        caption (optional): Optional.
-        parse_mode (optional): Optional.
-        caption_entities (optional): Optional.
-        reply_markup (optional): Optional.
-        input_message_content (optional): Optional.
+        caption (optional): Caption, 0-1024 characters after entities parsing.
+        parse_mode (optional): Mode for parsing entities in the voice message caption.
+        caption_entities (optional): List of special entities that appear in the caption, which can
+            be specified instead of parse_mode.
+        reply_markup (optional): Inline keyboard attached to the message.
+        input_message_content (optional): Content of the message to be sent instead of the voice
+            message.
 
     Example::
 
@@ -8186,11 +8573,12 @@ class InlineQueryResultCachedAudio(TelegramObject, kw_only=True, tag_field="type
     Attributes:
         id: Unique identifier for this result, 1-64 bytes.
         audio_file_id: A valid file identifier for the audio file.
-        caption (optional): Optional.
-        parse_mode (optional): Optional.
-        caption_entities (optional): Optional.
-        reply_markup (optional): Optional.
-        input_message_content (optional): Optional.
+        caption (optional): Caption, 0-1024 characters after entities parsing.
+        parse_mode (optional): Mode for parsing entities in the audio caption.
+        caption_entities (optional): List of special entities that appear in the caption, which can
+            be specified instead of parse_mode.
+        reply_markup (optional): Inline keyboard attached to the message.
+        input_message_content (optional): Content of the message to be sent instead of the audio.
 
     Example::
 
@@ -8218,9 +8606,10 @@ class InputTextMessageContent(TelegramObject, kw_only=True):
 
     Attributes:
         message_text: Text of the message to be sent, 1-4096 characters.
-        parse_mode (optional): Optional.
-        entities (optional): Optional.
-        link_preview_options (optional): Optional.
+        parse_mode (optional): Mode for parsing entities in the message text.
+        entities (optional): List of special entities that appear in message text, which can be
+            specified instead of parse_mode.
+        link_preview_options (optional): Link preview generation options for the message.
 
     Example::
 
@@ -8255,10 +8644,13 @@ class InputLocationMessageContent(TelegramObject, kw_only=True):
     Attributes:
         latitude: Latitude of the location in degrees.
         longitude: Longitude of the location in degrees.
-        horizontal_accuracy (optional): Optional.
-        live_period (optional): Optional.
-        heading (optional): Optional.
-        proximity_alert_radius (optional): Optional.
+        horizontal_accuracy (optional): The radius of uncertainty for the location, measured in
+            meters; 0-1500.
+        live_period (optional): Period in seconds during which the location can be updated, must be
+            between 60 and 86400, or 0x7FFFFFFF for live locations that can be edited indefinitely.
+        heading (optional): For live locations, a direction in which the user is moving, in degrees.
+        proximity_alert_radius (optional): For live locations, a maximum distance for proximity
+            alerts about approaching another chat member, in meters.
 
     Example::
 
@@ -8282,10 +8674,10 @@ class InputVenueMessageContent(TelegramObject, kw_only=True):
         longitude: Longitude of the venue in degrees.
         title: Name of the venue.
         address: Address of the venue.
-        foursquare_id (optional): Optional.
-        foursquare_type (optional): Optional.
-        google_place_id (optional): Optional.
-        google_place_type (optional): Optional.
+        foursquare_id (optional): Foursquare identifier of the venue, if known.
+        foursquare_type (optional): Foursquare type of the venue, if known.
+        google_place_id (optional): Google Places identifier of the venue.
+        google_place_type (optional): Google Places type of the venue.
 
     Example::
 
@@ -8309,8 +8701,8 @@ class InputContactMessageContent(TelegramObject, kw_only=True):
     Attributes:
         phone_number: Contact's phone number.
         first_name: Contact's first name.
-        last_name (optional): Optional.
-        vcard (optional): Optional.
+        last_name (optional): Contact's last name.
+        vcard (optional): Additional data about the contact in the form of a vCard, 0-2048 bytes.
 
     Example::
 
@@ -8331,23 +8723,31 @@ class InputInvoiceMessageContent(TelegramObject, kw_only=True):
         title: Product name, 1-32 characters.
         description: Product description, 1-255 characters.
         payload: Bot-defined invoice payload, 1-128 bytes.
-        provider_token (optional): Optional.
+        provider_token (optional): Payment provider token, obtained via @BotFather.
         currency: Three-letter ISO 4217 currency code, see more on currencies.
         prices: Price breakdown, a JSON-serialized list of components (e.g.
-        max_tip_amount (optional): Optional.
-        suggested_tip_amounts (optional): Optional.
-        provider_data (optional): Optional.
-        photo_url (optional): Optional.
-        photo_size (optional): Optional.
-        photo_width (optional): Optional.
-        photo_height (optional): Optional.
-        need_name (optional): Optional.
-        need_phone_number (optional): Optional.
-        need_email (optional): Optional.
-        need_shipping_address (optional): Optional.
-        send_phone_number_to_provider (optional): Optional.
-        send_email_to_provider (optional): Optional.
-        is_flexible (optional): Optional.
+        max_tip_amount (optional): The maximum accepted amount for tips in the smallest units of the
+            currency (integer, not float/double).
+        suggested_tip_amounts (optional): A JSON-serialized Array of suggested amounts of tip in the
+            smallest units of the currency (integer, not float/double).
+        provider_data (optional): A JSON-serialized object for data about the invoice, which will be
+            shared with the payment provider.
+        photo_url (optional): URL of the product photo for the invoice.
+        photo_size (optional): Photo size in bytes.
+        photo_width (optional): Photo width.
+        photo_height (optional): Photo height.
+        need_name (optional): Pass True if you require the user's full name to complete the order.
+        need_phone_number (optional): Pass True if you require the user's phone number to complete
+            the order.
+        need_email (optional): Pass True if you require the user's email address to complete the
+            order.
+        need_shipping_address (optional): Pass True if you require the user's shipping address to
+            complete the order.
+        send_phone_number_to_provider (optional): Pass True if the user's phone number should be
+            sent to the provider.
+        send_email_to_provider (optional): Pass True if the user's email address should be sent to
+            the provider.
+        is_flexible (optional): Pass True if the final price depends on the shipping method.
 
     Example::
 
@@ -8383,8 +8783,8 @@ class ChosenInlineResult(TelegramObject, kw_only=True):
     Attributes:
         result_id: The unique identifier for the result that was chosen.
         from_: The user that chose the result.
-        location (optional): Optional.
-        inline_message_id (optional): Optional.
+        location (optional): Sender location, only for bots that require user location.
+        inline_message_id (optional): Identifier of the sent inline message.
         query: The query that was used to obtain the result.
 
     Example::
@@ -8471,10 +8871,10 @@ class OrderInfo(TelegramObject, kw_only=True):
     """This object represents information about an order.
 
     Attributes:
-        name (optional): Optional.
-        phone_number (optional): Optional.
-        email (optional): Optional.
-        shipping_address (optional): Optional.
+        name (optional): User name.
+        phone_number (optional): User's phone number.
+        email (optional): User email.
+        shipping_address (optional): User shipping address.
 
     Example::
 
@@ -8514,11 +8914,12 @@ class SuccessfulPayment(TelegramObject, kw_only=True):
         currency: Three-letter ISO 4217 currency code, or "XTR" for payments in Telegram Stars.
         total_amount: Total price in the smallest units of the currency (integer, not float/double).
         invoice_payload: Bot-specified invoice payload.
-        subscription_expiration_date (optional): Optional.
-        is_recurring (optional): Optional.
-        is_first_recurring (optional): Optional.
-        shipping_option_id (optional): Optional.
-        order_info (optional): Optional.
+        subscription_expiration_date (optional): Expiration date of the subscription, in Unix time;
+            for recurring payments only.
+        is_recurring (optional): True, if the payment is a recurring payment for a subscription.
+        is_first_recurring (optional): True, if the payment is the first payment for a subscription.
+        shipping_option_id (optional): Identifier of the shipping option chosen by the user.
+        order_info (optional): Order information provided by the user.
         telegram_payment_charge_id: Telegram payment identifier.
         provider_payment_charge_id: Provider payment identifier.
 
@@ -8549,7 +8950,7 @@ class RefundedPayment(TelegramObject, kw_only=True):
             float/double).
         invoice_payload: Bot-specified invoice payload.
         telegram_payment_charge_id: Telegram payment identifier.
-        provider_payment_charge_id (optional): Optional.
+        provider_payment_charge_id (optional): Provider payment identifier.
 
     Example::
 
@@ -8594,8 +8995,8 @@ class PreCheckoutQuery(TelegramObject, kw_only=True):
         currency: Three-letter ISO 4217 currency code, or "XTR" for payments in Telegram Stars.
         total_amount: Total price in the smallest units of the currency (integer, not float/double).
         invoice_payload: Bot-specified invoice payload.
-        shipping_option_id (optional): Optional.
-        order_info (optional): Optional.
+        shipping_option_id (optional): Identifier of the shipping option chosen by the user.
+        order_info (optional): Order information provided by the user.
 
     Example::
 
@@ -8688,13 +9089,16 @@ class AffiliateInfo(TelegramObject, kw_only=True):
     """Contains information about the affiliate that received a commission via this transaction.
 
     Attributes:
-        affiliate_user (optional): Optional.
-        affiliate_chat (optional): Optional.
+        affiliate_user (optional): The bot or the user that received an affiliate commission if it
+            was received by a bot or a user.
+        affiliate_chat (optional): The chat that received an affiliate commission if it was received
+            by a chat.
         commission_per_mille: The number of Telegram Stars received by the affiliate for each 1000
             Telegram Stars received by the bot from referred users.
         amount: Integer amount of Telegram Stars received by the affiliate from the transaction,
             rounded to 0; can be negative for refunds.
-        nanostar_amount (optional): Optional.
+        nanostar_amount (optional): The number of 1/1000000000 shares of Telegram Stars received by
+            the affiliate; from -999999999 to 999999999; can be negative for refunds.
 
     Example::
 
@@ -8719,13 +9123,17 @@ class TransactionPartnerUser(TelegramObject, kw_only=True, tag_field="type", tag
             the bot, "business_account_transfer" for direct transfers from managed business
             accounts.
         user: Information about the user.
-        affiliate (optional): Optional.
-        invoice_payload (optional): Optional.
-        subscription_period (optional): Optional.
-        paid_media (optional): Optional.
-        paid_media_payload (optional): Optional.
-        gift (optional): Optional.
-        premium_subscription_duration (optional): Optional.
+        affiliate (optional): Information about the affiliate that received a commission via this
+            transaction.
+        invoice_payload (optional): Bot-specified invoice payload.
+        subscription_period (optional): The duration of the paid subscription.
+        paid_media (optional): Information about the paid media bought by the user; for
+            "paid_media_payment" transactions only.
+        paid_media_payload (optional): Bot-specified paid media payload.
+        gift (optional): The gift sent to the user by the bot; for "gift_purchase" transactions
+            only.
+        premium_subscription_duration (optional): Number of months the gifted Telegram Premium
+            subscription will be active for; for "premium_purchase" transactions only.
 
     Example::
 
@@ -8755,7 +9163,7 @@ class TransactionPartnerChat(TelegramObject, kw_only=True, tag_field="type", tag
 
     Attributes:
         chat: Information about the chat.
-        gift (optional): Optional.
+        gift (optional): The gift sent to the chat by the bot.
 
     Example::
 
@@ -8777,7 +9185,7 @@ class TransactionPartnerAffiliateProgram(TelegramObject, kw_only=True, tag_field
     """Describes the affiliate program that issued the affiliate commission received via this transaction.
 
     Attributes:
-        sponsor_user (optional): Optional.
+        sponsor_user (optional): Information about the bot that sponsored the affiliate program.
         commission_per_mille: The number of Telegram Stars received by the bot for each 1000
             Telegram Stars received by the affiliate program sponsor from referred users.
 
@@ -8801,7 +9209,7 @@ class TransactionPartnerFragment(TelegramObject, kw_only=True, tag_field="type",
     """Describes a withdrawal transaction with Fragment.
 
     Attributes:
-        withdrawal_state (optional): Optional.
+        withdrawal_state (optional): State of the transaction if the transaction is outgoing.
 
     Example::
 
@@ -8878,10 +9286,13 @@ class StarTransaction(TelegramObject, kw_only=True):
     Attributes:
         id: Unique identifier of the transaction.
         amount: Integer amount of Telegram Stars transferred by the transaction.
-        nanostar_amount (optional): Optional.
+        nanostar_amount (optional): The number of 1/1000000000 shares of Telegram Stars transferred
+            by the transaction; from 0 to 999999999.
         date: Date the transaction was created in Unix time.
-        source (optional): Optional.
-        receiver (optional): Optional.
+        source (optional): Source of an incoming transaction (e.g., a user purchasing goods or
+            services, Fragment refunding a failed withdrawal).
+        receiver (optional): Receiver of an outgoing transaction (e.g., a user for a purchase
+            refund, Fragment for a withdrawal).
 
     Example::
 
@@ -8957,14 +9368,27 @@ class EncryptedPassportElement(TelegramObject, kw_only=True):
 
     Attributes:
         type: Element type.
-        data (optional): Optional.
-        phone_number (optional): Optional.
-        email (optional): Optional.
-        files (optional): Optional.
-        front_side (optional): Optional.
-        reverse_side (optional): Optional.
-        selfie (optional): Optional.
-        translation (optional): Optional.
+        data (optional): Base64-encoded encrypted Telegram Passport element data provided by the
+            user; available only for "personal_details", "passport", "driver_license",
+            "identity_card", "internal_passport" and "address" types.
+        phone_number (optional): User's verified phone number; available only for "phone_number"
+            type.
+        email (optional): User's verified email address; available only for "email" type.
+        files (optional): Array of encrypted files with documents provided by the user; available
+            only for "utility_bill", "bank_statement", "rental_agreement", "passport_registration"
+            and "temporary_registration" types.
+        front_side (optional): Encrypted file with the front side of the document, provided by the
+            user; available only for "passport", "driver_license", "identity_card" and
+            "internal_passport".
+        reverse_side (optional): Encrypted file with the reverse side of the document, provided by
+            the user; available only for "driver_license" and "identity_card".
+        selfie (optional): Encrypted file with the selfie of the user holding a document, provided
+            by the user; available if requested for "passport", "driver_license", "identity_card"
+            and "internal_passport".
+        translation (optional): Array of encrypted files with translated versions of documents
+            provided by the user; available if requested for "passport", "driver_license",
+            "identity_card", "internal_passport", "utility_bill", "bank_statement",
+            "rental_agreement", "passport_registration" and "temporary_registration" types.
         hash: Base64-encoded element hash for using in PassportElementErrorUnspecified.
 
     Example::
@@ -9253,9 +9677,10 @@ class Game(TelegramObject, kw_only=True):
         title: Title of the game.
         description: Description of the game.
         photo: Photo that will be displayed in the game message in chats.
-        text (optional): Optional.
-        text_entities (optional): Optional.
-        animation (optional): Optional.
+        text (optional): Brief description of the game or high scores included in the game message.
+        text_entities (optional): Special entities that appear in text, such as usernames, URLs, bot
+            commands, etc.
+        animation (optional): Animation that will be displayed in the game message in chats.
 
     Example::
 

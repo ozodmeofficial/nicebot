@@ -26,6 +26,12 @@ class BotAPI:
     """
 
     async def request(self, method: str, params: dict[str, Any], returns: Any = Any) -> Any:  # pragma: no cover
+        """Send one Bot API request (implemented by ``Nicebot``).
+
+        Example::
+
+            await bot.request("getMe", {})
+        """
         raise NotImplementedError
 
     async def get_updates(self, *, offset: int | None = None, limit: int | None = None, timeout: int | None = None, allowed_updates: list[str] | None = None) -> list[Update]:

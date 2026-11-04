@@ -242,7 +242,7 @@ for name, t in TYPES.items():
         lines.append("")
         lines.append("    @property")
         lines.append(f"    def {safe(tag[0])}(self) -> str:")
-        lines.append(f'        """Always ``"{tag[1]}"`` for this type."""')
+        lines.append(f'        """Always ``"{tag[1]}"`` for this type.\n\n        Example::\n\n            obj.{safe(tag[0])}   # "{tag[1]}"\n        """')
         lines.append(f'        return "{tag[1]}"')
         lines.append("")
     for f in fields:
@@ -309,6 +309,12 @@ m = [
     '    """',
     "",
     "    async def request(self, method: str, params: dict[str, Any], returns: Any = Any) -> Any:  # pragma: no cover",
+    '        """Send one Bot API request (implemented by ``Nicebot``).',
+    "",
+    "        Example::",
+    "",
+    '            await bot.request("getMe", {})',
+    '        """',
     "        raise NotImplementedError",
     "",
 ]

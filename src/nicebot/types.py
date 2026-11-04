@@ -899,7 +899,12 @@ class MessageOriginUser(TelegramObject, kw_only=True, tag_field="type", tag="use
 
     @property
     def type(self) -> str:
-        """Always ``"user"`` for this type."""
+        """Always ``"user"`` for this type.
+
+        Example::
+
+            obj.type   # "user"
+        """
         return "user"
 
     date: int
@@ -922,7 +927,12 @@ class MessageOriginHiddenUser(TelegramObject, kw_only=True, tag_field="type", ta
 
     @property
     def type(self) -> str:
-        """Always ``"hidden_user"`` for this type."""
+        """Always ``"hidden_user"`` for this type.
+
+        Example::
+
+            obj.type   # "hidden_user"
+        """
         return "hidden_user"
 
     date: int
@@ -947,7 +957,12 @@ class MessageOriginChat(TelegramObject, kw_only=True, tag_field="type", tag="cha
 
     @property
     def type(self) -> str:
-        """Always ``"chat"`` for this type."""
+        """Always ``"chat"`` for this type.
+
+        Example::
+
+            obj.type   # "chat"
+        """
         return "chat"
 
     date: int
@@ -973,7 +988,12 @@ class MessageOriginChannel(TelegramObject, kw_only=True, tag_field="type", tag="
 
     @property
     def type(self) -> str:
-        """Always ``"channel"`` for this type."""
+        """Always ``"channel"`` for this type.
+
+        Example::
+
+            obj.type   # "channel"
+        """
         return "channel"
 
     date: int
@@ -1290,7 +1310,12 @@ class PaidMediaLivePhoto(TelegramObject, kw_only=True, tag_field="type", tag="li
 
     @property
     def type(self) -> str:
-        """Always ``"live_photo"`` for this type."""
+        """Always ``"live_photo"`` for this type.
+
+        Example::
+
+            obj.type   # "live_photo"
+        """
         return "live_photo"
 
     live_photo: LivePhoto
@@ -1311,7 +1336,12 @@ class PaidMediaPhoto(TelegramObject, kw_only=True, tag_field="type", tag="photo"
 
     @property
     def type(self) -> str:
-        """Always ``"photo"`` for this type."""
+        """Always ``"photo"`` for this type.
+
+        Example::
+
+            obj.type   # "photo"
+        """
         return "photo"
 
     photo: list[PhotoSize]
@@ -1334,7 +1364,12 @@ class PaidMediaPreview(TelegramObject, kw_only=True, tag_field="type", tag="prev
 
     @property
     def type(self) -> str:
-        """Always ``"preview"`` for this type."""
+        """Always ``"preview"`` for this type.
+
+        Example::
+
+            obj.type   # "preview"
+        """
         return "preview"
 
     width: int | None = None
@@ -1357,7 +1392,12 @@ class PaidMediaVideo(TelegramObject, kw_only=True, tag_field="type", tag="video"
 
     @property
     def type(self) -> str:
-        """Always ``"video"`` for this type."""
+        """Always ``"video"`` for this type.
+
+        Example::
+
+            obj.type   # "video"
+        """
         return "video"
 
     video: Video
@@ -1947,7 +1987,12 @@ class BackgroundFillSolid(TelegramObject, kw_only=True, tag_field="type", tag="s
 
     @property
     def type(self) -> str:
-        """Always ``"solid"`` for this type."""
+        """Always ``"solid"`` for this type.
+
+        Example::
+
+            obj.type   # "solid"
+        """
         return "solid"
 
     color: int
@@ -1970,7 +2015,12 @@ class BackgroundFillGradient(TelegramObject, kw_only=True, tag_field="type", tag
 
     @property
     def type(self) -> str:
-        """Always ``"gradient"`` for this type."""
+        """Always ``"gradient"`` for this type.
+
+        Example::
+
+            obj.type   # "gradient"
+        """
         return "gradient"
 
     top_color: int
@@ -1994,7 +2044,12 @@ class BackgroundFillFreeformGradient(TelegramObject, kw_only=True, tag_field="ty
 
     @property
     def type(self) -> str:
-        """Always ``"freeform_gradient"`` for this type."""
+        """Always ``"freeform_gradient"`` for this type.
+
+        Example::
+
+            obj.type   # "freeform_gradient"
+        """
         return "freeform_gradient"
 
     colors: list[int]
@@ -2016,7 +2071,12 @@ class BackgroundTypeFill(TelegramObject, kw_only=True, tag_field="type", tag="fi
 
     @property
     def type(self) -> str:
-        """Always ``"fill"`` for this type."""
+        """Always ``"fill"`` for this type.
+
+        Example::
+
+            obj.type   # "fill"
+        """
         return "fill"
 
     fill: BackgroundFill
@@ -2042,7 +2102,12 @@ class BackgroundTypeWallpaper(TelegramObject, kw_only=True, tag_field="type", ta
 
     @property
     def type(self) -> str:
-        """Always ``"wallpaper"`` for this type."""
+        """Always ``"wallpaper"`` for this type.
+
+        Example::
+
+            obj.type   # "wallpaper"
+        """
         return "wallpaper"
 
     document: Document
@@ -2071,7 +2136,12 @@ class BackgroundTypePattern(TelegramObject, kw_only=True, tag_field="type", tag=
 
     @property
     def type(self) -> str:
-        """Always ``"pattern"`` for this type."""
+        """Always ``"pattern"`` for this type.
+
+        Example::
+
+            obj.type   # "pattern"
+        """
         return "pattern"
 
     document: Document
@@ -2096,7 +2166,12 @@ class BackgroundTypeChatTheme(TelegramObject, kw_only=True, tag_field="type", ta
 
     @property
     def type(self) -> str:
-        """Always ``"chat_theme"`` for this type."""
+        """Always ``"chat_theme"`` for this type.
+
+        Example::
+
+            obj.type   # "chat_theme"
+        """
         return "chat_theme"
 
     theme_name: str
@@ -3434,7 +3509,12 @@ class ChatMemberOwner(TelegramObject, kw_only=True, tag_field="status", tag="cre
 
     @property
     def status(self) -> str:
-        """Always ``"creator"`` for this type."""
+        """Always ``"creator"`` for this type.
+
+        Example::
+
+            obj.status   # "creator"
+        """
         return "creator"
 
     user: User
@@ -3491,7 +3571,12 @@ class ChatMemberAdministrator(TelegramObject, kw_only=True, tag_field="status", 
 
     @property
     def status(self) -> str:
-        """Always ``"administrator"`` for this type."""
+        """Always ``"administrator"`` for this type.
+
+        Example::
+
+            obj.status   # "administrator"
+        """
         return "administrator"
 
     user: User
@@ -3534,7 +3619,12 @@ class ChatMemberMember(TelegramObject, kw_only=True, tag_field="status", tag="me
 
     @property
     def status(self) -> str:
-        """Always ``"member"`` for this type."""
+        """Always ``"member"`` for this type.
+
+        Example::
+
+            obj.status   # "member"
+        """
         return "member"
 
     tag: str | None = None
@@ -3580,7 +3670,12 @@ class ChatMemberRestricted(TelegramObject, kw_only=True, tag_field="status", tag
 
     @property
     def status(self) -> str:
-        """Always ``"restricted"`` for this type."""
+        """Always ``"restricted"`` for this type.
+
+        Example::
+
+            obj.status   # "restricted"
+        """
         return "restricted"
 
     tag: str | None = None
@@ -3620,7 +3715,12 @@ class ChatMemberLeft(TelegramObject, kw_only=True, tag_field="status", tag="left
 
     @property
     def status(self) -> str:
-        """Always ``"left"`` for this type."""
+        """Always ``"left"`` for this type.
+
+        Example::
+
+            obj.status   # "left"
+        """
         return "left"
 
     user: User
@@ -3642,7 +3742,12 @@ class ChatMemberBanned(TelegramObject, kw_only=True, tag_field="status", tag="ki
 
     @property
     def status(self) -> str:
-        """Always ``"kicked"`` for this type."""
+        """Always ``"kicked"`` for this type.
+
+        Example::
+
+            obj.status   # "kicked"
+        """
         return "kicked"
 
     user: User
@@ -3905,7 +4010,12 @@ class StoryAreaTypeLocation(TelegramObject, kw_only=True, tag_field="type", tag=
 
     @property
     def type(self) -> str:
-        """Always ``"location"`` for this type."""
+        """Always ``"location"`` for this type.
+
+        Example::
+
+            obj.type   # "location"
+        """
         return "location"
 
     latitude: float
@@ -3930,7 +4040,12 @@ class StoryAreaTypeSuggestedReaction(TelegramObject, kw_only=True, tag_field="ty
 
     @property
     def type(self) -> str:
-        """Always ``"suggested_reaction"`` for this type."""
+        """Always ``"suggested_reaction"`` for this type.
+
+        Example::
+
+            obj.type   # "suggested_reaction"
+        """
         return "suggested_reaction"
 
     reaction_type: ReactionType
@@ -3953,7 +4068,12 @@ class StoryAreaTypeLink(TelegramObject, kw_only=True, tag_field="type", tag="lin
 
     @property
     def type(self) -> str:
-        """Always ``"link"`` for this type."""
+        """Always ``"link"`` for this type.
+
+        Example::
+
+            obj.type   # "link"
+        """
         return "link"
 
     url: str
@@ -3976,7 +4096,12 @@ class StoryAreaTypeWeather(TelegramObject, kw_only=True, tag_field="type", tag="
 
     @property
     def type(self) -> str:
-        """Always ``"weather"`` for this type."""
+        """Always ``"weather"`` for this type.
+
+        Example::
+
+            obj.type   # "weather"
+        """
         return "weather"
 
     temperature: float
@@ -3999,7 +4124,12 @@ class StoryAreaTypeUniqueGift(TelegramObject, kw_only=True, tag_field="type", ta
 
     @property
     def type(self) -> str:
-        """Always ``"unique_gift"`` for this type."""
+        """Always ``"unique_gift"`` for this type.
+
+        Example::
+
+            obj.type   # "unique_gift"
+        """
         return "unique_gift"
 
     name: str
@@ -4054,7 +4184,12 @@ class ReactionTypeEmoji(TelegramObject, kw_only=True, tag_field="type", tag="emo
 
     @property
     def type(self) -> str:
-        """Always ``"emoji"`` for this type."""
+        """Always ``"emoji"`` for this type.
+
+        Example::
+
+            obj.type   # "emoji"
+        """
         return "emoji"
 
     emoji: str
@@ -4075,7 +4210,12 @@ class ReactionTypeCustomEmoji(TelegramObject, kw_only=True, tag_field="type", ta
 
     @property
     def type(self) -> str:
-        """Always ``"custom_emoji"`` for this type."""
+        """Always ``"custom_emoji"`` for this type.
+
+        Example::
+
+            obj.type   # "custom_emoji"
+        """
         return "custom_emoji"
 
     custom_emoji_id: str
@@ -4092,7 +4232,12 @@ class ReactionTypePaid(TelegramObject, kw_only=True, tag_field="type", tag="paid
 
     @property
     def type(self) -> str:
-        """Always ``"paid"`` for this type."""
+        """Always ``"paid"`` for this type.
+
+        Example::
+
+            obj.type   # "paid"
+        """
         return "paid"
 
 
@@ -4532,7 +4677,12 @@ class OwnedGiftRegular(TelegramObject, kw_only=True, tag_field="type", tag="regu
 
     @property
     def type(self) -> str:
-        """Always ``"regular"`` for this type."""
+        """Always ``"regular"`` for this type.
+
+        Example::
+
+            obj.type   # "regular"
+        """
         return "regular"
 
     gift: Gift
@@ -4578,7 +4728,12 @@ class OwnedGiftUnique(TelegramObject, kw_only=True, tag_field="type", tag="uniqu
 
     @property
     def type(self) -> str:
-        """Always ``"unique"`` for this type."""
+        """Always ``"unique"`` for this type.
+
+        Example::
+
+            obj.type   # "unique"
+        """
         return "unique"
 
     gift: UniqueGift
@@ -4701,7 +4856,12 @@ class BotCommandScopeDefault(TelegramObject, kw_only=True, tag_field="type", tag
 
     @property
     def type(self) -> str:
-        """Always ``"default"`` for this type."""
+        """Always ``"default"`` for this type.
+
+        Example::
+
+            obj.type   # "default"
+        """
         return "default"
 
 
@@ -4717,7 +4877,12 @@ class BotCommandScopeAllPrivateChats(TelegramObject, kw_only=True, tag_field="ty
 
     @property
     def type(self) -> str:
-        """Always ``"all_private_chats"`` for this type."""
+        """Always ``"all_private_chats"`` for this type.
+
+        Example::
+
+            obj.type   # "all_private_chats"
+        """
         return "all_private_chats"
 
 
@@ -4733,7 +4898,12 @@ class BotCommandScopeAllGroupChats(TelegramObject, kw_only=True, tag_field="type
 
     @property
     def type(self) -> str:
-        """Always ``"all_group_chats"`` for this type."""
+        """Always ``"all_group_chats"`` for this type.
+
+        Example::
+
+            obj.type   # "all_group_chats"
+        """
         return "all_group_chats"
 
 
@@ -4749,7 +4919,12 @@ class BotCommandScopeAllChatAdministrators(TelegramObject, kw_only=True, tag_fie
 
     @property
     def type(self) -> str:
-        """Always ``"all_chat_administrators"`` for this type."""
+        """Always ``"all_chat_administrators"`` for this type.
+
+        Example::
+
+            obj.type   # "all_chat_administrators"
+        """
         return "all_chat_administrators"
 
 
@@ -4770,7 +4945,12 @@ class BotCommandScopeChat(TelegramObject, kw_only=True, tag_field="type", tag="c
 
     @property
     def type(self) -> str:
-        """Always ``"chat"`` for this type."""
+        """Always ``"chat"`` for this type.
+
+        Example::
+
+            obj.type   # "chat"
+        """
         return "chat"
 
     chat_id: int | str
@@ -4792,7 +4972,12 @@ class BotCommandScopeChatAdministrators(TelegramObject, kw_only=True, tag_field=
 
     @property
     def type(self) -> str:
-        """Always ``"chat_administrators"`` for this type."""
+        """Always ``"chat_administrators"`` for this type.
+
+        Example::
+
+            obj.type   # "chat_administrators"
+        """
         return "chat_administrators"
 
     chat_id: int | str
@@ -4815,7 +5000,12 @@ class BotCommandScopeChatMember(TelegramObject, kw_only=True, tag_field="type", 
 
     @property
     def type(self) -> str:
-        """Always ``"chat_member"`` for this type."""
+        """Always ``"chat_member"`` for this type.
+
+        Example::
+
+            obj.type   # "chat_member"
+        """
         return "chat_member"
 
     chat_id: int | str
@@ -4878,7 +5068,12 @@ class MenuButtonCommands(TelegramObject, kw_only=True, tag_field="type", tag="co
 
     @property
     def type(self) -> str:
-        """Always ``"commands"`` for this type."""
+        """Always ``"commands"`` for this type.
+
+        Example::
+
+            obj.type   # "commands"
+        """
         return "commands"
 
 
@@ -4899,7 +5094,12 @@ class MenuButtonWebApp(TelegramObject, kw_only=True, tag_field="type", tag="web_
 
     @property
     def type(self) -> str:
-        """Always ``"web_app"`` for this type."""
+        """Always ``"web_app"`` for this type.
+
+        Example::
+
+            obj.type   # "web_app"
+        """
         return "web_app"
 
     text: str
@@ -4917,7 +5117,12 @@ class MenuButtonDefault(TelegramObject, kw_only=True, tag_field="type", tag="def
 
     @property
     def type(self) -> str:
-        """Always ``"default"`` for this type."""
+        """Always ``"default"`` for this type.
+
+        Example::
+
+            obj.type   # "default"
+        """
         return "default"
 
 
@@ -4937,7 +5142,12 @@ class ChatBoostSourcePremium(TelegramObject, kw_only=True, tag_field="source", t
 
     @property
     def source(self) -> str:
-        """Always ``"premium"`` for this type."""
+        """Always ``"premium"`` for this type.
+
+        Example::
+
+            obj.source   # "premium"
+        """
         return "premium"
 
     user: User
@@ -4958,7 +5168,12 @@ class ChatBoostSourceGiftCode(TelegramObject, kw_only=True, tag_field="source", 
 
     @property
     def source(self) -> str:
-        """Always ``"gift_code"`` for this type."""
+        """Always ``"gift_code"`` for this type.
+
+        Example::
+
+            obj.source   # "gift_code"
+        """
         return "gift_code"
 
     user: User
@@ -4986,7 +5201,12 @@ class ChatBoostSourceGiveaway(TelegramObject, kw_only=True, tag_field="source", 
 
     @property
     def source(self) -> str:
-        """Always ``"giveaway"`` for this type."""
+        """Always ``"giveaway"`` for this type.
+
+        Example::
+
+            obj.source   # "giveaway"
+        """
         return "giveaway"
 
     giveaway_message_id: int
@@ -5309,7 +5529,12 @@ class InputMediaAnimation(TelegramObject, kw_only=True, tag_field="type", tag="a
 
     @property
     def type(self) -> str:
-        """Always ``"animation"`` for this type."""
+        """Always ``"animation"`` for this type.
+
+        Example::
+
+            obj.type   # "animation"
+        """
         return "animation"
 
     media: str
@@ -5349,7 +5574,12 @@ class InputMediaAudio(TelegramObject, kw_only=True, tag_field="type", tag="audio
 
     @property
     def type(self) -> str:
-        """Always ``"audio"`` for this type."""
+        """Always ``"audio"`` for this type.
+
+        Example::
+
+            obj.type   # "audio"
+        """
         return "audio"
 
     media: str
@@ -5386,7 +5616,12 @@ class InputMediaDocument(TelegramObject, kw_only=True, tag_field="type", tag="do
 
     @property
     def type(self) -> str:
-        """Always ``"document"`` for this type."""
+        """Always ``"document"`` for this type.
+
+        Example::
+
+            obj.type   # "document"
+        """
         return "document"
 
     media: str
@@ -5412,7 +5647,12 @@ class InputMediaLink(TelegramObject, kw_only=True, tag_field="type", tag="link")
 
     @property
     def type(self) -> str:
-        """Always ``"link"`` for this type."""
+        """Always ``"link"`` for this type.
+
+        Example::
+
+            obj.type   # "link"
+        """
         return "link"
 
     url: str
@@ -5443,7 +5683,12 @@ class InputMediaLivePhoto(TelegramObject, kw_only=True, tag_field="type", tag="l
 
     @property
     def type(self) -> str:
-        """Always ``"live_photo"`` for this type."""
+        """Always ``"live_photo"`` for this type.
+
+        Example::
+
+            obj.type   # "live_photo"
+        """
         return "live_photo"
 
     media: str
@@ -5473,7 +5718,12 @@ class InputMediaLocation(TelegramObject, kw_only=True, tag_field="type", tag="lo
 
     @property
     def type(self) -> str:
-        """Always ``"location"`` for this type."""
+        """Always ``"location"`` for this type.
+
+        Example::
+
+            obj.type   # "location"
+        """
         return "location"
 
     latitude: float
@@ -5504,7 +5754,12 @@ class InputMediaPhoto(TelegramObject, kw_only=True, tag_field="type", tag="photo
 
     @property
     def type(self) -> str:
-        """Always ``"photo"`` for this type."""
+        """Always ``"photo"`` for this type.
+
+        Example::
+
+            obj.type   # "photo"
+        """
         return "photo"
 
     media: str
@@ -5531,7 +5786,12 @@ class InputMediaSticker(TelegramObject, kw_only=True, tag_field="type", tag="sti
 
     @property
     def type(self) -> str:
-        """Always ``"sticker"`` for this type."""
+        """Always ``"sticker"`` for this type.
+
+        Example::
+
+            obj.type   # "sticker"
+        """
         return "sticker"
 
     media: str
@@ -5560,7 +5820,12 @@ class InputMediaVenue(TelegramObject, kw_only=True, tag_field="type", tag="venue
 
     @property
     def type(self) -> str:
-        """Always ``"venue"`` for this type."""
+        """Always ``"venue"`` for this type.
+
+        Example::
+
+            obj.type   # "venue"
+        """
         return "venue"
 
     latitude: float
@@ -5604,7 +5869,12 @@ class InputMediaVideo(TelegramObject, kw_only=True, tag_field="type", tag="video
 
     @property
     def type(self) -> str:
-        """Always ``"video"`` for this type."""
+        """Always ``"video"`` for this type.
+
+        Example::
+
+            obj.type   # "video"
+        """
         return "video"
 
     media: str
@@ -5676,7 +5946,12 @@ class InputPaidMediaLivePhoto(TelegramObject, kw_only=True, tag_field="type", ta
 
     @property
     def type(self) -> str:
-        """Always ``"live_photo"`` for this type."""
+        """Always ``"live_photo"`` for this type.
+
+        Example::
+
+            obj.type   # "live_photo"
+        """
         return "live_photo"
 
     media: str
@@ -5698,7 +5973,12 @@ class InputPaidMediaPhoto(TelegramObject, kw_only=True, tag_field="type", tag="p
 
     @property
     def type(self) -> str:
-        """Always ``"photo"`` for this type."""
+        """Always ``"photo"`` for this type.
+
+        Example::
+
+            obj.type   # "photo"
+        """
         return "photo"
 
     media: str
@@ -5727,7 +6007,12 @@ class InputPaidMediaVideo(TelegramObject, kw_only=True, tag_field="type", tag="v
 
     @property
     def type(self) -> str:
-        """Always ``"video"`` for this type."""
+        """Always ``"video"`` for this type.
+
+        Example::
+
+            obj.type   # "video"
+        """
         return "video"
 
     media: str
@@ -5755,7 +6040,12 @@ class InputProfilePhotoStatic(TelegramObject, kw_only=True, tag_field="type", ta
 
     @property
     def type(self) -> str:
-        """Always ``"static"`` for this type."""
+        """Always ``"static"`` for this type.
+
+        Example::
+
+            obj.type   # "static"
+        """
         return "static"
 
     photo: str
@@ -5778,7 +6068,12 @@ class InputProfilePhotoAnimated(TelegramObject, kw_only=True, tag_field="type", 
 
     @property
     def type(self) -> str:
-        """Always ``"animated"`` for this type."""
+        """Always ``"animated"`` for this type.
+
+        Example::
+
+            obj.type   # "animated"
+        """
         return "animated"
 
     animation: str
@@ -5800,7 +6095,12 @@ class InputStoryContentPhoto(TelegramObject, kw_only=True, tag_field="type", tag
 
     @property
     def type(self) -> str:
-        """Always ``"photo"`` for this type."""
+        """Always ``"photo"`` for this type.
+
+        Example::
+
+            obj.type   # "photo"
+        """
         return "photo"
 
     photo: str
@@ -5825,7 +6125,12 @@ class InputStoryContentVideo(TelegramObject, kw_only=True, tag_field="type", tag
 
     @property
     def type(self) -> str:
-        """Always ``"video"`` for this type."""
+        """Always ``"video"`` for this type.
+
+        Example::
+
+            obj.type   # "video"
+        """
         return "video"
 
     video: str
@@ -6616,7 +6921,12 @@ class RichBlockParagraph(TelegramObject, kw_only=True, tag_field="type", tag="pa
 
     @property
     def type(self) -> str:
-        """Always ``"paragraph"`` for this type."""
+        """Always ``"paragraph"`` for this type.
+
+        Example::
+
+            obj.type   # "paragraph"
+        """
         return "paragraph"
 
     text: Any
@@ -6638,7 +6948,12 @@ class RichBlockSectionHeading(TelegramObject, kw_only=True, tag_field="type", ta
 
     @property
     def type(self) -> str:
-        """Always ``"heading"`` for this type."""
+        """Always ``"heading"`` for this type.
+
+        Example::
+
+            obj.type   # "heading"
+        """
         return "heading"
 
     text: Any
@@ -6661,7 +6976,12 @@ class RichBlockPreformatted(TelegramObject, kw_only=True, tag_field="type", tag=
 
     @property
     def type(self) -> str:
-        """Always ``"pre"`` for this type."""
+        """Always ``"pre"`` for this type.
+
+        Example::
+
+            obj.type   # "pre"
+        """
         return "pre"
 
     text: Any
@@ -6683,7 +7003,12 @@ class RichBlockFooter(TelegramObject, kw_only=True, tag_field="type", tag="foote
 
     @property
     def type(self) -> str:
-        """Always ``"footer"`` for this type."""
+        """Always ``"footer"`` for this type.
+
+        Example::
+
+            obj.type   # "footer"
+        """
         return "footer"
 
     text: Any
@@ -6700,7 +7025,12 @@ class RichBlockDivider(TelegramObject, kw_only=True, tag_field="type", tag="divi
 
     @property
     def type(self) -> str:
-        """Always ``"divider"`` for this type."""
+        """Always ``"divider"`` for this type.
+
+        Example::
+
+            obj.type   # "divider"
+        """
         return "divider"
 
 
@@ -6720,7 +7050,12 @@ class RichBlockMathematicalExpression(TelegramObject, kw_only=True, tag_field="t
 
     @property
     def type(self) -> str:
-        """Always ``"mathematical_expression"`` for this type."""
+        """Always ``"mathematical_expression"`` for this type.
+
+        Example::
+
+            obj.type   # "mathematical_expression"
+        """
         return "mathematical_expression"
 
     expression: str
@@ -6741,7 +7076,12 @@ class RichBlockAnchor(TelegramObject, kw_only=True, tag_field="type", tag="ancho
 
     @property
     def type(self) -> str:
-        """Always ``"anchor"`` for this type."""
+        """Always ``"anchor"`` for this type.
+
+        Example::
+
+            obj.type   # "anchor"
+        """
         return "anchor"
 
     name: str
@@ -6762,7 +7102,12 @@ class RichBlockList(TelegramObject, kw_only=True, tag_field="type", tag="list"):
 
     @property
     def type(self) -> str:
-        """Always ``"list"`` for this type."""
+        """Always ``"list"`` for this type.
+
+        Example::
+
+            obj.type   # "list"
+        """
         return "list"
 
     items: list[RichBlockListItem]
@@ -6784,7 +7129,12 @@ class RichBlockBlockQuotation(TelegramObject, kw_only=True, tag_field="type", ta
 
     @property
     def type(self) -> str:
-        """Always ``"blockquote"`` for this type."""
+        """Always ``"blockquote"`` for this type.
+
+        Example::
+
+            obj.type   # "blockquote"
+        """
         return "blockquote"
 
     blocks: list[RichBlock]
@@ -6807,7 +7157,12 @@ class RichBlockExpandableBlockQuotation(TelegramObject, kw_only=True, tag_field=
 
     @property
     def type(self) -> str:
-        """Always ``"expandable_blockquote"`` for this type."""
+        """Always ``"expandable_blockquote"`` for this type.
+
+        Example::
+
+            obj.type   # "expandable_blockquote"
+        """
         return "expandable_blockquote"
 
     text: Any
@@ -6830,7 +7185,12 @@ class RichBlockPullQuotation(TelegramObject, kw_only=True, tag_field="type", tag
 
     @property
     def type(self) -> str:
-        """Always ``"pullquote"`` for this type."""
+        """Always ``"pullquote"`` for this type.
+
+        Example::
+
+            obj.type   # "pullquote"
+        """
         return "pullquote"
 
     text: Any
@@ -6853,7 +7213,12 @@ class RichBlockCollage(TelegramObject, kw_only=True, tag_field="type", tag="coll
 
     @property
     def type(self) -> str:
-        """Always ``"collage"`` for this type."""
+        """Always ``"collage"`` for this type.
+
+        Example::
+
+            obj.type   # "collage"
+        """
         return "collage"
 
     blocks: list[RichBlock]
@@ -6876,7 +7241,12 @@ class RichBlockSlideshow(TelegramObject, kw_only=True, tag_field="type", tag="sl
 
     @property
     def type(self) -> str:
-        """Always ``"slideshow"`` for this type."""
+        """Always ``"slideshow"`` for this type.
+
+        Example::
+
+            obj.type   # "slideshow"
+        """
         return "slideshow"
 
     blocks: list[RichBlock]
@@ -6902,7 +7272,12 @@ class RichBlockTable(TelegramObject, kw_only=True, tag_field="type", tag="table"
 
     @property
     def type(self) -> str:
-        """Always ``"table"`` for this type."""
+        """Always ``"table"`` for this type.
+
+        Example::
+
+            obj.type   # "table"
+        """
         return "table"
 
     cells: list[list[RichBlockTableCell]]
@@ -6929,7 +7304,12 @@ class RichBlockDetails(TelegramObject, kw_only=True, tag_field="type", tag="deta
 
     @property
     def type(self) -> str:
-        """Always ``"details"`` for this type."""
+        """Always ``"details"`` for this type.
+
+        Example::
+
+            obj.type   # "details"
+        """
         return "details"
 
     summary: Any
@@ -6956,7 +7336,12 @@ class RichBlockMap(TelegramObject, kw_only=True, tag_field="type", tag="map"):
 
     @property
     def type(self) -> str:
-        """Always ``"map"`` for this type."""
+        """Always ``"map"`` for this type.
+
+        Example::
+
+            obj.type   # "map"
+        """
         return "map"
 
     location: Location
@@ -6982,7 +7367,12 @@ class RichBlockButtons(TelegramObject, kw_only=True, tag_field="type", tag="butt
 
     @property
     def type(self) -> str:
-        """Always ``"buttons"`` for this type."""
+        """Always ``"buttons"`` for this type.
+
+        Example::
+
+            obj.type   # "buttons"
+        """
         return "buttons"
 
     buttons: list[RichMessageButton]
@@ -7006,7 +7396,12 @@ class RichBlockAnimation(TelegramObject, kw_only=True, tag_field="type", tag="an
 
     @property
     def type(self) -> str:
-        """Always ``"animation"`` for this type."""
+        """Always ``"animation"`` for this type.
+
+        Example::
+
+            obj.type   # "animation"
+        """
         return "animation"
 
     animation: Animation
@@ -7030,7 +7425,12 @@ class RichBlockAudio(TelegramObject, kw_only=True, tag_field="type", tag="audio"
 
     @property
     def type(self) -> str:
-        """Always ``"audio"`` for this type."""
+        """Always ``"audio"`` for this type.
+
+        Example::
+
+            obj.type   # "audio"
+        """
         return "audio"
 
     audio: Audio
@@ -7053,7 +7453,12 @@ class RichBlockDocument(TelegramObject, kw_only=True, tag_field="type", tag="doc
 
     @property
     def type(self) -> str:
-        """Always ``"document"`` for this type."""
+        """Always ``"document"`` for this type.
+
+        Example::
+
+            obj.type   # "document"
+        """
         return "document"
 
     document: Document
@@ -7077,7 +7482,12 @@ class RichBlockPhoto(TelegramObject, kw_only=True, tag_field="type", tag="photo"
 
     @property
     def type(self) -> str:
-        """Always ``"photo"`` for this type."""
+        """Always ``"photo"`` for this type.
+
+        Example::
+
+            obj.type   # "photo"
+        """
         return "photo"
 
     photo: list[PhotoSize]
@@ -7102,7 +7512,12 @@ class RichBlockVideo(TelegramObject, kw_only=True, tag_field="type", tag="video"
 
     @property
     def type(self) -> str:
-        """Always ``"video"`` for this type."""
+        """Always ``"video"`` for this type.
+
+        Example::
+
+            obj.type   # "video"
+        """
         return "video"
 
     video: Video
@@ -7126,7 +7541,12 @@ class RichBlockVoiceNote(TelegramObject, kw_only=True, tag_field="type", tag="vo
 
     @property
     def type(self) -> str:
-        """Always ``"voice_note"`` for this type."""
+        """Always ``"voice_note"`` for this type.
+
+        Example::
+
+            obj.type   # "voice_note"
+        """
         return "voice_note"
 
     voice_note: Voice
@@ -7148,7 +7568,12 @@ class RichBlockThinking(TelegramObject, kw_only=True, tag_field="type", tag="thi
 
     @property
     def type(self) -> str:
-        """Always ``"thinking"`` for this type."""
+        """Always ``"thinking"`` for this type.
+
+        Example::
+
+            obj.type   # "thinking"
+        """
         return "thinking"
 
     text: Any
@@ -7194,7 +7619,12 @@ class InputRichBlockParagraph(TelegramObject, kw_only=True, tag_field="type", ta
 
     @property
     def type(self) -> str:
-        """Always ``"paragraph"`` for this type."""
+        """Always ``"paragraph"`` for this type.
+
+        Example::
+
+            obj.type   # "paragraph"
+        """
         return "paragraph"
 
     text: Any
@@ -7216,7 +7646,12 @@ class InputRichBlockSectionHeading(TelegramObject, kw_only=True, tag_field="type
 
     @property
     def type(self) -> str:
-        """Always ``"heading"`` for this type."""
+        """Always ``"heading"`` for this type.
+
+        Example::
+
+            obj.type   # "heading"
+        """
         return "heading"
 
     text: Any
@@ -7239,7 +7674,12 @@ class InputRichBlockPreformatted(TelegramObject, kw_only=True, tag_field="type",
 
     @property
     def type(self) -> str:
-        """Always ``"pre"`` for this type."""
+        """Always ``"pre"`` for this type.
+
+        Example::
+
+            obj.type   # "pre"
+        """
         return "pre"
 
     text: Any
@@ -7261,7 +7701,12 @@ class InputRichBlockFooter(TelegramObject, kw_only=True, tag_field="type", tag="
 
     @property
     def type(self) -> str:
-        """Always ``"footer"`` for this type."""
+        """Always ``"footer"`` for this type.
+
+        Example::
+
+            obj.type   # "footer"
+        """
         return "footer"
 
     text: Any
@@ -7278,7 +7723,12 @@ class InputRichBlockDivider(TelegramObject, kw_only=True, tag_field="type", tag=
 
     @property
     def type(self) -> str:
-        """Always ``"divider"`` for this type."""
+        """Always ``"divider"`` for this type.
+
+        Example::
+
+            obj.type   # "divider"
+        """
         return "divider"
 
 
@@ -7298,7 +7748,12 @@ class InputRichBlockMathematicalExpression(TelegramObject, kw_only=True, tag_fie
 
     @property
     def type(self) -> str:
-        """Always ``"mathematical_expression"`` for this type."""
+        """Always ``"mathematical_expression"`` for this type.
+
+        Example::
+
+            obj.type   # "mathematical_expression"
+        """
         return "mathematical_expression"
 
     expression: str
@@ -7319,7 +7774,12 @@ class InputRichBlockAnchor(TelegramObject, kw_only=True, tag_field="type", tag="
 
     @property
     def type(self) -> str:
-        """Always ``"anchor"`` for this type."""
+        """Always ``"anchor"`` for this type.
+
+        Example::
+
+            obj.type   # "anchor"
+        """
         return "anchor"
 
     name: str
@@ -7340,7 +7800,12 @@ class InputRichBlockList(TelegramObject, kw_only=True, tag_field="type", tag="li
 
     @property
     def type(self) -> str:
-        """Always ``"list"`` for this type."""
+        """Always ``"list"`` for this type.
+
+        Example::
+
+            obj.type   # "list"
+        """
         return "list"
 
     items: list[InputRichBlockListItem]
@@ -7362,7 +7827,12 @@ class InputRichBlockBlockQuotation(TelegramObject, kw_only=True, tag_field="type
 
     @property
     def type(self) -> str:
-        """Always ``"blockquote"`` for this type."""
+        """Always ``"blockquote"`` for this type.
+
+        Example::
+
+            obj.type   # "blockquote"
+        """
         return "blockquote"
 
     blocks: list[InputRichBlock]
@@ -7385,7 +7855,12 @@ class InputRichBlockExpandableBlockQuotation(TelegramObject, kw_only=True, tag_f
 
     @property
     def type(self) -> str:
-        """Always ``"expandable_blockquote"`` for this type."""
+        """Always ``"expandable_blockquote"`` for this type.
+
+        Example::
+
+            obj.type   # "expandable_blockquote"
+        """
         return "expandable_blockquote"
 
     text: Any
@@ -7408,7 +7883,12 @@ class InputRichBlockPullQuotation(TelegramObject, kw_only=True, tag_field="type"
 
     @property
     def type(self) -> str:
-        """Always ``"pullquote"`` for this type."""
+        """Always ``"pullquote"`` for this type.
+
+        Example::
+
+            obj.type   # "pullquote"
+        """
         return "pullquote"
 
     text: Any
@@ -7431,7 +7911,12 @@ class InputRichBlockCollage(TelegramObject, kw_only=True, tag_field="type", tag=
 
     @property
     def type(self) -> str:
-        """Always ``"collage"`` for this type."""
+        """Always ``"collage"`` for this type.
+
+        Example::
+
+            obj.type   # "collage"
+        """
         return "collage"
 
     blocks: list[InputRichBlock]
@@ -7454,7 +7939,12 @@ class InputRichBlockSlideshow(TelegramObject, kw_only=True, tag_field="type", ta
 
     @property
     def type(self) -> str:
-        """Always ``"slideshow"`` for this type."""
+        """Always ``"slideshow"`` for this type.
+
+        Example::
+
+            obj.type   # "slideshow"
+        """
         return "slideshow"
 
     blocks: list[InputRichBlock]
@@ -7480,7 +7970,12 @@ class InputRichBlockTable(TelegramObject, kw_only=True, tag_field="type", tag="t
 
     @property
     def type(self) -> str:
-        """Always ``"table"`` for this type."""
+        """Always ``"table"`` for this type.
+
+        Example::
+
+            obj.type   # "table"
+        """
         return "table"
 
     cells: list[list[RichBlockTableCell]]
@@ -7507,7 +8002,12 @@ class InputRichBlockDetails(TelegramObject, kw_only=True, tag_field="type", tag=
 
     @property
     def type(self) -> str:
-        """Always ``"details"`` for this type."""
+        """Always ``"details"`` for this type.
+
+        Example::
+
+            obj.type   # "details"
+        """
         return "details"
 
     summary: Any
@@ -7534,7 +8034,12 @@ class InputRichBlockMap(TelegramObject, kw_only=True, tag_field="type", tag="map
 
     @property
     def type(self) -> str:
-        """Always ``"map"`` for this type."""
+        """Always ``"map"`` for this type.
+
+        Example::
+
+            obj.type   # "map"
+        """
         return "map"
 
     location: Location
@@ -7560,7 +8065,12 @@ class InputRichBlockButtons(TelegramObject, kw_only=True, tag_field="type", tag=
 
     @property
     def type(self) -> str:
-        """Always ``"buttons"`` for this type."""
+        """Always ``"buttons"`` for this type.
+
+        Example::
+
+            obj.type   # "buttons"
+        """
         return "buttons"
 
     buttons: list[RichMessageButton]
@@ -7583,7 +8093,12 @@ class InputRichBlockAnimation(TelegramObject, kw_only=True, tag_field="type", ta
 
     @property
     def type(self) -> str:
-        """Always ``"animation"`` for this type."""
+        """Always ``"animation"`` for this type.
+
+        Example::
+
+            obj.type   # "animation"
+        """
         return "animation"
 
     animation: InputMediaAnimation
@@ -7606,7 +8121,12 @@ class InputRichBlockAudio(TelegramObject, kw_only=True, tag_field="type", tag="a
 
     @property
     def type(self) -> str:
-        """Always ``"audio"`` for this type."""
+        """Always ``"audio"`` for this type.
+
+        Example::
+
+            obj.type   # "audio"
+        """
         return "audio"
 
     audio: InputMediaAudio
@@ -7629,7 +8149,12 @@ class InputRichBlockDocument(TelegramObject, kw_only=True, tag_field="type", tag
 
     @property
     def type(self) -> str:
-        """Always ``"document"`` for this type."""
+        """Always ``"document"`` for this type.
+
+        Example::
+
+            obj.type   # "document"
+        """
         return "document"
 
     document: InputMediaDocument
@@ -7652,7 +8177,12 @@ class InputRichBlockPhoto(TelegramObject, kw_only=True, tag_field="type", tag="p
 
     @property
     def type(self) -> str:
-        """Always ``"photo"`` for this type."""
+        """Always ``"photo"`` for this type.
+
+        Example::
+
+            obj.type   # "photo"
+        """
         return "photo"
 
     photo: InputMediaPhoto
@@ -7675,7 +8205,12 @@ class InputRichBlockVideo(TelegramObject, kw_only=True, tag_field="type", tag="v
 
     @property
     def type(self) -> str:
-        """Always ``"video"`` for this type."""
+        """Always ``"video"`` for this type.
+
+        Example::
+
+            obj.type   # "video"
+        """
         return "video"
 
     video: InputMediaVideo
@@ -7698,7 +8233,12 @@ class InputRichBlockVoiceNote(TelegramObject, kw_only=True, tag_field="type", ta
 
     @property
     def type(self) -> str:
-        """Always ``"voice_note"`` for this type."""
+        """Always ``"voice_note"`` for this type.
+
+        Example::
+
+            obj.type   # "voice_note"
+        """
         return "voice_note"
 
     voice_note: InputMediaVoiceNote
@@ -7720,7 +8260,12 @@ class InputRichBlockThinking(TelegramObject, kw_only=True, tag_field="type", tag
 
     @property
     def type(self) -> str:
-        """Always ``"thinking"`` for this type."""
+        """Always ``"thinking"`` for this type.
+
+        Example::
+
+            obj.type   # "thinking"
+        """
         return "thinking"
 
     text: Any
@@ -7795,7 +8340,12 @@ class InlineQueryResultArticle(TelegramObject, kw_only=True, tag_field="type", t
 
     @property
     def type(self) -> str:
-        """Always ``"article"`` for this type."""
+        """Always ``"article"`` for this type.
+
+        Example::
+
+            obj.type   # "article"
+        """
         return "article"
 
     id: str
@@ -7839,7 +8389,12 @@ class InlineQueryResultPhoto(TelegramObject, kw_only=True, tag_field="type", tag
 
     @property
     def type(self) -> str:
-        """Always ``"photo"`` for this type."""
+        """Always ``"photo"`` for this type.
+
+        Example::
+
+            obj.type   # "photo"
+        """
         return "photo"
 
     id: str
@@ -7890,7 +8445,12 @@ class InlineQueryResultGif(TelegramObject, kw_only=True, tag_field="type", tag="
 
     @property
     def type(self) -> str:
-        """Always ``"gif"`` for this type."""
+        """Always ``"gif"`` for this type.
+
+        Example::
+
+            obj.type   # "gif"
+        """
         return "gif"
 
     id: str
@@ -7942,7 +8502,12 @@ class InlineQueryResultMpeg4Gif(TelegramObject, kw_only=True, tag_field="type", 
 
     @property
     def type(self) -> str:
-        """Always ``"mpeg4_gif"`` for this type."""
+        """Always ``"mpeg4_gif"`` for this type.
+
+        Example::
+
+            obj.type   # "mpeg4_gif"
+        """
         return "mpeg4_gif"
 
     id: str
@@ -7993,7 +8558,12 @@ class InlineQueryResultVideo(TelegramObject, kw_only=True, tag_field="type", tag
 
     @property
     def type(self) -> str:
-        """Always ``"video"`` for this type."""
+        """Always ``"video"`` for this type.
+
+        Example::
+
+            obj.type   # "video"
+        """
         return "video"
 
     id: str
@@ -8038,7 +8608,12 @@ class InlineQueryResultAudio(TelegramObject, kw_only=True, tag_field="type", tag
 
     @property
     def type(self) -> str:
-        """Always ``"audio"`` for this type."""
+        """Always ``"audio"`` for this type.
+
+        Example::
+
+            obj.type   # "audio"
+        """
         return "audio"
 
     id: str
@@ -8078,7 +8653,12 @@ class InlineQueryResultVoice(TelegramObject, kw_only=True, tag_field="type", tag
 
     @property
     def type(self) -> str:
-        """Always ``"voice"`` for this type."""
+        """Always ``"voice"`` for this type.
+
+        Example::
+
+            obj.type   # "voice"
+        """
         return "voice"
 
     id: str
@@ -8122,7 +8702,12 @@ class InlineQueryResultDocument(TelegramObject, kw_only=True, tag_field="type", 
 
     @property
     def type(self) -> str:
-        """Always ``"document"`` for this type."""
+        """Always ``"document"`` for this type.
+
+        Example::
+
+            obj.type   # "document"
+        """
         return "document"
 
     id: str
@@ -8170,7 +8755,12 @@ class InlineQueryResultLocation(TelegramObject, kw_only=True, tag_field="type", 
 
     @property
     def type(self) -> str:
-        """Always ``"location"`` for this type."""
+        """Always ``"location"`` for this type.
+
+        Example::
+
+            obj.type   # "location"
+        """
         return "location"
 
     id: str
@@ -8216,7 +8806,12 @@ class InlineQueryResultVenue(TelegramObject, kw_only=True, tag_field="type", tag
 
     @property
     def type(self) -> str:
-        """Always ``"venue"`` for this type."""
+        """Always ``"venue"`` for this type.
+
+        Example::
+
+            obj.type   # "venue"
+        """
         return "venue"
 
     id: str
@@ -8259,7 +8854,12 @@ class InlineQueryResultContact(TelegramObject, kw_only=True, tag_field="type", t
 
     @property
     def type(self) -> str:
-        """Always ``"contact"`` for this type."""
+        """Always ``"contact"`` for this type.
+
+        Example::
+
+            obj.type   # "contact"
+        """
         return "contact"
 
     id: str
@@ -8291,7 +8891,12 @@ class InlineQueryResultGame(TelegramObject, kw_only=True, tag_field="type", tag=
 
     @property
     def type(self) -> str:
-        """Always ``"game"`` for this type."""
+        """Always ``"game"`` for this type.
+
+        Example::
+
+            obj.type   # "game"
+        """
         return "game"
 
     id: str
@@ -8326,7 +8931,12 @@ class InlineQueryResultCachedPhoto(TelegramObject, kw_only=True, tag_field="type
 
     @property
     def type(self) -> str:
-        """Always ``"photo"`` for this type."""
+        """Always ``"photo"`` for this type.
+
+        Example::
+
+            obj.type   # "photo"
+        """
         return "photo"
 
     id: str
@@ -8368,7 +8978,12 @@ class InlineQueryResultCachedGif(TelegramObject, kw_only=True, tag_field="type",
 
     @property
     def type(self) -> str:
-        """Always ``"gif"`` for this type."""
+        """Always ``"gif"`` for this type.
+
+        Example::
+
+            obj.type   # "gif"
+        """
         return "gif"
 
     id: str
@@ -8409,7 +9024,12 @@ class InlineQueryResultCachedMpeg4Gif(TelegramObject, kw_only=True, tag_field="t
 
     @property
     def type(self) -> str:
-        """Always ``"mpeg4_gif"`` for this type."""
+        """Always ``"mpeg4_gif"`` for this type.
+
+        Example::
+
+            obj.type   # "mpeg4_gif"
+        """
         return "mpeg4_gif"
 
     id: str
@@ -8441,7 +9061,12 @@ class InlineQueryResultCachedSticker(TelegramObject, kw_only=True, tag_field="ty
 
     @property
     def type(self) -> str:
-        """Always ``"sticker"`` for this type."""
+        """Always ``"sticker"`` for this type.
+
+        Example::
+
+            obj.type   # "sticker"
+        """
         return "sticker"
 
     id: str
@@ -8475,7 +9100,12 @@ class InlineQueryResultCachedDocument(TelegramObject, kw_only=True, tag_field="t
 
     @property
     def type(self) -> str:
-        """Always ``"document"`` for this type."""
+        """Always ``"document"`` for this type.
+
+        Example::
+
+            obj.type   # "document"
+        """
         return "document"
 
     id: str
@@ -8516,7 +9146,12 @@ class InlineQueryResultCachedVideo(TelegramObject, kw_only=True, tag_field="type
 
     @property
     def type(self) -> str:
-        """Always ``"video"`` for this type."""
+        """Always ``"video"`` for this type.
+
+        Example::
+
+            obj.type   # "video"
+        """
         return "video"
 
     id: str
@@ -8555,7 +9190,12 @@ class InlineQueryResultCachedVoice(TelegramObject, kw_only=True, tag_field="type
 
     @property
     def type(self) -> str:
-        """Always ``"voice"`` for this type."""
+        """Always ``"voice"`` for this type.
+
+        Example::
+
+            obj.type   # "voice"
+        """
         return "voice"
 
     id: str
@@ -8590,7 +9230,12 @@ class InlineQueryResultCachedAudio(TelegramObject, kw_only=True, tag_field="type
 
     @property
     def type(self) -> str:
-        """Always ``"audio"`` for this type."""
+        """Always ``"audio"`` for this type.
+
+        Example::
+
+            obj.type   # "audio"
+        """
         return "audio"
 
     id: str
@@ -9042,7 +9687,12 @@ class RevenueWithdrawalStatePending(TelegramObject, kw_only=True, tag_field="typ
 
     @property
     def type(self) -> str:
-        """Always ``"pending"`` for this type."""
+        """Always ``"pending"`` for this type.
+
+        Example::
+
+            obj.type   # "pending"
+        """
         return "pending"
 
 
@@ -9063,7 +9713,12 @@ class RevenueWithdrawalStateSucceeded(TelegramObject, kw_only=True, tag_field="t
 
     @property
     def type(self) -> str:
-        """Always ``"succeeded"`` for this type."""
+        """Always ``"succeeded"`` for this type.
+
+        Example::
+
+            obj.type   # "succeeded"
+        """
         return "succeeded"
 
     date: int
@@ -9081,7 +9736,12 @@ class RevenueWithdrawalStateFailed(TelegramObject, kw_only=True, tag_field="type
 
     @property
     def type(self) -> str:
-        """Always ``"failed"`` for this type."""
+        """Always ``"failed"`` for this type.
+
+        Example::
+
+            obj.type   # "failed"
+        """
         return "failed"
 
 
@@ -9145,7 +9805,12 @@ class TransactionPartnerUser(TelegramObject, kw_only=True, tag_field="type", tag
 
     @property
     def type(self) -> str:
-        """Always ``"user"`` for this type."""
+        """Always ``"user"`` for this type.
+
+        Example::
+
+            obj.type   # "user"
+        """
         return "user"
 
     transaction_type: str
@@ -9175,7 +9840,12 @@ class TransactionPartnerChat(TelegramObject, kw_only=True, tag_field="type", tag
 
     @property
     def type(self) -> str:
-        """Always ``"chat"`` for this type."""
+        """Always ``"chat"`` for this type.
+
+        Example::
+
+            obj.type   # "chat"
+        """
         return "chat"
 
     chat: Chat
@@ -9199,7 +9869,12 @@ class TransactionPartnerAffiliateProgram(TelegramObject, kw_only=True, tag_field
 
     @property
     def type(self) -> str:
-        """Always ``"affiliate_program"`` for this type."""
+        """Always ``"affiliate_program"`` for this type.
+
+        Example::
+
+            obj.type   # "affiliate_program"
+        """
         return "affiliate_program"
 
     sponsor_user: User | None = None
@@ -9221,7 +9896,12 @@ class TransactionPartnerFragment(TelegramObject, kw_only=True, tag_field="type",
 
     @property
     def type(self) -> str:
-        """Always ``"fragment"`` for this type."""
+        """Always ``"fragment"`` for this type.
+
+        Example::
+
+            obj.type   # "fragment"
+        """
         return "fragment"
 
     withdrawal_state: RevenueWithdrawalState | None = None
@@ -9238,7 +9918,12 @@ class TransactionPartnerTelegramAds(TelegramObject, kw_only=True, tag_field="typ
 
     @property
     def type(self) -> str:
-        """Always ``"telegram_ads"`` for this type."""
+        """Always ``"telegram_ads"`` for this type.
+
+        Example::
+
+            obj.type   # "telegram_ads"
+        """
         return "telegram_ads"
 
 
@@ -9259,7 +9944,12 @@ class TransactionPartnerTelegramApi(TelegramObject, kw_only=True, tag_field="typ
 
     @property
     def type(self) -> str:
-        """Always ``"telegram_api"`` for this type."""
+        """Always ``"telegram_api"`` for this type.
+
+        Example::
+
+            obj.type   # "telegram_api"
+        """
         return "telegram_api"
 
     request_count: int
@@ -9276,7 +9966,12 @@ class TransactionPartnerOther(TelegramObject, kw_only=True, tag_field="type", ta
 
     @property
     def type(self) -> str:
-        """Always ``"other"`` for this type."""
+        """Always ``"other"`` for this type.
+
+        Example::
+
+            obj.type   # "other"
+        """
         return "other"
 
 
@@ -9451,7 +10146,12 @@ class PassportElementErrorDataField(TelegramObject, kw_only=True, tag_field="sou
 
     @property
     def source(self) -> str:
-        """Always ``"data"`` for this type."""
+        """Always ``"data"`` for this type.
+
+        Example::
+
+            obj.source   # "data"
+        """
         return "data"
 
     type: str
@@ -9478,7 +10178,12 @@ class PassportElementErrorFrontSide(TelegramObject, kw_only=True, tag_field="sou
 
     @property
     def source(self) -> str:
-        """Always ``"front_side"`` for this type."""
+        """Always ``"front_side"`` for this type.
+
+        Example::
+
+            obj.source   # "front_side"
+        """
         return "front_side"
 
     type: str
@@ -9504,7 +10209,12 @@ class PassportElementErrorReverseSide(TelegramObject, kw_only=True, tag_field="s
 
     @property
     def source(self) -> str:
-        """Always ``"reverse_side"`` for this type."""
+        """Always ``"reverse_side"`` for this type.
+
+        Example::
+
+            obj.source   # "reverse_side"
+        """
         return "reverse_side"
 
     type: str
@@ -9530,7 +10240,12 @@ class PassportElementErrorSelfie(TelegramObject, kw_only=True, tag_field="source
 
     @property
     def source(self) -> str:
-        """Always ``"selfie"`` for this type."""
+        """Always ``"selfie"`` for this type.
+
+        Example::
+
+            obj.source   # "selfie"
+        """
         return "selfie"
 
     type: str
@@ -9557,7 +10272,12 @@ class PassportElementErrorFile(TelegramObject, kw_only=True, tag_field="source",
 
     @property
     def source(self) -> str:
-        """Always ``"file"`` for this type."""
+        """Always ``"file"`` for this type.
+
+        Example::
+
+            obj.source   # "file"
+        """
         return "file"
 
     type: str
@@ -9584,7 +10304,12 @@ class PassportElementErrorFiles(TelegramObject, kw_only=True, tag_field="source"
 
     @property
     def source(self) -> str:
-        """Always ``"files"`` for this type."""
+        """Always ``"files"`` for this type.
+
+        Example::
+
+            obj.source   # "files"
+        """
         return "files"
 
     type: str
@@ -9611,7 +10336,12 @@ class PassportElementErrorTranslationFile(TelegramObject, kw_only=True, tag_fiel
 
     @property
     def source(self) -> str:
-        """Always ``"translation_file"`` for this type."""
+        """Always ``"translation_file"`` for this type.
+
+        Example::
+
+            obj.source   # "translation_file"
+        """
         return "translation_file"
 
     type: str
@@ -9638,7 +10368,12 @@ class PassportElementErrorTranslationFiles(TelegramObject, kw_only=True, tag_fie
 
     @property
     def source(self) -> str:
-        """Always ``"translation_files"`` for this type."""
+        """Always ``"translation_files"`` for this type.
+
+        Example::
+
+            obj.source   # "translation_files"
+        """
         return "translation_files"
 
     type: str
@@ -9663,7 +10398,12 @@ class PassportElementErrorUnspecified(TelegramObject, kw_only=True, tag_field="s
 
     @property
     def source(self) -> str:
-        """Always ``"unspecified"`` for this type."""
+        """Always ``"unspecified"`` for this type.
+
+        Example::
+
+            obj.source   # "unspecified"
+        """
         return "unspecified"
 
     type: str

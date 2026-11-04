@@ -18,6 +18,8 @@ GROUPS = {
     "start": "Getting started",
     "basics": "Basics",
     "ui": "Buttons and dialogs",
+    "media": "Media and files",
+    "miniapp": "Mini Apps",
     "data": "Data",
     "business": "Business tools",
     "advanced": "Advanced",
@@ -52,6 +54,8 @@ The same bot in nicebot:
 - **Dialogs:** `ask`, `confirm`, `choose`, `form` and ready-made validators
 - **Buttons:** `on_click`, templates, toggles, expiring and one-time buttons, automatic layout
 - **Business:** referrals, broadcasts, statistics, admin panel, required subscription, support, Telegram Stars
+- **Media:** `ctx.media` — a received file as one object, `save()`, `download()`, mixed albums
+- **Mini Apps:** `@bot.api`, `nicebot.js`, HTTPS without a domain via `tunnel=True`
 - **Reliability:** waits out flood limits, retries on network errors, loses no updates on restart
 - **Speed:** msgspec types and a single connection pool
 
@@ -109,7 +113,7 @@ The terminal shows `✅ @your_bot ishga tushdi`. Send `/start` to your bot and i
 |---|---|
 | `Nicebot(token=...)` | Creates the bot. Without `db`, an in-memory SQLite is used |
 | `@bot.command("start")` | Calls the function below when `/start` arrives |
-| `async def start(ctx)` | `ctx` knows everything about the current message |
+| `async def start(ctx: Context)` | `ctx` knows everything about the current message. `: Context` turns on autocomplete in your editor |
 | `await ctx.reply(...)` | Sends a reply to this chat |
 | `bot.start()` | Starts receiving messages. Stop it with Ctrl+C |
 
@@ -191,6 +195,11 @@ You can add these options to any decorator:
 """)
 
 PAGES["ctx"] = ("ctx: the context", """
+`ctx` is the object every handler receives as its first argument. This page shows the parts you use most; the full list is in [ctx: full reference](#ref-ctx).
+
+> [!TIP]
+> Write `async def handler(ctx: Context)` and VS Code lists every method after `ctx.`. [More](#vscode).
+
 ## Data
 
 {code:ctx_props}
@@ -549,18 +558,6 @@ Available by name: `bot`, `message`, `callback`, `user`, `chat`, `text`, `args`,
 {code:errors}
 """)
 
-PAGES["miniapp"] = ("Mini Apps", """
-nicebot includes a web server that runs in the same process as the bot. It serves Mini App files and creates API endpoints. Telegram's `initData` signature is verified with HMAC automatically.
-
-{code:miniapp_py}
-
-In the browser, include the ready-made `nicebot.js`. It adds `initData` to every request:
-
-{code:miniapp_js:html}
-
-A missing, wrong or expired `initData` is rejected with `401`. `@bot.api(..., auth=False)` creates a public endpoint. The `WebAppRequest` object has `user`, `json`, `query`, `params` and `db_user()`.
-""")
-
 PAGES["scheduler"] = ("Scheduling, background and cache", """
 ## Scheduled jobs
 
@@ -604,6 +601,10 @@ On Ctrl+C or SIGTERM the bot stops fetching new updates and waits for running ha
 - Network and 5xx errors: up to 3 retries with exponential backoff
 - Unknown new update kinds don't break the bot: they are logged and skipped
 - Concurrent handlers are capped by `max_concurrency=256`
+
+## Webhook without a domain
+
+`bot.start(tunnel=True, webhook=True)` runs the webhook through a free HTTPS tunnel. In production: `Nicebot(public_url="https://bot.example.uz")` and `bot.start(webhook=True, port=8080)`.
 """)
 
 PAGES["testing"] = ("Testing", """
@@ -623,6 +624,10 @@ You can test the bot without Telegram, the way a real user would use it. A fake 
 | `t.blocked = {id}` | A user who blocked the bot |
 
 Works with `pytest` and `pytest-asyncio`.
+
+## Files and Mini Apps
+
+`user.send_document("report.pdf", content=b"...")`, `send_photo`, `send_video`, `send_voice` — the bot really downloads these files with `ctx.download()`. Test Mini App endpoints with `await t.api("/api/...", {...}, user=ali)` — [example](#miniapp-backend).
 """)
 
 PAGES["features"] = ("50 features", """
@@ -640,7 +645,7 @@ Types are available via `from nicebot import types`, for example `types.Message`
 
 | | |
 |---|---|
-| nicebot | 0.1.2 |
+| nicebot | 1.0.0 |
 | Bot API | 10.3 |
 | Python | 3.10+ |
 | License | MIT |
